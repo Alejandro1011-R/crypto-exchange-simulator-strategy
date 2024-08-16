@@ -1,13 +1,28 @@
 from abc import ABC
-from rule_interpreter import *
+from rules_interpreter import *
+from typing import List, Dict
+from market import *
 
 class Agent(ABC):
-    def __init__(self, name: str, initial_balance: Dict[str, float], intelligence: RuleInterpreter):
-        # Inicializa un agente con un nombre, balance inicial y una inteligencia
+    def __init__(self, name: str, initial_balance: Dict[str, float], intelligence):
         self.name = name
-        self.balance = initial_balance
+        self.initial_balance = initial_balance.copy()
+        self.balance = initial_balance.copy()
         self.intelligence = intelligence
-        self.portfolio = {crypto: 0 for crypto in initial_balance.keys()}
+        self.portfolio = {crypto: 0 for crypto in initial_balance.keys() if crypto != "USD"}
+        self.performance_history = []
+
+    def calculate_total_value(self, market: Market):
+        total_value = self.balance["USD"]
+        for crypto, amount in self.portfolio.items():
+            total_value += amount * market.cryptocurrencies[crypto].price
+        return total_value
+
+    def update_performance(self, market: Market):
+        current_value = self.calculate_total_value(market)
+        initial_value = sum(self.initial_balance.values())
+        performance = (current_value - initial_value) / initial_value
+        self.performance_history.append(performance)
 
     def decide(self, market: Market) -> Dict[str, List[tuple]]:
         # Toma decisiones de trading basadas en la inteligencia del agente

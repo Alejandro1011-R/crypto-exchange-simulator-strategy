@@ -2,7 +2,6 @@ import random
 from datetime import datetime, timedelta
 from typing import List, Dict
 import numpy as np
-from agents import *
 
 class Cryptocurrency:
     def __init__(self, name: str, initial_price: float, initial_volatility: float):
@@ -12,6 +11,7 @@ class Cryptocurrency:
         self.volume = 0
         self.order_book = {"buy": {}, "sell": {}}
         self.price_history = [initial_price]
+
 
     def update_price(self, market_sentiment: float, trades: List[float]):
         # Actualiza el precio basado en el sentimiento del mercado, las operaciones y la volatilidad
