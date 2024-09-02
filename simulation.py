@@ -21,8 +21,10 @@ class Simulation:
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
-                decisions = agent.decide(self.market)
-                agent.execute_trades(self.market, decisions)
+                #decisions = agent.decide(self.market)
+                decision = agent.tomar_decision(self.market)
+                # agent.execute_trades(self.market, decisions)
+                agent.ejecutar_accion(decision,self.market,)
                 agent.update_performance(self.market)
                 self.agent_performances[agent.name].append(agent.performance_history[-1])
 
