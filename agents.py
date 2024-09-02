@@ -185,6 +185,8 @@ class Agente:
         punto_cruce = random.randint(1, len(partes1) - 2)
         nueva_regla = partes1[:punto_cruce] + partes2[punto_cruce:]
         return " ".join(nueva_regla)
+    def mutation(self, regla1, regla2):
+        
 
     def validar_regla(self, regla):
         # Intenta analizar la regla para verificar su validez
