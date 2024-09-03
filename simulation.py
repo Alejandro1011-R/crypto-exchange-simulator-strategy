@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from agents import *
 
 class Simulation:
-    def __init__(self, num_steps: int, agents: List[Agent], market: Market):
+    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agent], market: Market):
         self.num_steps = num_steps
+        self.agent_gen = agent_gen
         self.agents = agents
         self.market = market
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
@@ -14,6 +15,8 @@ class Simulation:
         self.agent_performances = {agent.name: [] for agent in agents}
 
     def run(self):
+        generacion = 0
+        No_Agente = 0
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
             market_sentiment = np.random.normal(0, 0.1)
