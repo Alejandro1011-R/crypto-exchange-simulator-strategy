@@ -84,14 +84,6 @@ class Simulation:
 
         return " ".join(partes)
 
-    # def crossmutation(self, regla1, regla2):
-    #     # Realiza un crossover entre dos reglas, combinando partes de ambas
-    #     partes1 = regla1.split(" ")
-    #     partes2 = regla2.split(" ")
-    #     punto_cruce = random.randint(1, len(partes1) - 2)
-    #     nueva_regla = partes1[:punto_cruce] + partes2[punto_cruce:]
-    #     return " ".join(nueva_regla)
-
     def crossover(parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
         if len(parent1) != len(parent2):
@@ -162,25 +154,6 @@ class Simulation:
                     else:
                         print(f"Regla generada no válida y descartada")
             return  nuevos_agentes,peores
-            #     # Reemplaza las reglas antiguas con las nuevas reglas generadas
-            #     self.mejor_agentes = mejores 
-
-            # # Imprime el mejor conjunto de reglas obtenido
-            # print(f"Mejor conjunto de reglas para {self.nombre}: {self.mejor_reglas}")
-
-    # def simular(self, contexto, ciclos=100):
-    #     """Simula la operación del agente en el mercado durante un número dado de ciclos."""
-    #     capital_inicial = self.capital
-    #     ganancias = []
-        
-    #     for _ in range(ciclos):
-    #         accion, _ = self.tomar_decision(contexto)
-    #         cripto = random.choice(list(contexto.datos.keys()))  # Selecciona una criptomoneda aleatoria
-    #         self.ejecutar_accion(accion, contexto, cripto)
-    #         ganancias.append(self.capital - capital_inicial)
-    #         actualizar_mercado(contexto)  # Supone que tienes una función para actualizar el mercado
-            
-    #     return ganancias
 
     def comparar_reglas(self, contexto, generaciones=10, ciclos=100):
         """Compara el desempeño del agente antes y después del algoritmo genético."""
