@@ -198,7 +198,7 @@ class ParserReglas:
                         bestCrip = None
                         bestVal = 2.0
                         var, operator, val = condition
-                        current_value = contex.cryptocurrencies[cripto].price
+                        current_value = contexto.cryptocurrencies[cripto].price
                         pertenencia_valor = self.evaluate_operator(current_value, operator, val)
                         if pertenencia_valor < bestVal:
                                     bestVal = pertenencia_valor
