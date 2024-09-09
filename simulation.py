@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from agents import *
+from gemini_ai import *
 
 class Simulation:
     def __init__(self, num_steps: int,agent_gen:int, agents: List[Agente], market: Market,parser):
@@ -11,7 +12,7 @@ class Simulation:
         self.market = market
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
-        self.sentiment_history = []
+        self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
 
@@ -20,18 +21,18 @@ class Simulation:
         No_Agente = 0
         count = 1
 
-        subreddits_list = {}
-        trainer = SentimentAnalyzer()
-        reddit_instance = CryptoTradingAgent()
+        subreddits_list = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting']
+        trainer = SentimentAnalyzer('gem.env')
+        reddit_instance = CryptoTradingAgent('gem.env')
         post_limit = 100
 
-        for crypto in market.cryptocurrencie:
-                new_subreddits[crypto.name] = [ 'CryptoInvesting',crypto.name]
+        for crypto in self.market.cryptocurrencies:
+            subreddits_list.append(crypto)
         #search_query = 'trading OR investment OR market OR price'
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
-            for crypto in market.cryptocurrencie:
-                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,new_subreddits[crypto.name],post_limit,))
+            for crypto in self.market.cryptocurrencies:
+                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,subreddits_list[crypto],post_limit,'trading OR investment OR market OR price'))
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
@@ -50,9 +51,9 @@ class Simulation:
                 nuevos,peores=self.algoritmo_genetico(self.market,self.agents,count)
                 # Registra datos para análisis posterior
                 for agente in peores:
-                    self.agents.remove(agent)
+                    self.agents.remove(agente)
                 for reglas in nuevos:
-                    self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,parser))
+                    self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,self.parser))
                     No_Agente =  No_Agente +1
                 generacion = generacion + 1
                 No_Agente = 0

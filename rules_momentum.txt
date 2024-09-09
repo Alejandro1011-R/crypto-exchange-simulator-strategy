@@ -1,2 +1,2 @@
-IF price > np.mean(price_history[-5:]) THEN agent.holdings += agent.cash // price; agent.cash -= (agent.cash // price) * price
-IF price <= np.mean(price_history[-5:]) THEN agent.cash += agent.holdings * price; agent.holdings = 0
+SI price > np.mean(price_history[-5:]) ENTONCES agent.holdings += agent.cash // price; agent.cash -= (agent.cash // price) * price
+SI price <= np.mean(price_history[-5:]) ENTONCES agent.cash += agent.holdings * price; agent.holdings = 0
