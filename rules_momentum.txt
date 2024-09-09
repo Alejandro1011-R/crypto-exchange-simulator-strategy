@@ -1,2 +1,3 @@
-SI price > np.mean(price_history[-5:]) ENTONCES agent.holdings += agent.cash // price; agent.cash -= (agent.cash // price) * price
-SI price <= np.mean(price_history[-5:]) ENTONCES agent.cash += agent.holdings * price; agent.holdings = 0
+SI precio es bajo ENTONCES compra
+SI precio es alto ENTONCES vende
+SI precio es medio ENTONCES mantener

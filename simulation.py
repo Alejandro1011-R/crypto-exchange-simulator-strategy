@@ -21,13 +21,13 @@ class Simulation:
         No_Agente = 0
         count = 1
 
-        subreddits_list = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting']
+        subreddits_list = {}
         trainer = SentimentAnalyzer('gem.env')
         reddit_instance = CryptoTradingAgent('gem.env')
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
-            subreddits_list.append(crypto)
+            subreddits_list[crypto]=['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting',crypto]
         #search_query = 'trading OR investment OR market OR price'
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
