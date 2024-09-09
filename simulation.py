@@ -11,13 +11,8 @@ class Simulation:
         self.market = market
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
-<<<<<<< HEAD
         self.sentiment_history = []
         self.agent_performances = {agent.nombre: [] for agent in agents}
-=======
-        self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
-        self.agent_performances = {agent.name: [] for agent in agents}
->>>>>>> main
         self.parser = parser
 
     def run(self):
