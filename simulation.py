@@ -2,9 +2,10 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from agents import *
+from gemini_ai import *
 
 class Simulation:
-    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agent], market: Market,parser):
+    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agente], market: Market,parser):
         self.num_steps = num_steps
         self.agent_gen = agent_gen
         self.agents = agents
@@ -12,7 +13,7 @@ class Simulation:
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
-        self.agent_performances = {agent.name: [] for agent in agents}
+        self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
 
     def run(self):
@@ -21,17 +22,17 @@ class Simulation:
         count = 1
 
         subreddits_list = {}
-        trainer = SentimentAnalyzer()
-        reddit_instance = CryptoTradingAgent()
+        trainer = SentimentAnalyzer('gem.env')
+        reddit_instance = CryptoTradingAgent('gem.env')
         post_limit = 100
 
-        for crypto in market.cryptocurrencie:
-                new_subreddits[crypto.name] = [ 'CryptoInvesting',crypto.name]
+        for crypto in self.market.cryptocurrencies:
+            subreddits_list[crypto]=['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting',crypto]
         #search_query = 'trading OR investment OR market OR price'
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
-            for crypto in market.cryptocurrencie:
-                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,new_subreddits[crypto.name],post_limit,))
+            for crypto in self.market.cryptocurrencies:
+                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,subreddits_list[crypto],post_limit,'trading OR investment OR market OR price'))
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
@@ -50,9 +51,9 @@ class Simulation:
                 nuevos,peores=self.algoritmo_genetico(self.market,self.agents,count)
                 # Registra datos para análisis posterior
                 for agente in peores:
-                    self.agents.remove(agent)
-                for reglas in nuevo:
-                    self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,parser))
+                    self.agents.remove(agente)
+                for reglas in nuevos:
+                    self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,self.parser))
                     No_Agente =  No_Agente +1
                 generacion = generacion + 1
                 No_Agente = 0
@@ -92,14 +93,6 @@ class Simulation:
         partes[-1] = random.choice(["comprar", "vender", "mantener"])
 
         return " ".join(partes)
-
-    # def crossmutation(self, regla1, regla2):
-    #     # Realiza un crossover entre dos reglas, combinando partes de ambas
-    #     partes1 = regla1.split(" ")
-    #     partes2 = regla2.split(" ")
-    #     punto_cruce = random.randint(1, len(partes1) - 2)
-    #     nueva_regla = partes1[:punto_cruce] + partes2[punto_cruce:]
-    #     return " ".join(nueva_regla)
 
     def crossover(parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
@@ -171,25 +164,6 @@ class Simulation:
                     else:
                         print(f"Regla generada no válida y descartada")
             return  nuevos_agentes,peores
-            #     # Reemplaza las reglas antiguas con las nuevas reglas generadas
-            #     self.mejor_agentes = mejores 
-
-            # # Imprime el mejor conjunto de reglas obtenido
-            # print(f"Mejor conjunto de reglas para {self.nombre}: {self.mejor_reglas}")
-
-    # def simular(self, contexto, ciclos=100):
-    #     """Simula la operación del agente en el mercado durante un número dado de ciclos."""
-    #     capital_inicial = self.capital
-    #     ganancias = []
-        
-    #     for _ in range(ciclos):
-    #         accion, _ = self.tomar_decision(contexto)
-    #         cripto = random.choice(list(contexto.datos.keys()))  # Selecciona una criptomoneda aleatoria
-    #         self.ejecutar_accion(accion, contexto, cripto)
-    #         ganancias.append(self.capital - capital_inicial)
-    #         actualizar_mercado(contexto)  # Supone que tienes una función para actualizar el mercado
-            
-    #     return ganancias
 
     def comparar_reglas(self, contexto, generaciones=10, ciclos=100):
         """Compara el desempeño del agente antes y después del algoritmo genético."""

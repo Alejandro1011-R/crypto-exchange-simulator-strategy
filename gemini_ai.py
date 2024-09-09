@@ -117,7 +117,7 @@ class SentimentAnalyzer:
                     influences.append(result)
         return influences
 
-def Process(SentimentAnalyzer,CryptoTradingAgent,subreddit_names,post_limit,search_query):
+def Process(trainer,reddit_instance,subreddit_names,post_limit,search_query):
     posts = reddit_instance.search_posts(subreddit_names, post_limit, search_query)
 
     posts_subset = random.sample(posts, 10)
@@ -136,17 +136,17 @@ def Process(SentimentAnalyzer,CryptoTradingAgent,subreddit_names,post_limit,sear
     return sum(influences)/len(influences)
 
 
-if __name__ == "__main__":
-    trainer = SentimentAnalyzer()
+# if __name__ == "__main__":
+#     trainer = SentimentAnalyzer()
 
-    reddit_instance = CryptoTradingAgent()
+#     reddit_instance = CryptoTradingAgent()
 
-    subreddit_names = ['CryptoCurrency', 'Bitcoin', 'Ethereum', 'CryptoTrading', 'CryptoInvesting']
-    post_limit = 100
-    search_query = 'trading OR investment OR market OR price'
+#     subreddit_names = ['CryptoCurrency', 'Bitcoin', 'Ethereum', 'CryptoTrading', 'CryptoInvesting']
+#     post_limit = 100
+#     search_query = 'trading OR investment OR market OR price'
 
-    posts = reddit_instance.search_posts(subreddit_names, post_limit, search_query)
+#     posts = reddit_instance.search_posts(subreddit_names, post_limit, search_query)
 
-    posts_subset = random.sample(posts, 10)
+#     posts_subset = random.sample(posts, 10)
 
     
