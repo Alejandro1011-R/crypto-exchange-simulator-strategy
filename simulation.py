@@ -11,18 +11,32 @@ class Simulation:
         self.market = market
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
+<<<<<<< HEAD
         self.sentiment_history = []
         self.agent_performances = {agent.nombre: [] for agent in agents}
+=======
+        self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
+        self.agent_performances = {agent.name: [] for agent in agents}
+>>>>>>> main
         self.parser = parser
 
     def run(self):
         generacion = 1
         No_Agente = 0
         count = 1
+
+        subreddits_list = {}
+        trainer = SentimentAnalyzer()
+        reddit_instance = CryptoTradingAgent()
+        post_limit = 100
+
+        for crypto in market.cryptocurrencie:
+                new_subreddits[crypto.name] = [ 'CryptoInvesting',crypto.name]
+        #search_query = 'trading OR investment OR market OR price'
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
-            market_sentiment = np.random.normal(0, 0.1)
-            self.sentiment_history.append(market_sentiment)
+            for crypto in market.cryptocurrencie:
+                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,new_subreddits[crypto.name],post_limit,))
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
