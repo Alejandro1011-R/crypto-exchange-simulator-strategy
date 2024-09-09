@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from agents import *
 
 class Simulation:
-    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agent], market: Market,parser):
+    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agente], market: Market,parser):
         self.num_steps = num_steps
         self.agent_gen = agent_gen
         self.agents = agents
@@ -12,7 +12,7 @@ class Simulation:
         self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = []
-        self.agent_performances = {agent.name: [] for agent in agents}
+        self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
 
     def run(self):
@@ -42,7 +42,7 @@ class Simulation:
                 # Registra datos para análisis posterior
                 for agente in peores:
                     self.agents.remove(agent)
-                for reglas in nuevo:
+                for reglas in nuevos:
                     self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,parser))
                     No_Agente =  No_Agente +1
                 generacion = generacion + 1
