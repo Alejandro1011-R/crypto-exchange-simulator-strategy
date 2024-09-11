@@ -205,6 +205,7 @@ class ParserReglas:
                                     bestCrip = cripto
                     and_results.append(bestVal,bestCrip)
             
+            
             # La lógica AND se aplica usando el mínimo de los resultados
             or_results.append(min(and_results, key=lambda x: x[0]))
         

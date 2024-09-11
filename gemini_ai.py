@@ -133,7 +133,8 @@ def Process(trainer,reddit_instance,subreddit_names,post_limit,search_query):
     print(len(influences))
     for inf in influences:
         print(f'Message: {inf[0][:100]}...\nRelevance: {inf[1]}\n\n')
-    return sum(influences)/len(influences)
+    # return sum(influences)/len(influences)
+    return sum(inf[1] for inf in influences)/len(influences)
 
 
 # if __name__ == "__main__":
