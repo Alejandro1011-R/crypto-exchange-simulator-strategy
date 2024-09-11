@@ -1,3 +1,3 @@
-SI precio es bajo ENTONCES compra
-SI precio es alto ENTONCES vende
+SI precio es bajo ENTONCES comprar
+SI precio es alto ENTONCES vender
 SI precio es medio ENTONCES mantener
