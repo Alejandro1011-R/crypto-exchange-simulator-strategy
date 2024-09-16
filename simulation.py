@@ -2,28 +2,28 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from agents import *
-from gemini_ai import *
+#from gemini_ai import *
+
 
 class Simulation:
-    def __init__(self, num_steps: int,agent_gen:int, agents: List[Agente], market: Market,parser):
+    def __init__(self, num_steps: int, agents: List[Agente], market: Market,parser):
         self.num_steps = num_steps
-        self.agent_gen = agent_gen
         self.agents = agents
         self.market = market
-        self.price_history = {crypto: [] for crypto in market.cryptocurrencies}
-        self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
+        self.price_history = {crypto: [market.cryptocurrencies[crypto].price] for crypto in market.cryptocurrencies}
+        #self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
-
+    
     def run(self):
-        generacion = 1
+        agent_gen = 1
         No_Agente = 0
         count = 1
 
         subreddits_list = {}
-        trainer = SentimentAnalyzer('gem.env')
-        reddit_instance = CryptoTradingAgent('gem.env')
+        # trainer = SentimentAnalyzer('gem.env')
+        # reddit_instance = CryptoTradingAgent('gem.env')
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
@@ -32,30 +32,36 @@ class Simulation:
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
             for crypto in self.market.cryptocurrencies:
-                self.sentiment_history[crypto].append(Process( trainer,reddit_instance,subreddits_list[crypto],post_limit,'trading OR investment OR market OR price'))
-
+                # self.sentiment_history[crypto].append(Process( trainer,reddit_instance,subreddits_list[crypto],post_limit,crypto))
+                self.sentiment_history[crypto].append(np.random.normal(0, 0.1))#quitar
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
-                #decisions = agent.decide(self.market)
-                decision = agent.tomar_decision(self.market)
-                # agent.execute_trades(self.market, decisions)
-                agent.ejecutar_accion(decision,self.market,decision[1])
-                agent.update_performance(self.market)
-                self.agent_performances[agent.name].append(agent.performance_history[-1])
+               
+                #decision = agent.tomar_decision(self.market)
+                decision = np.random.choice(["comprar","vender","mantener" ])#quitar
+                                         
+                agent.ejecutar_accion(decision,self.market,"Bitcoin")#cambiar
+                #agent.update_performance(self.market)#arreglar
+                #self.agent_performances[agent.name].append(agent.performance_history[-1])#arreglar
 
             # Actualiza el estado del mercado
-            self.market.update(market_sentiment)
+            self.market.update(self.sentiment_history)
 
             if count == 10:
                 count = 1
                 nuevos,peores=self.algoritmo_genetico(self.market,self.agents,count)
                 # Registra datos para análisis posterior
+                print("**** Nuevos agentes y reglas *****")
+                for agente in nuevos:
+                    print(agente.nombre)
+                    print(agente.reglas)
+
                 for agente in peores:
                     self.agents.remove(agente)
-                for reglas in nuevos:
-                    self.agents.append(agent(f'agente {No_Agente} generación {generacion}',reglas,self.parser))
+                for agente in nuevos:
+                    self.agents.append(Agente(f'agente {No_Agente} generación { agent_gen}',agente.reglas,self.parser))
                     No_Agente =  No_Agente +1
-                generacion = generacion + 1
+                agent_gen =  agent_gen + 1
                 No_Agente = 0
 
             else: 
@@ -94,10 +100,14 @@ class Simulation:
 
         return " ".join(partes)
 
-    def crossover(parent1, parent2, crossover_rate=0.5):
+    def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
-        if len(parent1) != len(parent2):
-            raise ValueError("Los padres deben tener el mismo tamaño")
+        
+        '''if len(parent1) != len(parent2):
+            raise ValueError("Los padres deben tener el mismo tamaño")'''
+        # Trunca las listas al tamaño del padre más corto si no tienen el mismo tamaño
+        min_len = min(len(parent1), len(parent2))
+        parent1, parent2 = parent1[:min_len], parent2[:min_len]
         
         child1 = []
         child2 = []
@@ -119,23 +129,26 @@ class Simulation:
     def validar_regla(self, regla):
         # Intenta analizar la regla para verificar su validez
         try:
-            parsed_conditions, accion = self.parser_reglas.parse_rule(regla)
+            parsed_conditions, accion = self.parser.parse_rule(regla)
             return True
         except ValueError as e:
             # Imprime un mensaje de error si la regla no es válida
             print(f"Regla inválida: {regla}. Error: {e}")
             return False
 
-    def algoritmo_genetico(self, contexto,agentes, tasa_mutacion=0.1 ):
+    '''def algoritmo_genetico(self, contexto,agentes, tasa_mutacion=0.1 ):
         # Ejecuta el algoritmo genético para evolucionar las reglas del agente
         
             nuevos_agentes = []
-            ganancias = self.evaluar_desempeno(self.capital)
+            #ganancias = agentes.evaluar_desempeno(self.capital)
                 
             # Selecciona las mejores reglas según el desempeño
-            reglas_seleccionadas = sorted(self.reglas, key=lambda x: self.evaluar_desempeno(ganancias), reverse=True)[:len(self.reglas)//2]
-                
+            #reglas_seleccionadas = sorted(self.reglas, key=lambda x: self.evaluar_desempeno(ganancias), reverse=True)[:len(self.reglas)//2]
+
+            for agente in agentes:
+                print(agente)   
             agentes_orden = [agente.evaluar_desempeno(contexto) for agente in agentes].sort(key=lambda x: x[1])
+            print(agentes_orden)
             corte = len(agentes_orden)//2
             mejores = agentes_orden[:corte]
             peores = agentes_orden[-corte:]
@@ -147,14 +160,14 @@ class Simulation:
                     nuevas_regla = self.crossover(padre1[1], padre2[1])
 
                     if random.random() < tasa_mutacion:
-                        regla1 = self.mutar_regla(regla1)
+                        regla1 = self.mutar_regla( nuevas_regla[0])
 
                     if random.random() < tasa_mutacion:
-                        regla2 = self.mutar_regla(regla2)
+                        regla2 = self.mutar_regla( nuevas_regla[1])
                         
                     # Valida la nueva regla antes de agregarla
                     if self.validar_regla(regla1):
-                        nuevas_reglas.append(regla1)
+                        nuevos_agentes.append(regla1)
                     else:
                         print(f"Regla generada no válida y descartada")
 
@@ -163,44 +176,116 @@ class Simulation:
                         nuevos_agentes.append(regla2)
                     else:
                         print(f"Regla generada no válida y descartada")
-            return  nuevos_agentes,peores
+            return  nuevos_agentes,peores'''
 
-    def comparar_reglas(self, contexto, generaciones=10, ciclos=100):
-        """Compara el desempeño del agente antes y después del algoritmo genético."""
-        
-        # Simular con las reglas originales
-        print("Simulación con reglas originales...")
-        rendimiento_original = self.simular(contexto, ciclos=ciclos)
-        capital_final_original = self.capital
-        
-        # Aplicar algoritmo genético
-        print("Aplicando algoritmo genético...")
-        self.algoritmo_genetico(contexto, generaciones=generaciones)
-        
-        # Reiniciar capital del agente para una nueva simulación
-        self.capital = capital_final_original
-        self.portafolio = {}
-        
-        # Simular con las reglas modificadas
-        print("Simulación con reglas modificadas...")
-        rendimiento_modificado = self.simular(contexto, ciclos=ciclos)
-        capital_final_modificado = self.capital
-        
-        # Comparar los resultados
-        print(f"Capital final con reglas originales: {capital_final_original}")
-        print(f"Capital final con reglas modificadas: {capital_final_modificado}")
-        
-        # Visualizar o analizar los resultados
-        import matplotlib.pyplot as plt
-        plt.plot(rendimiento_original, label="Original")
-        plt.plot(rendimiento_modificado, label="Modificado")
-        plt.xlabel("Ciclos")
-        plt.ylabel("Ganancias Acumuladas")
-        plt.legend()
-        plt.show()
+    '''def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
 
-        # Retornar la comparación
-        return capital_final_modificado > capital_final_original, rendimiento_original, rendimiento_modificado
+        nuevos_agentes = []
+        
+        # Evaluar desempeño de cada agente
+        desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
+        
+        # Ordenar los agentes por desempeño
+        desempeno_agentes.sort(key=lambda x: x[1], reverse=True)
+
+        # Dividir en mejores y peores agentes
+        corte = len(desempeno_agentes) // 2
+
+        if len(corte > 1):
+            mejores = desempeno_agentes[:corte]  # Mejores agentes
+            peores = desempeno_agentes[corte:]   # Peores agentes (serán reemplazados)
+
+            # Realiza crossover y mutación en las reglas seleccionadas
+            while len(nuevos_agentes) < len(peores):
+                # Selecciona dos padres al azar de los mejores
+                
+                padre1, padre2 = random.sample(mejores, 2)
+                
+                # Realizar crossover (cruce) entre las reglas de los padres
+                nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(padre1[0].reglas, padre2[0].reglas)
+
+                # Mutar reglas con probabilidad de tasa_mutacion
+                if random.random() < tasa_mutacion:
+                    nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
+                if random.random() < tasa_mutacion:
+                    nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
+                
+                # Validar reglas y crear nuevos agentes
+                if self.validar_regla(" ".join(nuevas_reglas_padre1)):
+                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser))
+                
+                if self.validar_regla(" ".join(nuevas_reglas_padre2)):
+                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser))
+
+            # Reemplaza los peores agentes por los nuevos agentes generados
+            for i in range(len(peores)):
+                agentes[agentes.index(peores[i][0])] = nuevos_agentes[i]
+
+            # Devolver los nuevos agentes y los agentes eliminados
+            return nuevos_agentes, [agente[0] for agente in peores]'''
+        
+    def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
+
+        nuevos_agentes = []
+
+        # Evaluar desempeño de cada agente
+        desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
+        
+        # Ordenar los agentes por desempeño
+        desempeno_agentes.sort(key=lambda x: x[1], reverse=True)
+        # Caso especial: Solo hay dos agentes
+        if len(agentes) <= 3:
+            mejor_agente = desempeno_agentes[0]  # Agente con mejor desempeño
+            peor_agente = desempeno_agentes[1]   # Agente con peor desempeño
+
+            # Realizar crossover y mutación entre los dos agentes
+            #print(len(mejor_agente[0].reglas))
+            nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(mejor_agente[0].reglas, peor_agente[0].reglas)
+
+
+            # Aplicar mutación a las reglas con una probabilidad definida
+            if random.random() < tasa_mutacion:
+                nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
+            if random.random() < tasa_mutacion:
+                nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
+
+            # Validar reglas y generar un nuevo agente para reemplazar al peor
+            if self.validar_regla(" ".join(nuevas_reglas_padre2)):
+                nuevo_agente = Agente(f'Nuevo Agente {peor_agente[0].nombre}', nuevas_reglas_padre2, self.parser)
+                nuevos_agentes.append(nuevo_agente)
+
+            # Retornar el nuevo agente creado y el agente reemplazado
+            return nuevos_agentes, [peor_agente[0]]
+
+        # Caso general: Más de dos agentes
+        else:
+            corte = len(desempeno_agentes) // 2
+            mejores = desempeno_agentes[:corte]  # Mejores agentes
+            peores = desempeno_agentes[corte:]   # Peores agentes (serán reemplazados)
+
+            # Realiza crossover y mutación en las reglas seleccionadas
+            while len(nuevos_agentes) < len(peores):
+                # Selecciona dos padres al azar de los mejores
+                padre1, padre2 = random.sample(mejores, 2)
+                # Realizar crossover (cruce) entre las reglas de los padres
+                nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(padre1[0].reglas, padre2[0].reglas)
+
+                # Mutar reglas con probabilidad de tasa_mutacion
+                if random.random() < tasa_mutacion:
+                    nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
+                if random.random() < tasa_mutacion:
+                    nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
+
+                # Validar reglas y crear nuevos agentes
+                if self.validar_regla(" ".join(nuevas_reglas_padre1)):
+                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser))
+                if self.validar_regla(" ".join(nuevas_reglas_padre2)):
+                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser))
+
+            # Retornar los nuevos agentes creados y los agentes que fueron reemplazados
+            return nuevos_agentes, [agente[0] for agente in peores]
+
+
 
     def _record_data(self):
         for crypto_name, crypto in self.market.cryptocurrencies.items():

@@ -14,7 +14,7 @@ class Agente:
         self.parser_reglas = parser_reglas
         self.mejor_reglas = []  # Almacena las mejores reglas seleccionadas
         self.portafolio = {}  # Portafolio para almacenar las criptomonedas compradas
-    
+        self.ciclo = 1
     def tomar_decision(self, contexto):#ver
         # Inicializa variables para rastrear la mejor acción y el mejor resultado
         mejor_resultado = 0
@@ -67,7 +67,7 @@ class Agente:
     
     def ejecutar_accion(self, accion, contexto, cripto):
         # Obtiene el precio actual de la criptomoneda del contexto de mercado
-        precio = contexto.obtener_dato(cripto, "precio")
+        precio = contexto.cryptocurrencies[cripto].price
         
         if accion == "comprar" and self.capital > precio:
             # Calcula cuántas unidades se pueden comprar y actualiza el capital y portafolio del agente
@@ -102,5 +102,6 @@ class Agente:
         for crypto,value in self.portafolio:
             ganancia =  ganancia + (contexto.Cryptocurrency[crypto].price * value)
         ganancia = ganancia + capital
-
-        return (self.nombre,ganancia/self.capital_inicial)
+        desempeño = ganancia/self.ciclo
+        self.ciclo = self.ciclo + 1
+        return (self.nombre,desempeño)

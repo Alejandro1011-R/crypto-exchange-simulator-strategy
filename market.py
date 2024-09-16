@@ -13,7 +13,7 @@ class Cryptocurrency:
         self.price_history = [initial_price]
 
 
-    def update_price(self, market_sentiment: float, trades: List[float]):
+    def update_price(self,market_sentiment, trades: List[float]):
         # Actualiza el precio basado en el sentimiento del mercado, las operaciones y la volatilidad
         price_change = np.random.normal(0, self.volatility)
         trade_impact = sum(trades) * 0.001
@@ -54,12 +54,12 @@ class Market:
         self.cryptocurrencies = {crypto.name: crypto for crypto in cryptocurrencies}
         self.timestamp = datetime.now()
 
-    def update(self, market_sentiment: float):
+    def update(self,sentiment_history):
         # Actualiza el estado del mercado
         self.timestamp += timedelta(minutes=1)
         for crypto in self.cryptocurrencies.values():
             trades = self.match_orders(crypto)
-            crypto.update_price(market_sentiment, trades)
+            crypto.update_price(sentiment_history[crypto.name][-1],trades)
             crypto.update_volume(sum(abs(trade) for trade in trades))
 
     def match_orders(self, crypto: Cryptocurrency) -> List[float]:
