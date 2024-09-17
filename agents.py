@@ -5,7 +5,7 @@ from market import *
 
 # Definición de la clase Agente
 class Agente:
-    def __init__(self, nombre, reglas, parser_reglas, capital_inicial=1000):
+    def __init__(self, nombre, reglas, parser_reglas, capital_inicial=100000):
         # Inicializa el agente con un nombre, capital inicial, conjunto de reglas, parser de reglas y portafolio vacío
         self.nombre = nombre
         self.capital_inicial = capital_inicial
@@ -75,9 +75,12 @@ class Agente:
                 return f"Débil recomendación para no {accion_str} {cripto} con confianza de {valor:.2f}."
 
     def ejecutar_accion(self, accion, contexto, cripto):
+        print("********* EJECUTAR ACCION*******")
+        print(accion)
         # Obtiene el precio actual de la criptomoneda del contexto de mercado
         precio = contexto.cryptocurrencies[cripto].price
-
+        print(precio)
+        print(self.capital)
         if accion == "comprar" and self.capital > precio:
             # Calcula cuántas unidades se pueden comprar y actualiza el capital y portafolio del agente
             cantidad = self.capital // precio

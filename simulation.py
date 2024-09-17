@@ -11,7 +11,7 @@ class Simulation:
         self.agents = agents
         self.market = market
         self.price_history = {crypto: [market.cryptocurrencies[crypto].price] for crypto in market.cryptocurrencies}
-        # self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
+        self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
@@ -44,7 +44,7 @@ class Simulation:
                 accion, resultado = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
                 # Para usar la decisión aleatoria:
                 # decision = np.random.choice(["comprar","vender","mantener" ])#quitar
-                # agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
+                agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
                 agent.actualizar_ganancia(self.market)
                 self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
@@ -81,9 +81,9 @@ class Simulation:
             else:
                 count += 1
 
+            self._record_data()
             # Imprime información del paso actual
             self._print_step_info(step)
-
 
 
     def mutar_regla(self, regla):
@@ -269,15 +269,15 @@ class Simulation:
 
 
 
-    # def _record_data(self):
-    #     for crypto_name, crypto in self.market.cryptocurrencies.items():
-    #         self.price_history[crypto_name].append(crypto.price)
-    #         self.volume_history[crypto_name].append(crypto.volume)
+    def _record_data(self):
+        for crypto_name, crypto in self.market.cryptocurrencies.items():
+            self.price_history[crypto_name].append(crypto.price)
+            self.volume_history[crypto_name].append(crypto.volume)
 
 
     def plot_results(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
-
+        #fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(12, 24))
         # Graficar precios
         for crypto, prices in self.price_history.items():
             ax1.plot(prices, label=crypto)
@@ -286,13 +286,13 @@ class Simulation:
         ax1.set_ylabel('Precio')
         ax1.legend()
 
-        # # Graficar volúmenes
-        # for crypto, volumes in self.volume_history.items():
-        #     ax2.plot(volumes, label=crypto)
-        # ax2.set_title('Volumen de transacciones')
-        # ax2.set_xlabel('Pasos de tiempo')
-        # ax2.set_ylabel('Volumen')
-        # ax2.legend()
+        # Graficar volúmenes
+        for crypto, volumes in self.volume_history.items():
+            ax2.plot(volumes, label=crypto)
+        ax2.set_title('Volumen de transacciones')
+        ax2.set_xlabel('Pasos de tiempo')
+        ax2.set_ylabel('Volumen')
+        ax2.legend()
 
         # # Graficar sentimiento del mercado
         # ax3.plot(self.sentiment_history)
@@ -308,9 +308,9 @@ class Simulation:
         ax3.set_ylabel('Sentimiento')
         ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
 
-        ax4 = fig.add_subplot(414)
-        for agent_name, performances in self.agent_performances.items():
-            ax4.plot(performances, label=agent_name)
+        #ax4 = fig.add_subplot(414)
+        for agent  in self.agents:
+            ax4.plot(self.agent_performances[agent.nombre], label=agent.nombre)
         ax4.set_title('Rendimiento de los agentes')
         ax4.set_xlabel('Pasos de tiempo')
         ax4.set_ylabel('Rendimiento (%)')
@@ -328,7 +328,7 @@ class Simulation:
                 'price_change': (prices[-1] - prices[0]) / prices[0] * 100,
                 'max_price': max(prices),
                 'min_price': min(prices),
-                #'total_volume': sum(self.volume_history[crypto_name])
+                'total_volume': sum(self.volume_history[crypto_name])
             }
 
         # Añadir resumen del rendimiento de los agentes
