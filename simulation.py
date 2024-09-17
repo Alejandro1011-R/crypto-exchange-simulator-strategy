@@ -41,8 +41,8 @@ class Simulation:
                 decision = np.random.choice(["comprar","vender","mantener" ])#quitar
                                          
                 agent.ejecutar_accion(decision,self.market,"Bitcoin")#cambiar
-                #agent.update_performance(self.market)#arreglar
-                #self.agent_performances[agent.name].append(agent.performance_history[-1])#arreglar
+                agent.actualizar_ganancia(self.market)
+                self.agent_performances[agent.name].append(agent.historia_ganancia[-1])
 
             # Actualiza el estado del mercado
             self.market.update(self.sentiment_history)
@@ -136,93 +136,6 @@ class Simulation:
             print(f"Regla inválida: {regla}. Error: {e}")
             return False
 
-    '''def algoritmo_genetico(self, contexto,agentes, tasa_mutacion=0.1 ):
-        # Ejecuta el algoritmo genético para evolucionar las reglas del agente
-        
-            nuevos_agentes = []
-            #ganancias = agentes.evaluar_desempeno(self.capital)
-                
-            # Selecciona las mejores reglas según el desempeño
-            #reglas_seleccionadas = sorted(self.reglas, key=lambda x: self.evaluar_desempeno(ganancias), reverse=True)[:len(self.reglas)//2]
-
-            for agente in agentes:
-                print(agente)   
-            agentes_orden = [agente.evaluar_desempeno(contexto) for agente in agentes].sort(key=lambda x: x[1])
-            print(agentes_orden)
-            corte = len(agentes_orden)//2
-            mejores = agentes_orden[:corte]
-            peores = agentes_orden[-corte:]
-            # Realiza crossover y mutación en las reglas seleccionadas
-            while len(nuevos_agentes) < ( agentes_orden-corte):
-                padre1 = random.choice(mejores)
-                padre2 = random.choice(mejores)
-                if padre1[0] != padre2[0]:
-                    nuevas_regla = self.crossover(padre1[1], padre2[1])
-
-                    if random.random() < tasa_mutacion:
-                        regla1 = self.mutar_regla( nuevas_regla[0])
-
-                    if random.random() < tasa_mutacion:
-                        regla2 = self.mutar_regla( nuevas_regla[1])
-                        
-                    # Valida la nueva regla antes de agregarla
-                    if self.validar_regla(regla1):
-                        nuevos_agentes.append(regla1)
-                    else:
-                        print(f"Regla generada no válida y descartada")
-
-                    # Valida la nueva regla antes de agregarla
-                    if self.validar_regla(regla2):
-                        nuevos_agentes.append(regla2)
-                    else:
-                        print(f"Regla generada no válida y descartada")
-            return  nuevos_agentes,peores'''
-
-    '''def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
-
-        nuevos_agentes = []
-        
-        # Evaluar desempeño de cada agente
-        desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
-        
-        # Ordenar los agentes por desempeño
-        desempeno_agentes.sort(key=lambda x: x[1], reverse=True)
-
-        # Dividir en mejores y peores agentes
-        corte = len(desempeno_agentes) // 2
-
-        if len(corte > 1):
-            mejores = desempeno_agentes[:corte]  # Mejores agentes
-            peores = desempeno_agentes[corte:]   # Peores agentes (serán reemplazados)
-
-            # Realiza crossover y mutación en las reglas seleccionadas
-            while len(nuevos_agentes) < len(peores):
-                # Selecciona dos padres al azar de los mejores
-                
-                padre1, padre2 = random.sample(mejores, 2)
-                
-                # Realizar crossover (cruce) entre las reglas de los padres
-                nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(padre1[0].reglas, padre2[0].reglas)
-
-                # Mutar reglas con probabilidad de tasa_mutacion
-                if random.random() < tasa_mutacion:
-                    nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
-                if random.random() < tasa_mutacion:
-                    nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
-                
-                # Validar reglas y crear nuevos agentes
-                if self.validar_regla(" ".join(nuevas_reglas_padre1)):
-                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser))
-                
-                if self.validar_regla(" ".join(nuevas_reglas_padre2)):
-                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser))
-
-            # Reemplaza los peores agentes por los nuevos agentes generados
-            for i in range(len(peores)):
-                agentes[agentes.index(peores[i][0])] = nuevos_agentes[i]
-
-            # Devolver los nuevos agentes y los agentes eliminados
-            return nuevos_agentes, [agente[0] for agente in peores]'''
         
     def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
 
@@ -287,100 +200,110 @@ class Simulation:
 
 
 
-    def _record_data(self):
-        for crypto_name, crypto in self.market.cryptocurrencies.items():
-            self.price_history[crypto_name].append(crypto.price)
-            self.volume_history[crypto_name].append(crypto.volume)
+    # def _record_data(self):
+    #     for crypto_name, crypto in self.market.cryptocurrencies.items():
+    #         self.price_history[crypto_name].append(crypto.price)
+    #         self.volume_history[crypto_name].append(crypto.volume)
 
-    def _print_step_info(self, step):
-        print(f"Step {step}: Timestamp = {self.market.timestamp}")
-        for crypto_name, crypto in self.market.cryptocurrencies.items():
-            print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
+    # def _print_step_info(self, step):
+    #     print(f"Step {step}: Timestamp = {self.market.timestamp}")
+    #     for crypto_name, crypto in self.market.cryptocurrencies.items():
+    #         #print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
+    #         print(f"  {crypto_name}: Price = ${crypto.price:.2f}")
 
-    def plot_results(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
 
-        # Graficar precios
-        for crypto, prices in self.price_history.items():
-            ax1.plot(prices, label=crypto)
-        ax1.set_title('Precio de las criptomonedas')
-        ax1.set_xlabel('Pasos de tiempo')
-        ax1.set_ylabel('Precio')
-        ax1.legend()
+    # def plot_results(self):
+    #     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
 
-        # Graficar volúmenes
-        for crypto, volumes in self.volume_history.items():
-            ax2.plot(volumes, label=crypto)
-        ax2.set_title('Volumen de transacciones')
-        ax2.set_xlabel('Pasos de tiempo')
-        ax2.set_ylabel('Volumen')
-        ax2.legend()
+    #     # Graficar precios
+    #     for crypto, prices in self.price_history.items():
+    #         ax1.plot(prices, label=crypto)
+    #     ax1.set_title('Precio de las criptomonedas')
+    #     ax1.set_xlabel('Pasos de tiempo')
+    #     ax1.set_ylabel('Precio')
+    #     ax1.legend()
 
-        # Graficar sentimiento del mercado
-        ax3.plot(self.sentiment_history)
-        ax3.set_title('Sentimiento del mercado')
-        ax3.set_xlabel('Pasos de tiempo')
-        ax3.set_ylabel('Sentimiento')
+    #     # # Graficar volúmenes
+    #     # for crypto, volumes in self.volume_history.items():
+    #     #     ax2.plot(volumes, label=crypto)
+    #     # ax2.set_title('Volumen de transacciones')
+    #     # ax2.set_xlabel('Pasos de tiempo')
+    #     # ax2.set_ylabel('Volumen')
+    #     # ax2.legend()
 
-        ax4 = fig.add_subplot(414)
-        for agent_name, performances in self.agent_performances.items():
-            ax4.plot(performances, label=agent_name)
-        ax4.set_title('Rendimiento de los agentes')
-        ax4.set_xlabel('Pasos de tiempo')
-        ax4.set_ylabel('Rendimiento (%)')
-        ax4.legend()
+    #     # # Graficar sentimiento del mercado
+    #     # ax3.plot(self.sentiment_history)
+    #     # ax3.set_title('Sentimiento del mercado')
+    #     # ax3.set_xlabel('Pasos de tiempo')
+    #     # ax3.set_ylabel('Sentimiento')
 
-        plt.tight_layout()
-        plt.show()
+    #     # Graficar sentimiento del mercado
+    #     for crypto, sentiment in self.sentiment_history.items():
+    #         ax3.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
+    #     ax3.set_title('Sentimiento del mercado')
+    #     ax3.set_xlabel('Pasos de tiempo')
+    #     ax3.set_ylabel('Sentimiento')
+    #     ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
 
-    def get_summary(self):
-        summary = {}
-        for crypto_name, prices in self.price_history.items():
-            summary[crypto_name] = {
-                'initial_price': prices[0],
-                'final_price': prices[-1],
-                'price_change': (prices[-1] - prices[0]) / prices[0] * 100,
-                'max_price': max(prices),
-                'min_price': min(prices),
-                'total_volume': sum(self.volume_history[crypto_name])
-            }
+    #     ax4 = fig.add_subplot(414)
+    #     for agent_name, performances in self.agent_performances.items():
+    #         ax4.plot(performances, label=agent_name)
+    #     ax4.set_title('Rendimiento de los agentes')
+    #     ax4.set_xlabel('Pasos de tiempo')
+    #     ax4.set_ylabel('Rendimiento (%)')
+    #     ax4.legend()
 
-        # Añadir resumen del rendimiento de los agentes
-        summary['agent_performance'] = {}
-        for agent in self.agents:
-            final_value = agent.calculate_total_value(self.market)
-            initial_value = sum(agent.initial_balance.values())
-            performance = (final_value - initial_value) / initial_value * 100
-            summary['agent_performance'][agent.name] = {
-                'initial_value': initial_value,
-                'final_value': final_value,
-                'performance': performance,
-                'max_performance': max(agent.performance_history) * 100,
-                'min_performance': min(agent.performance_history) * 100,
-                'avg_performance': sum(agent.performance_history) / len(agent.performance_history) * 100
-            }
+    #     plt.tight_layout()
+    #     plt.show()
 
-        return summary
+    # def get_summary(self):
+    #     summary = {}
+    #     for crypto_name, prices in self.price_history.items():
+    #         summary[crypto_name] = {
+    #             'initial_price': prices[0],
+    #             'final_price': prices[-1],
+    #             'price_change': (prices[-1] - prices[0]) / prices[0] * 100,
+    #             'max_price': max(prices),
+    #             'min_price': min(prices),
+    #             'total_volume': sum(self.volume_history[crypto_name])
+    #         }
 
-    def get_performance(self):
+    #     # Añadir resumen del rendimiento de los agentes
+    #     summary['agent_performance'] = {}
+    #     for agent in self.agents:
+    #         final_value = agent.calculate_total_value(self.market)
+    #         initial_value = sum(agent.initial_balance.values())
+    #         performance = (final_value - initial_value) / initial_value * 100
+    #         summary['agent_performance'][agent.name] = {
+    #             'initial_value': initial_value,
+    #             'final_value': final_value,
+    #             'performance': performance,
+    #             'max_performance': max(agent.performance_history) * 100,
+    #             'min_performance': min(agent.performance_history) * 100,
+    #             'avg_performance': sum(agent.performance_history) / len(agent.performance_history) * 100
+    #         }
 
-        summary = self.get_summary()
+    #     return summary
 
-        print("Resumen de la simulación:")
-        for crypto, data in summary.items():
-            if crypto != 'agent_performance':
-                print(f"{crypto}:")
-                for key, value in data.items():
-                    print(f"  {key}: {value}")
+    # def get_performance(self):
 
-        print("\nRendimiento de los agentes:")
-        for agent_name, performance in summary['agent_performance'].items():
-            print(f"{agent_name}:")
-            for key, value in performance.items():
-                print(f"  {key}: {value:.2%}")
+    #     summary = self.get_summary()
 
-        # Determinar la estrategia más efectiva
-        best_agent = max(summary['agent_performance'], key=lambda x: summary['agent_performance'][x]['performance'])
-        print(f"\nLa estrategia más efectiva fue: {best_agent}\n\n")
+    #     print("Resumen de la simulación:")
+    #     for crypto, data in summary.items():
+    #         if crypto != 'agent_performance':
+    #             print(f"{crypto}:")
+    #             for key, value in data.items():
+    #                 print(f"  {key}: {value}")
 
-        return best_agent
+    #     print("\nRendimiento de los agentes:")
+    #     for agent_name, performance in summary['agent_performance'].items():
+    #         print(f"{agent_name}:")
+    #         for key, value in performance.items():
+    #             print(f"  {key}: {value:.2%}")
+
+    #     # Determinar la estrategia más efectiva
+    #     best_agent = max(summary['agent_performance'], key=lambda x: summary['agent_performance'][x]['performance'])
+    #     print(f"\nLa estrategia más efectiva fue: {best_agent}\n\n")
+
+    #     return best_agent
