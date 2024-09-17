@@ -96,40 +96,86 @@ class ParserReglas:
 
         return parsed_conditions, action
 
+    # def parse_conditions(self, conditions_str):
+    #     # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
+    #     conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
+
+    #     if "SI NO" in conditions_str:
+    #         conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
+
+    #     # Divide las condiciones por "OR" y luego por "AND" para analizarlas
+    #     or_conditions = re.split(r'\sOR\s', conditions_str)
+    #     parsed_conditions = []
+
+    #     for or_cond in or_conditions:
+    #         # Divide las condiciones por "AND" dentro de cada condición "OR"
+    #         and_conditions = re.split(r'\sAND\s', or_cond)
+    #         and_parsed = []
+
+    #         for condition in and_conditions:
+    #             if "NOT" in condition:
+    #                 # Si la condición incluye "NOT", marca la condición como negada
+    #                 condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
+    #                 negated = True
+    #             else:
+    #                 negated = False
+
+    #             # Analiza cada condición individualmente
+    #             parsed_condition = self.parse_single_condition(condition)
+    #             if negated:
+    #                 parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
+
+    #             and_parsed.append(parsed_condition)
+
+    #         parsed_conditions.append(and_parsed)
+
+    #     return parsed_conditions
+    
     def parse_conditions(self, conditions_str):
-        # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
-        conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
-
-        if "SI NO" in conditions_str:
-            conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
-
-        # Divide las condiciones por "OR" y luego por "AND" para analizarlas
-        or_conditions = re.split(r'\sOR\s', conditions_str)
         parsed_conditions = []
+        if " NO " in conditions_str or " Y " in conditions_str or " O " in conditions_str :
+            print("*******************REGLA COMPLEJA*************************")
+            # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
+            conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
+            
+            if "SI NO" in conditions_str:
+                conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
+            
+            # Divide las condiciones por "OR" y luego por "AND" para analizarlas
+            or_conditions = re.split(r'\sOR\s', conditions_str)
+            #parsed_conditions = []
 
-        for or_cond in or_conditions:
-            # Divide las condiciones por "AND" dentro de cada condición "OR"
-            and_conditions = re.split(r'\sAND\s', or_cond)
-            and_parsed = []
+            for or_cond in or_conditions:
+                # Divide las condiciones por "AND" dentro de cada condición "OR"
+                and_conditions = re.split(r'\sAND\s', or_cond)
+                and_parsed = []
+                
+                for condition in and_conditions:
+                    if "NOT" in condition:
+                        # Si la condición incluye "NOT", marca la condición como negada
+                        condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
+                        negated = True
+                    else:
+                        negated = False
 
-            for condition in and_conditions:
-                if "NOT" in condition:
-                    # Si la condición incluye "NOT", marca la condición como negada
-                    condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
-                    negated = True
-                else:
-                    negated = False
+                    # Analiza cada condición individualmente
+                    parsed_condition = self.parse_single_condition(condition)
+                    if negated:
+                        parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
+                    
+                    and_parsed.append(parsed_condition)
+                
+                parsed_conditions.append(and_parsed)
+            print("*******************PARSD*************************")  
+            print(parsed_conditions) 
+            return parsed_conditions
+        else:
+            print("*******************REGLA SIMPLE*************************")
+            parsed_condition = self.parse_single_condition(conditions_str) 
+            print("*******************PARSD*************************")  
+            print(parsed_condition) 
+            return parsed_condition
 
-                # Analiza cada condición individualmente
-                parsed_condition = self.parse_single_condition(condition)
-                if negated:
-                    parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
-
-                and_parsed.append(parsed_condition)
-
-            parsed_conditions.append(and_parsed)
-
-        return parsed_conditions
 
     def parse_single_condition(self, condition):
         # Expresión regular para analizar condiciones del tipo "variable de criptomoneda es valor"
