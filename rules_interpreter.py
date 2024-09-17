@@ -72,7 +72,6 @@ def pertenencia_sentimiento_neutro(sentimiento):
 def pertenencia_sentimiento_positivo(sentimiento):
     return max(0, (sentimiento - 0) / 1)  # Pertenece más al conjunto "positivo" cuanto más cerca de 1 esté
 
-
 # Definición de la clase ParserReglas
 class ParserReglas:
     def __init__(self, pertenencia_map):
@@ -96,64 +95,30 @@ class ParserReglas:
 
         return parsed_conditions, action
 
-    # def parse_conditions(self, conditions_str):
-    #     # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
-    #     conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
 
-    #     if "SI NO" in conditions_str:
-    #         conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
-
-    #     # Divide las condiciones por "OR" y luego por "AND" para analizarlas
-    #     or_conditions = re.split(r'\sOR\s', conditions_str)
-    #     parsed_conditions = []
-
-    #     for or_cond in or_conditions:
-    #         # Divide las condiciones por "AND" dentro de cada condición "OR"
-    #         and_conditions = re.split(r'\sAND\s', or_cond)
-    #         and_parsed = []
-
-    #         for condition in and_conditions:
-    #             if "NOT" in condition:
-    #                 # Si la condición incluye "NOT", marca la condición como negada
-    #                 condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
-    #                 negated = True
-    #             else:
-    #                 negated = False
-
-    #             # Analiza cada condición individualmente
-    #             parsed_condition = self.parse_single_condition(condition)
-    #             if negated:
-    #                 parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
-
-    #             and_parsed.append(parsed_condition)
-
-    #         parsed_conditions.append(and_parsed)
-
-    #     return parsed_conditions
-    
     def parse_conditions(self, conditions_str):
         parsed_conditions = []
         if " NO " in conditions_str or " Y " in conditions_str or " O " in conditions_str :
-            print("*****REGLA COMPLEJA*******")
+            #nt("*******************REGLA COMPLEJA*************************")
             # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
             conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
 
             if "SI NO" in conditions_str:
-                conditions_str = conditions_str.replace("SI NO", "IF NOT") # Maneja la negación "SI NO"
+                conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
 
             # Divide las condiciones por "OR" y luego por "AND" para analizarlas
             or_conditions = re.split(r'\sOR\s', conditions_str)
             #parsed_conditions = []
 
             for or_cond in or_conditions:
-            # Divide las condiciones por "AND" dentro de cada condición "OR"
+                # Divide las condiciones por "AND" dentro de cada condición "OR"
                 and_conditions = re.split(r'\sAND\s', or_cond)
                 and_parsed = []
 
                 for condition in and_conditions:
                     if "NOT" in condition:
                         # Si la condición incluye "NOT", marca la condición como negada
-                        condition = condition.replace("NOT", "").strip() # Elimina "NOT" para su análisis
+                        condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
                         negated = True
                     else:
                         negated = False
@@ -161,20 +126,16 @@ class ParserReglas:
                     # Analiza cada condición individualmente
                     parsed_condition = self.parse_single_condition(condition)
                     if negated:
-                        parsed_condition = ("NOT", parsed_condition) # Marca la condición como negada
+                        parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
 
                     and_parsed.append(parsed_condition)
 
                 parsed_conditions.append(and_parsed)
-            print("*****PARSD*******") 
-            print(parsed_conditions)
         else:
-            print("*****REGLA SIMPLE*******")
             parsed_condition = self.parse_single_condition(conditions_str)
-            print("*****PARSD*******") 
-            print(parsed_condition)
             parsed_conditions.append([parsed_condition])
-    return parsed_conditions
+
+        return parsed_conditions
 
 
     def parse_single_condition(self, condition):
@@ -188,12 +149,8 @@ class ParserReglas:
         var, operator, val = match.groups()
         var, operator, val = var.strip(), operator.strip(), val.strip()
 
-        if operator == "es":
-            # Verifica si la condición es válida según el mapa de pertenencia
-            return (var, val)
-        else:
-            # Devuelve la condición analizada con el operador y el valor correspondiente
-            return (var, operator, val)
+
+        return (var, operator, val)
 
     def parse_action(self, action_str):
         # Asigna una acción numérica según la cadena de acción
@@ -261,13 +218,34 @@ class ParserReglas:
 
     def evaluate_operator(self, current_value, operator, val):
         # Evalúa operadores relacionales en las condiciones
-        if operator == "es mayor que":
+        if operator == "igual a":
+            return 1 if current_value == float(val) else 0
+        elif operator == "mayor que":
             return 1 if current_value > float(val) else 0
-        elif operator == "es menor que":
+        elif operator == "menor que":
             return 1 if current_value < float(val) else 0
-        elif operator == "es aproximadamente igual a":
+        elif operator == "aproximadamente igual a":
             return 1 if abs(current_value - float(val)) <= 0.05 * float(val) else 0
         elif operator == "está entre":
             # Divide el valor en límites inferior y superior, y verifica si el valor actual está entre ellos
             lower, upper = map(float, val.split(' y '))
             return 1 if lower <= current_value <= upper else 0
+
+    def evaluate_condition(self, var, operator, val, cripto, datos):
+        if var == "precio" or var == "volumen":
+            if val == "alto" or val == "medio" or val == "bajo":
+              if var == "precio":
+                  return self.pertenencia_map[cripto][var][val](datos.price)
+              else:
+                  return self.pertenencia_map[cripto][var][val](datos.volume)
+            else:
+                chucks = val.rsplit(' ', 1)  # Solo dividir en el último espacio
+                if var == "precio":
+                    return self.evaluate_operator(datos.price, chucks[0], float(chucks[1]))
+                else:
+                    return self.evaluate_operator(datos.volume, chucks[0], float(chucks[1]))
+        else:
+            print(f"Advertencia: Parámetro {var} desconocido.. Se omite.")
+            return 0
+
+
