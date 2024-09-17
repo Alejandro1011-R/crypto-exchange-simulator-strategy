@@ -85,7 +85,7 @@ class ParserReglas:
         match = re.match(pattern, rule)
         if not match:
             raise ValueError("Formato de regla no válido")  # Lanza un error si la regla no tiene el formato correcto
-        
+
         # Extrae las condiciones y la acción de la regla
         conditions_str = match.group(1)
         action_str = match.group(2).strip()
@@ -93,16 +93,16 @@ class ParserReglas:
         # Analiza las condiciones y la acción por separado
         parsed_conditions = self.parse_conditions(conditions_str)
         action = self.parse_action(action_str)
-        
+
         return parsed_conditions, action
-    
+
     def parse_conditions(self, conditions_str):
         # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
         conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
-        
+
         if "SI NO" in conditions_str:
             conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
-        
+
         # Divide las condiciones por "OR" y luego por "AND" para analizarlas
         or_conditions = re.split(r'\sOR\s', conditions_str)
         parsed_conditions = []
@@ -111,7 +111,7 @@ class ParserReglas:
             # Divide las condiciones por "AND" dentro de cada condición "OR"
             and_conditions = re.split(r'\sAND\s', or_cond)
             and_parsed = []
-            
+
             for condition in and_conditions:
                 if "NOT" in condition:
                     # Si la condición incluye "NOT", marca la condición como negada
@@ -124,9 +124,9 @@ class ParserReglas:
                 parsed_condition = self.parse_single_condition(condition)
                 if negated:
                     parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
-                
+
                 and_parsed.append(parsed_condition)
-            
+
             parsed_conditions.append(and_parsed)
 
         return parsed_conditions
@@ -137,7 +137,7 @@ class ParserReglas:
         match = re.match(pattern, condition)
         if not match:
             raise ValueError(f"Condición no válida: {condition}")  # Lanza un error si la condición no tiene el formato correcto
-        
+
         # Extrae las partes de la condición: variable, operador, valor
         var, operator, val = match.groups()
         var, operator, val = var.strip(), operator.strip(), val.strip()
@@ -161,57 +161,57 @@ class ParserReglas:
             raise ValueError(f"Acción no válida: {action_str}")  # Lanza un error si la acción no es reconocida
 
     def aplicar_regla(self, parsed_conditions, action, contexto):
-        # Lista para almacenar los resultados de las condiciones "OR"
-        or_results = []
-
-        for and_conditions in parsed_conditions:
-            # Lista para almacenar los resultados de las condiciones "AND"
-            and_results = []
-            for condition in and_conditions:
-                if condition[0] == "NOT":
-                    bestCrip = None
-                    bestVal = 2.0
-                    for cripto in contexto.cryptocurrencies:
-                        # Si la condición es negada, invierte el valor de pertenencia
-                        var, label = condition[1]
-                        func = self.pertenencia_map[cripto][var][label]
-                        pertenencia_valor = func(*(contexto.cryptocurrencies[cripto].price,contexto[cripto].volatility) if val == "volatilidad" else (contexto[cripto].price))
-                        if pertenencia_valor < bestVal:
-                            bestVal = pertenencia_valor
-                            bestCrip = cripto
-                    and_results.append((1 - bestVal),bestCrip) # Invierte la pertenencia para condiciones negadas
-                elif len(condition) == 3:
-                    # Si la condición tiene 3 partes (cripto, var, label), evalúa la pertenencia
-                    for cripto in contexto.cryptocurrencies:
-                        bestCrip = None
-                        bestVal = 2.0
-                        var, label = condition
-                        func = self.pertenencia_map[cripto][var][label]
-                        pertenencia_valor = func(*(contexto.cryptocurrencies[cripto].price,contexto[cripto].volatility) if val == "volatilidad" else (contexto[cripto].price))
-                        if pertenencia_valor < bestVal:
-                            bestVal = pertenencia_valor
-                            bestCrip = cripto
-                    and_results.append(bestVal,bestCrip)
-                elif len(condition) == 4:
-                    # Si la condición tiene 4 partes (cripto, var, operator, val), evalúa el operador
-                    for cripto in contexto.cryptocurrencies:
-                        bestCrip = None
-                        bestVal = 2.0
+        resultados = {}
+        for cripto, datos in contexto.cryptocurrencies.items():
+            or_results = []
+            for and_conditions in parsed_conditions:
+                and_results = []
+                for condition in and_conditions:
+                    if condition[0] == "NOT":
+                        # Verificar que la condición negada tenga tres elementos
+                        if len(condition) < 2 or len(condition[1]) < 3:
+                            print(f"Advertencia: Condición inválida {condition} para {cripto}. Se omite.")
+                            continue
+                        var, operator, val = condition[1]
+                        pertenencia_valor = self.evaluate_condition(var, operator, val, cripto, datos)
+                        pertenencia_valor = 1 - pertenencia_valor
+                    else:
+                        # Verificar que la condición tenga tres elementos
+                        if len(condition) < 3:
+                            print(f"Advertencia: Condición inválida {condition} para {cripto}. Se omite.")
+                            continue
                         var, operator, val = condition
-                        current_value = contexto.cryptocurrencies[cripto].price
-                        pertenencia_valor = self.evaluate_operator(current_value, operator, val)
-                        if pertenencia_valor < bestVal:
-                                    bestVal = pertenencia_valor
-                                    bestCrip = cripto
-                    and_results.append(bestVal,bestCrip)
-            
-            
-            # La lógica AND se aplica usando el mínimo de los resultados
-            or_results.append(min(and_results, key=lambda x: x[0]))
-        
-        # La lógica OR se aplica usando el máximo de los resultados
-        result = max(or_results, key=lambda x: x[0])
-        return ((result[0]*action), result[1])
+                        pertenencia_valor = self.evaluate_condition(var, operator, val, cripto, datos)
+
+                    and_results.append(pertenencia_valor)
+
+                # Manejar caso donde and_results está vacío
+                if and_results:
+                    and_result = min(and_results)
+                    or_results.append(and_result)
+                else:
+                    # Asignar un valor predeterminado si no hay condiciones que se cumplan
+                    or_results.append(0)
+
+            # Manejar caso donde or_results está vacío
+            if or_results:
+                final_pert = max(or_results)
+            else:
+                final_pert = 0
+
+            resultado = final_pert * action
+            resultados[cripto] = resultado
+
+        # Determinar la criptomoneda con el mayor impacto positivo
+        if resultados:
+            mejor_cripto = max(resultados, key=resultados.get)
+            mejor_resultado = resultados[mejor_cripto]
+        else:
+            mejor_cripto = None
+            mejor_resultado = 0
+
+        return (mejor_resultado, mejor_cripto)
+
 
     def evaluate_operator(self, current_value, operator, val):
         # Evalúa operadores relacionales en las condiciones

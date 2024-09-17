@@ -2,16 +2,16 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from agents import *
-#from gemini_ai import *
-
+# from gemini_ai import *  # Asegúrate de que este módulo exista y esté correctamente implementado
+import random  # Asegúrate de importar random si no está ya importado
 
 class Simulation:
-    def __init__(self, num_steps: int, agents: List[Agente], market: Market,parser):
+    def __init__(self, num_steps: int, agents: List[Agente], market: Market, parser):
         self.num_steps = num_steps
         self.agents = agents
         self.market = market
         self.price_history = {crypto: [market.cryptocurrencies[crypto].price] for crypto in market.cryptocurrencies}
-        #self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
+        # self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
@@ -27,29 +27,38 @@ class Simulation:
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
-            subreddits_list[crypto]=['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting',crypto]
-        #search_query = 'trading OR investment OR market OR price'
+            subreddits_list[crypto] = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting', crypto]
+        # search_query = 'trading OR investment OR market OR price'
+
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
             for crypto in self.market.cryptocurrencies:
-                # self.sentiment_history[crypto].append(Process( trainer,reddit_instance,subreddits_list[crypto],post_limit,crypto))
-                self.sentiment_history[crypto].append(np.random.normal(0, 0.1))#quitar
+                # self.sentiment_history[crypto].append(Process(trainer, reddit_instance, subreddits_list[crypto], post_limit, crypto))
+                self.sentiment_history[crypto].append(np.random.normal(0, 0.1))  # Simulación simplificada
+
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
+                # decision = agent.tomar_decision(self.market)
+                decision = np.random.choice(["comprar", "vender", "mantener"])  # Simulación simplificada
 
-                #decision = agent.tomar_decision(self.market)
-                decision = np.random.choice(["comprar","vender","mantener" ])#quitar
+                accion, resultado = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
+                # Para usar la decisión aleatoria:
+                # decision = np.random.choice(["comprar","vender","mantener" ])#quitar
+                # agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
+                # agent.actualizar_ganancia(self.market)
+                # self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
-                agent.ejecutar_accion(decision,self.market,"Bitcoin")#cambiar
-                agent.actualizar_ganancia(self.market)
-                self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
+                # Ejecutar la acción basada en la decisión tomada por el agente
+                if accion and resultado:
+                    self.agent_performances[agent.nombre].append(resultado[0])  # Asumiendo que resultado es una tupla (valor, cripto)
 
             # Actualiza el estado del mercado
             self.market.update(self.sentiment_history)
 
+            # Algoritmo Genético cada 10 pasos
             if count == 10:
                 count = 1
-                nuevos,peores=self.algoritmo_genetico(self.market,self.agents,count)
+                nuevos, peores = self.algoritmo_genetico(self.market, self.agents, count)
                 # Registra datos para análisis posterior
                 print("**** Nuevos agentes y reglas *****")
                 for agente in nuevos:
@@ -58,47 +67,95 @@ class Simulation:
 
                 for agente in peores:
                     self.agents.remove(agente)
+
                 for agente in nuevos:
-                    self.agents.append(Agente(f'agente {No_Agente} generación { agent_gen}',agente.reglas,self.parser))
-                    No_Agente =  No_Agente +1
-                agent_gen =  agent_gen + 1
+                    nuevo_nombre = f'agente {No_Agente} generación {agent_gen}'
+                    nuevo_agente = Agente(nuevo_nombre, agente.reglas, self.parser)
+                    self.agents.append(nuevo_agente)
+                    self.agent_performances[nuevo_nombre] = []  # Inicializa el desempeño del nuevo agente
+                    No_Agente += 1
+
+                agent_gen += 1
                 No_Agente = 0
 
             else:
-                count = count+1
+                count += 1
+
             # Imprime información del paso actual
             self._print_step_info(step)
 
-    def mutar_regla(self, regla):
-        # Divide la regla en partes usando espacios como delimitadores
-        partes = regla.split(" ")
 
-        # Listas de posibles valores para la mutación
+
+    def mutar_regla(self, regla):
+        # Separar la regla en 'SI', condiciones, 'ENTONCES', acción
+        partes = regla.split(" ENTONCES ")
+        if len(partes) != 2:
+            # Regla mal formada, no puede mutar
+            print(f"Regla mal formada, no se puede mutar: {regla}")
+            return regla
+
+        condiciones = partes[0].replace("SI ", "")
+        accion = partes[1]
+
+        # Split condiciones en palabras
+        condiciones_partes = condiciones.split(" ")
+
+        # Mutar condiciones
         valores_precio_volumen = ["alto", "bajo", "medio"]
         valores_sentimiento = ["negativo", "neutro", "positivo"]
 
-        # Identifica todas las posiciones donde se encuentran valores de precio/volumen
-        indices_precio_volumen = [i for i, palabra in enumerate(partes) if palabra in valores_precio_volumen]
+        for i, palabra in enumerate(condiciones_partes):
+            if palabra in valores_precio_volumen:
+                nuevas_valores = [valor for valor in valores_precio_volumen if valor != palabra]
+                condiciones_partes[i] = random.choice(nuevas_valores)
+            elif palabra in valores_sentimiento:
+                nuevas_valores = [valor for valor in valores_sentimiento if valor != palabra]
+                condiciones_partes[i] = random.choice(nuevos_valores)
 
-        # Mutar cada valor de precio/volumen encontrado en la regla
-        for index in indices_precio_volumen:
-            valor_actual = partes[index]
-            nuevos_valores = [valor for valor in valores_precio_volumen if valor != valor_actual]
-            partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
+        condiciones_mutadas = " ".join(condiciones_partes)
 
-        # Identifica todas las posiciones donde se encuentran valores de sentimiento
-        indices_sentimiento = [i for i, palabra in enumerate(partes) if palabra in valores_sentimiento]
+        # Mutar la acción
+        acciones = ["comprar", "vender", "mantener"]
+        accion_mutada = accion
+        if accion in acciones:
+            accion_mutada = random.choice([a for a in acciones if a != accion])
 
-        # Mutar cada valor de sentimiento encontrado en la regla
-        for index in indices_sentimiento:
-            valor_actual = partes[index]
-            nuevos_valores = [valor for valor in valores_sentimiento if valor != valor_actual]
-            partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
+        # Reconstruir la regla asegurando la estructura correcta
+        regla_mutada = f"SI {condiciones_mutadas} ENTONCES {accion_mutada}"
+        return regla_mutada
 
-        # Si no se encontraron valores de precio/volumen ni de sentimiento, mutar la acción
-        partes[-1] = random.choice(["comprar", "vender", "mantener"])
+    # def mutar_regla(self, regla):
+    #     import random  # Asegúrate de importar random si no está ya importado
+    #     # Divide la regla en partes usando espacios como delimitadores
+    #     partes = regla.split(" ")
 
-        return " ".join(partes)
+    #     # Listas de posibles valores para la mutación
+    #     valores_precio_volumen = ["alto", "bajo", "medio"]
+    #     valores_sentimiento = ["negativo", "neutro", "positivo"]
+
+    #     # Identifica todas las posiciones donde se encuentran valores de precio/volumen
+    #     indices_precio_volumen = [i for i, palabra in enumerate(partes) if palabra in valores_precio_volumen]
+
+    #     # Mutar cada valor de precio/volumen encontrado en la regla
+    #     for index in indices_precio_volumen:
+    #         valor_actual = partes[index]
+    #         nuevos_valores = [valor for valor in valores_precio_volumen if valor != valor_actual]
+    #         partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
+
+    #     # Identifica todas las posiciones donde se encuentran valores de sentimiento
+    #     indices_sentimiento = [i for i, palabra in enumerate(partes) if palabra in valores_sentimiento]
+
+    #     # Mutar cada valor de sentimiento encontrado en la regla
+    #     for index in indices_sentimiento:
+    #         valor_actual = partes[index]
+    #         nuevos_valores = [valor for valor in valores_sentimiento if valor != valor_actual]
+    #         partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
+
+    #     # Si no se encontraron valores de precio/volumen ni de sentimiento, mutar la acción
+    #     if not indices_precio_volumen and not indices_sentimiento:
+    #         partes[-1] = random.choice(["comprar", "vender", "mantener"])
+
+    #     return " ".join(partes)
 
     def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
@@ -125,7 +182,6 @@ class Simulation:
 
         return child1, child2
 
-
     def validar_regla(self, regla):
         # Intenta analizar la regla para verificar su validez
         try:
@@ -136,7 +192,6 @@ class Simulation:
             print(f"Regla inválida: {regla}. Error: {e}")
             return False
 
-
     def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
 
         nuevos_agentes = []
@@ -144,8 +199,9 @@ class Simulation:
         # Evaluar desempeño de cada agente
         desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
 
-        # Ordenar los agentes por desempeño
-        desempeno_agentes.sort(key=lambda x: x[1], reverse=True)
+        # Ordenar los agentes por desempeño (mayor desempeño primero)
+        desempeno_agentes.sort(key=lambda x: x[1][1], reverse=True)  # Asumiendo que evaluar_desempeno devuelve (nombre, desempeño)
+
         # Caso especial: Solo hay dos agentes
         if len(agentes) <= 3:
             mejor_agente = desempeno_agentes[0]  # Agente con mejor desempeño
@@ -155,7 +211,6 @@ class Simulation:
             #print(len(mejor_agente[0].reglas))
             nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(mejor_agente[0].reglas, peor_agente[0].reglas)
 
-
             # Aplicar mutación a las reglas con una probabilidad definida
             if random.random() < tasa_mutacion:
                 nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
@@ -164,7 +219,7 @@ class Simulation:
 
             # Validar reglas y generar un nuevo agente para reemplazar al peor
             if self.validar_regla(" ".join(nuevas_reglas_padre2)):
-                nuevo_agente = Agente(f'Nuevo Agente {peor_agente[0].nombre}', nuevas_reglas_padre2, self.parser)
+                nuevo_agente = Agente(f'agente {peor_agente[0].nombre}', nuevas_reglas_padre2, self.parser)
                 nuevos_agentes.append(nuevo_agente)
 
             # Retornar el nuevo agente creado y el agente reemplazado
@@ -179,9 +234,11 @@ class Simulation:
             # Realiza crossover y mutación en las reglas seleccionadas
             while len(nuevos_agentes) < len(peores):
                 # Selecciona dos padres al azar de los mejores
-                padre1, padre2 = random.sample(mejores, 2)
+                padres = random.sample(mejores, 2)
+                padre1, padre2 = padres[0][0], padres[1][0]
+
                 # Realizar crossover (cruce) entre las reglas de los padres
-                nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(padre1[0].reglas, padre2[0].reglas)
+                nuevas_reglas_padre1, nuevas_reglas_padre2 = self.crossover(padre1.reglas, padre2.reglas)
 
                 # Mutar reglas con probabilidad de tasa_mutacion
                 if random.random() < tasa_mutacion:
@@ -191,12 +248,24 @@ class Simulation:
 
                 # Validar reglas y crear nuevos agentes
                 if self.validar_regla(" ".join(nuevas_reglas_padre1)):
-                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser))
+                    nuevo_agente1 = Agente(f'agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser)
+                    nuevos_agentes.append(nuevo_agente1)
+                    self.agent_performances[nuevo_agente1.nombre] = []  # Inicializa el desempeño
+
                 if self.validar_regla(" ".join(nuevas_reglas_padre2)):
-                    nuevos_agentes.append(Agente(f'Agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser))
+                    nuevo_agente2 = Agente(f'agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser)
+                    nuevos_agentes.append(nuevo_agente2)
+                    self.agent_performances[nuevo_agente2.nombre] = []  # Inicializa el desempeño
 
             # Retornar los nuevos agentes creados y los agentes que fueron reemplazados
             return nuevos_agentes, [agente[0] for agente in peores]
+
+    def _print_step_info(self, step):
+        print(f"Step {step}: Timestamp = {self.market.timestamp}")
+        for crypto_name, crypto in self.market.cryptocurrencies.items():
+            # print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
+            print(f"  {crypto_name}: Price = ${crypto.price:.2f}")
+
 
 
 
@@ -204,12 +273,6 @@ class Simulation:
     #     for crypto_name, crypto in self.market.cryptocurrencies.items():
     #         self.price_history[crypto_name].append(crypto.price)
     #         self.volume_history[crypto_name].append(crypto.volume)
-
-    def _print_step_info(self, step):
-        print(f"Step {step}: Timestamp = {self.market.timestamp}")
-        for crypto_name, crypto in self.market.cryptocurrencies.items():
-            #print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
-            print(f"  {crypto_name}: Price = ${crypto.price:.2f}")
 
 
     # def plot_results(self):
