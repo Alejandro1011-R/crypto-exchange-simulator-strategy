@@ -15,30 +15,30 @@ class Agente:
         self.historia_ganancia = []
         self.portafolio = {}  # Portafolio para almacenar las criptomonedas compradas
         self.ciclo = 1
-       
+
     def tomar_decision(self, contexto):#ver
         # Inicializa variables para rastrear la mejor acción y el mejor resultado
         mejor_resultado = 0
         mejor_accion = "mantener"
-        
+
         # Itera sobre cada regla para evaluarla en el contexto actual
         for regla in self.reglas:
             # Analiza la regla y la aplica al contexto de mercado
             parsed_conditions, accion = self.parser_reglas.parse_rule(regla)
             resultado = self.parser_reglas.aplicar_regla(parsed_conditions, accion, contexto)
-            
+
             # Actualiza la mejor acción si el resultado de esta regla es superior
             if abs(resultado[0]) > abs(mejor_resultado[0]):
                 mejor_resultado = resultado
                 mejor_accion = accion
-        
+
         # Interpreta el resultado y muestra la decisión tomada
         interpretacion = self.interpretar_resultado(mejor_resultado, mejor_accion)
         print(f"{self.nombre} decidió: {interpretacion}")
-        
+
         # Retorna la mejor acción y el resultado asociado
         return mejor_accion, mejor_resultado
-    
+
     def interpretar_resultado(self, resultado, accion):
         # Convierte la acción numérica en una cadena descriptiva
         if accion == 1:
@@ -47,7 +47,7 @@ class Agente:
             accion_str = "vender"
         else:
             accion_str = "mantener"
-        
+
         # Interpreta el resultado de la acción basada en la confianza (valor de resultado)
         if resultado[0] == 0:
             return f"La regla sugiere no {accion_str} en este contexto."
@@ -65,11 +65,11 @@ class Agente:
                 return f"Moderada recomendación para no {accion_str} {resultado[1]} con confianza de {resultado[0]:.2f}."
             else:
                 return f"Débil recomendación para no {accion_str} {resultado[1]} con confianza de {resultado[0]:.2f}."
-    
+
     def ejecutar_accion(self, accion, contexto, cripto):
         # Obtiene el precio actual de la criptomoneda del contexto de mercado
         precio = contexto.cryptocurrencies[cripto].price
-        
+
         if accion == "comprar" and self.capital > precio:
             # Calcula cuántas unidades se pueden comprar y actualiza el capital y portafolio del agente
             cantidad = self.capital // precio
@@ -79,7 +79,7 @@ class Agente:
             else:
                 self.portafolio[cripto] = cantidad
             print(f"{self.nombre} compró {cantidad} unidades de {cripto}.")
-            
+
             contexto.cryptocurrencies[cripto].add_order("buy",precio,cantidad)
 
         elif accion == "vender":
@@ -89,7 +89,7 @@ class Agente:
                 self.capital += cantidad * precio
                 self.portafolio[cripto] = 0  # Vender todas las unidades
                 print(f"{self.nombre} vendió {cantidad} unidades de {cripto}.")
-                
+
                 # Actualizar el precio en el contexto: la venta disminuye el precio ligeramente
                 nuevo_precio = precio * (1 - cantidad / 100000)  # Simplificación: pequeña caída de precio
 
@@ -107,10 +107,10 @@ class Agente:
         self.ciclo = self.ciclo + 1
         return (self.nombre,desempeño)
 
-    def actualizar_ganancia(sel,contexto):
+    def actualizar_ganancia(self,contexto):
         ganancia = 0
         for crypto,value in self.portafolio:
             ganancia =  ganancia + (contexto.Cryptocurrency[crypto].price * value)
-        ganancia = ganancia + capital
-        historia_ganancia.append(ganancia-self.capital_inicial)
+        ganancia = ganancia + self.capital
+        self.historia_ganancia.append(ganancia-self.capital_inicial)
         return

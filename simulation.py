@@ -15,7 +15,7 @@ class Simulation:
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.parser = parser
-    
+
     def run(self):
         agent_gen = 1
         No_Agente = 0
@@ -36,13 +36,13 @@ class Simulation:
                 self.sentiment_history[crypto].append(np.random.normal(0, 0.1))#quitar
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
-               
+
                 #decision = agent.tomar_decision(self.market)
                 decision = np.random.choice(["comprar","vender","mantener" ])#quitar
-                                         
+
                 agent.ejecutar_accion(decision,self.market,"Bitcoin")#cambiar
                 agent.actualizar_ganancia(self.market)
-                self.agent_performances[agent.name].append(agent.historia_ganancia[-1])
+                self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
             # Actualiza el estado del mercado
             self.market.update(self.sentiment_history)
@@ -64,19 +64,19 @@ class Simulation:
                 agent_gen =  agent_gen + 1
                 No_Agente = 0
 
-            else: 
-                count = count+1    
+            else:
+                count = count+1
             # Imprime información del paso actual
             self._print_step_info(step)
 
     def mutar_regla(self, regla):
         # Divide la regla en partes usando espacios como delimitadores
         partes = regla.split(" ")
-        
+
         # Listas de posibles valores para la mutación
         valores_precio_volumen = ["alto", "bajo", "medio"]
         valores_sentimiento = ["negativo", "neutro", "positivo"]
-        
+
         # Identifica todas las posiciones donde se encuentran valores de precio/volumen
         indices_precio_volumen = [i for i, palabra in enumerate(partes) if palabra in valores_precio_volumen]
 
@@ -102,16 +102,16 @@ class Simulation:
 
     def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
-        
+
         '''if len(parent1) != len(parent2):
             raise ValueError("Los padres deben tener el mismo tamaño")'''
         # Trunca las listas al tamaño del padre más corto si no tienen el mismo tamaño
         min_len = min(len(parent1), len(parent2))
         parent1, parent2 = parent1[:min_len], parent2[:min_len]
-        
+
         child1 = []
         child2 = []
-        
+
         # Iterar sobre cada gen/law en los padres
         for i in range(len(parent1)):
             if random.random() < crossover_rate:
@@ -122,7 +122,7 @@ class Simulation:
                 # Tomar el gen/law del segundo padre para el primer hijo, y del primero para el segundo hijo
                 child1.append(parent2[i])
                 child2.append(parent1[i])
-        
+
         return child1, child2
 
 
@@ -136,14 +136,14 @@ class Simulation:
             print(f"Regla inválida: {regla}. Error: {e}")
             return False
 
-        
+
     def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
 
         nuevos_agentes = []
 
         # Evaluar desempeño de cada agente
         desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
-        
+
         # Ordenar los agentes por desempeño
         desempeno_agentes.sort(key=lambda x: x[1], reverse=True)
         # Caso especial: Solo hay dos agentes
@@ -205,11 +205,11 @@ class Simulation:
     #         self.price_history[crypto_name].append(crypto.price)
     #         self.volume_history[crypto_name].append(crypto.volume)
 
-    # def _print_step_info(self, step):
-    #     print(f"Step {step}: Timestamp = {self.market.timestamp}")
-    #     for crypto_name, crypto in self.market.cryptocurrencies.items():
-    #         #print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
-    #         print(f"  {crypto_name}: Price = ${crypto.price:.2f}")
+    def _print_step_info(self, step):
+        print(f"Step {step}: Timestamp = {self.market.timestamp}")
+        for crypto_name, crypto in self.market.cryptocurrencies.items():
+            #print(f"  {crypto_name}: Price = ${crypto.price:.2f}, Volume = {crypto.volume:.2f}")
+            print(f"  {crypto_name}: Price = ${crypto.price:.2f}")
 
 
     # def plot_results(self):
