@@ -1,0 +1,3 @@
+SI sentimiento es positivo ENTONCES comprar
+SI sentimiento es neutro ENTONCES mantener
+SI sentimiento es negativo ENTONCES vender
