@@ -107,9 +107,9 @@ if st.sidebar.button("Iniciar Simulación"):
     initial_volatilities = {
         "Bitcoin": 0.9,
         "Ethereum": 0.7,
-        "Ripple": 0.5,
-        "Litecoin": 0.6,
-        "Cardano": 0.8,
+        "Ripple": 10.0,
+        "Litecoin": 6.0,
+        "Cardano": 2.0,
         # Añadir más criptomonedas según sea necesario
     }
 
