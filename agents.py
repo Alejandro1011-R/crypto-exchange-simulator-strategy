@@ -2,6 +2,8 @@ from abc import ABC
 from rules_interpreter import *
 from typing import List, Dict
 from market import *
+import random
+import numpy as np
 
 # Definición de la clase Agente
 class Agente:
@@ -15,6 +17,43 @@ class Agente:
         self.historia_ganancia = []
         self.portafolio = {}  # Portafolio para almacenar las criptomonedas compradas
         self.ciclo = 1
+
+        # **Componentes BDI**
+        self.beliefs = {}          # Creencias: Información actual del mercado
+        self.desire = "Maximizar ganancias"  # Deseo fijo
+        self.intentions = reglas   # Intenciones: Reglas de acción
+
+    def update_beliefs(self, market_context, sentiment_history):
+        """
+        Actualiza las creencias del agente con el nuevo contexto del mercado.
+        """
+        self.beliefs = {
+                name: {
+                    'price': crypto.price,
+                    'volume': crypto.volume,
+                    'sentiment': self.get_sentiment(name, sentiment_history)  # Método para obtener el sentimiento actual
+                }
+                for name, crypto in market_context.cryptocurrencies.items()
+            }
+        print(self.beliefs)
+        print(self.intentions)
+
+
+
+    def get_sentiment(self, crypto_name, sentiment_history):
+        """
+        Obtiene el sentimiento actual para una criptomoneda específica.
+        """
+        # Asumiendo que tienes un historial de sentimientos almacenado
+        if sentiment_history and crypto_name in sentiment_history:
+            return sentiment_history[crypto_name][-1]
+        return 0  # Sentimiento neutro por defecto si no hay datos
+
+    def set_intentions(self, plans):
+        """
+        Establece las intenciones/plans del agente.
+        """
+        self.intentions = plans
 
     def tomar_decision(self, contexto):
         # Inicializa variables para rastrear la mejor acción y el mejor resultado
@@ -112,16 +151,21 @@ class Agente:
                 print(f"{self.nombre} no tiene unidades de {cripto} para vender.")
 
     def evaluar_desempeno(self, contexto):
-        # Evalúa el desempeño del agente basado en las ganancias obtenidas
+        """
+        Evalúa el desempeño del agente basado en las ganancias obtenidas.
+        """
         ganancia = 0
         for crypto, value in self.portafolio.items():
             ganancia += contexto.cryptocurrencies[crypto].price * value
         ganancia += self.capital
-        desempeño = ganancia / self.ciclo
+        desempeño = (ganancia - self.capital_inicial) / self.capital_inicial * 100  # Rendimiento porcentual
         self.ciclo += 1
         return (self.nombre, desempeño)
 
     def actualizar_ganancia(self, contexto):
+        """
+        Actualiza el historial de ganancias del agente.
+        """
         ganancia = 0
         for crypto, value in self.portafolio.items():
             ganancia += contexto.cryptocurrencies[crypto].price * value
