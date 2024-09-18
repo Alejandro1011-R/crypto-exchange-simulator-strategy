@@ -134,20 +134,4 @@ def Process(trainer,reddit_instance,subreddit_names,post_limit,search_query):
     for inf in influences:
         print(f'Message: {inf[0][:100]}...\nRelevance: {inf[1]}\n\n')
     # return sum(influences)/len(influences)
-    return sum(inf[1] for inf in influences)/len(influences)
-
-
-# if __name__ == "__main__":
-#     trainer = SentimentAnalyzer()
-
-#     reddit_instance = CryptoTradingAgent()
-
-#     subreddit_names = ['CryptoCurrency', 'Bitcoin', 'Ethereum', 'CryptoTrading', 'CryptoInvesting']
-#     post_limit = 100
-#     search_query = 'trading OR investment OR market OR price'
-
-#     posts = reddit_instance.search_posts(subreddit_names, post_limit, search_query)
-
-#     posts_subset = random.sample(posts, 10)
-
-    
+    return sum(inf[1] for inf in influences)/len(influences)    

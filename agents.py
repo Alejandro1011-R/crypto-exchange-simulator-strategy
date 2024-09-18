@@ -42,7 +42,7 @@ class Agente:
         print(f"{self.nombre} decidió: {interpretacion}")
 
         # Retorna la mejor acción y el resultado asociado
-        return mejor_accion, mejor_resultado
+        return mejor_accion, mejor_resultado,cripto
 
     def interpretar_resultado(self, resultado, accion):
         # Convierte la acción numérica en una cadena descriptiva

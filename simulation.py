@@ -22,8 +22,9 @@ class Simulation:
         count = 1
 
         subreddits_list = {}
-        trainer = SentimentAnalyzer('gem.env')
-        reddit_instance = CryptoTradingAgent('gem.env')
+
+        trainer = SentimentAnalyzer('.env')
+        reddit_instance = CryptoTradingAgent('.env')
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
@@ -34,19 +35,11 @@ class Simulation:
             # Simula el sentimiento del mercado
             for crypto in self.market.cryptocurrencies:
                 self.sentiment_history[crypto].append(Process(trainer, reddit_instance, subreddits_list[crypto], post_limit, crypto))
-                #self.sentiment_history[crypto].append(np.random.normal(0, 0.1))  # Simulación simplificada
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
-                # decision = agent.tomar_decision(self.market)
-                #decision = np.random.choice(["comprar", "vender", "mantener"])  # Simulación simplificada
-
-                accion, resultado = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
-                # Para usar la decisión aleatoria:
-                # decision = np.random.choice(["comprar","vender","mantener" ])#quitar
-                #agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
-                if accion != "mantener":
-                    agent.ejecutar_accion(accion, self.market, resultado[1])
+                accion, resultado,crypto = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
+                agent.ejecutar_accion(accion, self.market, crypto)#cambiar
                 agent.actualizar_ganancia(self.market)
                 self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
@@ -125,39 +118,6 @@ class Simulation:
         # Reconstruir la regla asegurando la estructura correcta
         regla_mutada = f"SI {condiciones_mutadas} ENTONCES {accion_mutada}"
         return regla_mutada
-
-    # def mutar_regla(self, regla):
-    #     import random  # Asegúrate de importar random si no está ya importado
-    #     # Divide la regla en partes usando espacios como delimitadores
-    #     partes = regla.split(" ")
-
-    #     # Listas de posibles valores para la mutación
-    #     valores_precio_volumen = ["alto", "bajo", "medio"]
-    #     valores_sentimiento = ["negativo", "neutro", "positivo"]
-
-    #     # Identifica todas las posiciones donde se encuentran valores de precio/volumen
-    #     indices_precio_volumen = [i for i, palabra in enumerate(partes) if palabra in valores_precio_volumen]
-
-    #     # Mutar cada valor de precio/volumen encontrado en la regla
-    #     for index in indices_precio_volumen:
-    #         valor_actual = partes[index]
-    #         nuevos_valores = [valor for valor in valores_precio_volumen if valor != valor_actual]
-    #         partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
-
-    #     # Identifica todas las posiciones donde se encuentran valores de sentimiento
-    #     indices_sentimiento = [i for i, palabra in enumerate(partes) if palabra in valores_sentimiento]
-
-    #     # Mutar cada valor de sentimiento encontrado en la regla
-    #     for index in indices_sentimiento:
-    #         valor_actual = partes[index]
-    #         nuevos_valores = [valor for valor in valores_sentimiento if valor != valor_actual]
-    #         partes[index] = random.choice(nuevos_valores)  # Sustituir por un nuevo valor
-
-    #     # Si no se encontraron valores de precio/volumen ni de sentimiento, mutar la acción
-    #     if not indices_precio_volumen and not indices_sentimiento:
-    #         partes[-1] = random.choice(["comprar", "vender", "mantener"])
-
-    #     return " ".join(partes)
 
     def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño

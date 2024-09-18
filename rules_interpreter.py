@@ -241,9 +241,9 @@ class ParserReglas:
             else:
                 chucks = val.rsplit(' ', 1)  # Solo dividir en el último espacio
                 if var == "precio":
-                    return self.evaluate_operator(datos.price, chucks[0], float(chucks[1]))
+                    return self.evaluate_operator(datos.price, chucks[0], operator,float(chucks[1]))
                 else:
-                    return self.evaluate_operator(datos.volume, chucks[0], float(chucks[1]))
+                    return self.evaluate_operator(datos.volume, chucks[0], operator,float(chucks[1]))
         else:
             print(f"Advertencia: Parámetro {var} desconocido.. Se omite.")
             return 0
