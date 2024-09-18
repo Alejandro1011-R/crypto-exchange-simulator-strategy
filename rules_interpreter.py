@@ -247,5 +247,45 @@ class ParserReglas:
         else:
             print(f"Advertencia: Parámetro {var} desconocido.. Se omite.")
             return 0
+class Map:
+    def __init__(self):
+        self.pertenencia_map = {
+    "Bitcoin": {
+        "precio": {
+            "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=15000, limite_superior=30000),
+            "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=30000, limite_superior=45000),
+            "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=45000, limite_superior=60000)
+        },
+        "volumen": {
+            "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+            "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+            "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+        },
+        "sentimiento": {
+            "negativo":lambda sentimiento: pertenencia_sentimiento_negativo,
+            "neutro": lambda sentimiento: pertenencia_sentimiento_neutro,
+            "positivo": lambda sentimiento: pertenencia_sentimiento_positivo
+        }
+    },
+    "Ethereum": {
+        "precio": {
+            "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1000, limite_superior=2000),
+            "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2000, limite_superior=3000),
+            "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3000, limite_superior=5000)
+        },
+        "volumen": {
+            "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+            "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+            "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+        },
+        "sentimiento": {
+            "negativo": lambda sentimiento: pertenencia_sentimiento_negativo,
+            "neutro": lambda sentimiento: pertenencia_sentimiento_neutro,
+            "positivo": lambda sentimiento: pertenencia_sentimiento_positivo
+        }
+    }
+}
+
+
 
 

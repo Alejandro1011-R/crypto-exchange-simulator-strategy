@@ -22,13 +22,14 @@ class Simulation:
         count = 1
 
         subreddits_list = {}
+
         trainer = SentimentAnalyzer('.env')
         reddit_instance = CryptoTradingAgent('.env')
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
             subreddits_list[crypto] = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting', crypto]
-        # search_query = 'trading OR investment OR market OR price'
+            #search_query = 'trading OR investment OR market OR price'
 
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
@@ -233,12 +234,13 @@ class Simulation:
     def _record_data(self):
         for crypto_name, crypto in self.market.cryptocurrencies.items():
             self.price_history[crypto_name].append(crypto.price)
+            print(f'VOLUMEN: {crypto.volume}')
             self.volume_history[crypto_name].append(crypto.volume)
 
 
     def plot_results(self):
-        #fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(12, 24))
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
+
         # Graficar precios
         for crypto, prices in self.price_history.items():
             ax1.plot(prices, label=crypto)
@@ -247,13 +249,13 @@ class Simulation:
         ax1.set_ylabel('Precio')
         ax1.legend()
 
-        # Graficar volúmenes
-        for crypto, volumes in self.volume_history.items():
-            ax2.plot(volumes, label=crypto)
-        ax2.set_title('Volumen de transacciones')
-        ax2.set_xlabel('Pasos de tiempo')
-        ax2.set_ylabel('Volumen')
-        ax2.legend()
+        # # Graficar volúmenes
+        # for crypto, volumes in self.volume_history.items():
+        #     ax2.plot(volumes, label=crypto)
+        # ax2.set_title('Volumen de transacciones')
+        # ax2.set_xlabel('Pasos de tiempo')
+        # ax2.set_ylabel('Volumen')
+        # ax2.legend()
 
         # # Graficar sentimiento del mercado
         # ax3.plot(self.sentiment_history)
@@ -261,21 +263,37 @@ class Simulation:
         # ax3.set_xlabel('Pasos de tiempo')
         # ax3.set_ylabel('Sentimiento')
 
+        # # Graficar sentimiento del mercado
+        # for crypto, sentiment in self.sentiment_history.items():
+        #     ax3.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
+        # ax3.set_title('Sentimiento del mercado')
+        # ax3.set_xlabel('Pasos de tiempo')
+        # ax3.set_ylabel('Sentimiento')
+        # ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
+
         # Graficar sentimiento del mercado
         for crypto, sentiment in self.sentiment_history.items():
-            ax3.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
-        ax3.set_title('Sentimiento del mercado')
-        ax3.set_xlabel('Pasos de tiempo')
-        ax3.set_ylabel('Sentimiento')
-        ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
+            ax2.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
+        ax2.set_title('Sentimiento del mercado')
+        ax2.set_xlabel('Pasos de tiempo')
+        ax2.set_ylabel('Sentimiento')
+        ax2.legend()  # Añadir leyenda para identificar cada criptomoneda
+
+        # ax4 = fig.add_subplot(414)
+        # for agent  in self.agents:
+        #   ax4.plot(self.agent_performances[agent.nombre], label=agent.nombre)
+        # ax4.set_title('Rendimiento de los agentes')
+        # ax4.set_xlabel('Pasos de tiempo')
+        # ax4.set_ylabel('Rendimiento (%)')
+        # ax4.legend()
 
         #ax4 = fig.add_subplot(414)
         for agent  in self.agents:
-            ax4.plot(self.agent_performances[agent.nombre], label=agent.nombre)
-        ax4.set_title('Rendimiento de los agentes')
-        ax4.set_xlabel('Pasos de tiempo')
-        ax4.set_ylabel('Rendimiento (%)')
-        ax4.legend()
+            ax3.plot(self.agent_performances[agent.nombre], label=agent.nombre)
+        ax3.set_title('Rendimiento de los agentes')
+        ax3.set_xlabel('Pasos de tiempo')
+        ax3.set_ylabel('Rendimiento (%)')
+        ax3.legend()
 
         plt.tight_layout()
         plt.show()
