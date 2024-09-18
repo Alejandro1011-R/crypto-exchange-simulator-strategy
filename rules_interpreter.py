@@ -232,12 +232,14 @@ class ParserReglas:
             return 1 if lower <= current_value <= upper else 0
 
     def evaluate_condition(self, var, operator, val, cripto, datos):
-        if var == "precio" or var == "volumen":
+        if var == "precio" or var == "volumen" or var == "sentimiento":
             if val == "alto" or val == "medio" or val == "bajo":
               if var == "precio":
                   return self.pertenencia_map[cripto][var][val](datos.price)
               else:
                   return self.pertenencia_map[cripto][var][val](datos.volume)
+            elif val =="positivo" or val =="neutro" or val =="negativo":
+                return self.pertenencia_map[cripto][var][val](datos.last_sentiment)
             else:
                 chucks = val.rsplit(' ', 1)  # Solo dividir en el último espacio
                 if var == "precio":
@@ -250,42 +252,90 @@ class ParserReglas:
 class Map:
     def __init__(self):
         self.pertenencia_map = {
-    "Bitcoin": {
-        "precio": {
-            "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=15000, limite_superior=30000),
-            "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=30000, limite_superior=45000),
-            "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=45000, limite_superior=60000)
-        },
-        "volumen": {
-            "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
-            "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
-            "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
-        },
-        "sentimiento": {
-            "negativo":lambda sentimiento: pertenencia_sentimiento_negativo,
-            "neutro": lambda sentimiento: pertenencia_sentimiento_neutro,
-            "positivo": lambda sentimiento: pertenencia_sentimiento_positivo
+            "Bitcoin": {
+                "precio": {
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=15000, limite_superior=30000),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=30000, limite_superior=45000),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=45000, limite_superior=60000)
+                },
+                "volumen": {
+                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+                },
+                "sentimiento": {
+                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                }
+            },
+            "Ethereum": {
+                "precio": {
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1000, limite_superior=2000),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2000, limite_superior=3000),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3000, limite_superior=5000)
+                },
+                "volumen": {
+                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+                },
+                "sentimiento": {
+                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                }
+            },
+            # Añadir más criptomonedas aquí
+            "Ripple": {
+                "precio": {
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=0.5, limite_superior=1.0),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=1.0, limite_superior=1.5),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=1.5, limite_superior=2.0)
+                },
+                "volumen": {
+                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=500, limite_superior=2000),
+                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=2000, limite_superior=5000),
+                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=5000, limite_superior=10000)
+                },
+                "sentimiento": {
+                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                }
+            },
+            "Litecoin": {
+                "precio": {
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=100, limite_superior=200),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=200, limite_superior=300),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=300, limite_superior=400)
+                },
+                "volumen": {
+                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=300, limite_superior=1000),
+                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=1000, limite_superior=3000),
+                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=3000, limite_superior=6000)
+                },
+                "sentimiento": {
+                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                }
+            },
+            "Cardano": {
+                "precio": {
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1.0, limite_superior=2.0),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2.0, limite_superior=3.0),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3.0, limite_superior=4.0)
+                },
+                "volumen": {
+                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=800, limite_superior=2500),
+                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=2500, limite_superior=6000),
+                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=6000, limite_superior=12000)
+                },
+                "sentimiento": {
+                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                }
+            }
         }
-    },
-    "Ethereum": {
-        "precio": {
-            "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1000, limite_superior=2000),
-            "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2000, limite_superior=3000),
-            "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3000, limite_superior=5000)
-        },
-        "volumen": {
-            "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
-            "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
-            "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
-        },
-        "sentimiento": {
-            "negativo": lambda sentimiento: pertenencia_sentimiento_negativo,
-            "neutro": lambda sentimiento: pertenencia_sentimiento_neutro,
-            "positivo": lambda sentimiento: pertenencia_sentimiento_positivo
-        }
-    }
-}
-
-
-
-
