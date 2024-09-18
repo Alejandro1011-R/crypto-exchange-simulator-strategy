@@ -2,7 +2,7 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from agents import *
-# from gemini_ai import *  # Asegúrate de que este módulo exista y esté correctamente implementado
+from gemini_ai import *  # Asegúrate de que este módulo exista y esté correctamente implementado
 import random  # Asegúrate de importar random si no está ya importado
 
 class Simulation:
@@ -22,29 +22,31 @@ class Simulation:
         count = 1
 
         subreddits_list = {}
-        # trainer = SentimentAnalyzer('gem.env')
-        # reddit_instance = CryptoTradingAgent('gem.env')
+        trainer = SentimentAnalyzer('gem.env')
+        reddit_instance = CryptoTradingAgent('gem.env')
         post_limit = 100
 
         for crypto in self.market.cryptocurrencies:
             subreddits_list[crypto] = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting', crypto]
-        # search_query = 'trading OR investment OR market OR price'
+            #search_query = 'trading OR investment OR market OR price'
 
         for step in range(self.num_steps):
             # Simula el sentimiento del mercado
             for crypto in self.market.cryptocurrencies:
-                # self.sentiment_history[crypto].append(Process(trainer, reddit_instance, subreddits_list[crypto], post_limit, crypto))
-                self.sentiment_history[crypto].append(np.random.normal(0, 0.1))  # Simulación simplificada
+                self.sentiment_history[crypto].append(Process(trainer, reddit_instance, subreddits_list[crypto], post_limit, crypto))
+                #self.sentiment_history[crypto].append(np.random.normal(0, 0.1))  # Simulación simplificada
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
                 # decision = agent.tomar_decision(self.market)
-                decision = np.random.choice(["comprar", "vender", "mantener"])  # Simulación simplificada
+                #decision = np.random.choice(["comprar", "vender", "mantener"])  # Simulación simplificada
 
                 accion, resultado = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
                 # Para usar la decisión aleatoria:
                 # decision = np.random.choice(["comprar","vender","mantener" ])#quitar
-                agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
+                #agent.ejecutar_accion(decision, self.market, "Bitcoin")#cambiar
+                if accion != "mantener":
+                    agent.ejecutar_accion(accion, self.market, resultado[1])
                 agent.actualizar_ganancia(self.market)
                 self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
@@ -110,7 +112,7 @@ class Simulation:
                 condiciones_partes[i] = random.choice(nuevas_valores)
             elif palabra in valores_sentimiento:
                 nuevas_valores = [valor for valor in valores_sentimiento if valor != palabra]
-                condiciones_partes[i] = random.choice(nuevos_valores)
+                condiciones_partes[i] = random.choice(nuevas_valores)
 
         condiciones_mutadas = " ".join(condiciones_partes)
 
@@ -272,12 +274,13 @@ class Simulation:
     def _record_data(self):
         for crypto_name, crypto in self.market.cryptocurrencies.items():
             self.price_history[crypto_name].append(crypto.price)
+            print(f'VOLUMEN: {crypto.volume}')
             self.volume_history[crypto_name].append(crypto.volume)
 
 
     def plot_results(self):
-        #fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(12, 24))
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 18))
+
         # Graficar precios
         for crypto, prices in self.price_history.items():
             ax1.plot(prices, label=crypto)
@@ -286,13 +289,13 @@ class Simulation:
         ax1.set_ylabel('Precio')
         ax1.legend()
 
-        # Graficar volúmenes
-        for crypto, volumes in self.volume_history.items():
-            ax2.plot(volumes, label=crypto)
-        ax2.set_title('Volumen de transacciones')
-        ax2.set_xlabel('Pasos de tiempo')
-        ax2.set_ylabel('Volumen')
-        ax2.legend()
+        # # Graficar volúmenes
+        # for crypto, volumes in self.volume_history.items():
+        #     ax2.plot(volumes, label=crypto)
+        # ax2.set_title('Volumen de transacciones')
+        # ax2.set_xlabel('Pasos de tiempo')
+        # ax2.set_ylabel('Volumen')
+        # ax2.legend()
 
         # # Graficar sentimiento del mercado
         # ax3.plot(self.sentiment_history)
@@ -300,21 +303,37 @@ class Simulation:
         # ax3.set_xlabel('Pasos de tiempo')
         # ax3.set_ylabel('Sentimiento')
 
+        # # Graficar sentimiento del mercado
+        # for crypto, sentiment in self.sentiment_history.items():
+        #     ax3.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
+        # ax3.set_title('Sentimiento del mercado')
+        # ax3.set_xlabel('Pasos de tiempo')
+        # ax3.set_ylabel('Sentimiento')
+        # ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
+
         # Graficar sentimiento del mercado
         for crypto, sentiment in self.sentiment_history.items():
-            ax3.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
-        ax3.set_title('Sentimiento del mercado')
-        ax3.set_xlabel('Pasos de tiempo')
-        ax3.set_ylabel('Sentimiento')
-        ax3.legend()  # Añadir leyenda para identificar cada criptomoneda
+            ax2.plot(sentiment, label=crypto)  # Graficar cada criptomoneda
+        ax2.set_title('Sentimiento del mercado')
+        ax2.set_xlabel('Pasos de tiempo')
+        ax2.set_ylabel('Sentimiento')
+        ax2.legend()  # Añadir leyenda para identificar cada criptomoneda
+
+        # ax4 = fig.add_subplot(414)
+        # for agent  in self.agents:
+        #   ax4.plot(self.agent_performances[agent.nombre], label=agent.nombre)
+        # ax4.set_title('Rendimiento de los agentes')
+        # ax4.set_xlabel('Pasos de tiempo')
+        # ax4.set_ylabel('Rendimiento (%)')
+        # ax4.legend()
 
         #ax4 = fig.add_subplot(414)
         for agent  in self.agents:
-            ax4.plot(self.agent_performances[agent.nombre], label=agent.nombre)
-        ax4.set_title('Rendimiento de los agentes')
-        ax4.set_xlabel('Pasos de tiempo')
-        ax4.set_ylabel('Rendimiento (%)')
-        ax4.legend()
+            ax3.plot(self.agent_performances[agent.nombre], label=agent.nombre)
+        ax3.set_title('Rendimiento de los agentes')
+        ax3.set_xlabel('Pasos de tiempo')
+        ax3.set_ylabel('Rendimiento (%)')
+        ax3.legend()
 
         plt.tight_layout()
         plt.show()

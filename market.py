@@ -35,6 +35,7 @@ class Cryptocurrency:
     def update_volume(self, new_volume: float):
         # Actualiza el volumen de transacciones
         self.volume += new_volume
+        print(self.volume )
 
     def add_order(self, order_type: str, price: float, amount: float):
         # Agrega una nueva orden al libro de órdenes
