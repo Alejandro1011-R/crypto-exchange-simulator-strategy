@@ -8,6 +8,7 @@ class Cryptocurrency:
         self.name = name
         self.price = initial_price
         self.volatility = initial_volatility
+        self.last_sentiment=0.0
         self.volume = 0
         self.order_book = {"buy": {}, "sell": {}}
         self.price_history = [initial_price]
@@ -15,6 +16,7 @@ class Cryptocurrency:
 
     def update_price(self,market_sentiment, trades: List[float]):
         # Actualiza el precio basado en el sentimiento del mercado, las operaciones y la volatilidad
+        self.last_sentiment=market_sentiment
         price_change = np.random.normal(0, self.volatility)
         trade_impact = sum(trades) * 0.1
         sentiment_impact = market_sentiment * 0.1

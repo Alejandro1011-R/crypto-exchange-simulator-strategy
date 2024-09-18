@@ -35,6 +35,7 @@ class Simulation:
             # Simula el sentimiento del mercado
             for crypto in self.market.cryptocurrencies:
                 self.sentiment_history[crypto].append(Process(trainer, reddit_instance, subreddits_list[crypto], post_limit, crypto))
+                # self.sentiment_history[crypto].append(random.uniform(-1, 1))
 
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
