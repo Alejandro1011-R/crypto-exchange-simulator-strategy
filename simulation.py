@@ -27,28 +27,30 @@ class Simulation:
 
         subreddits_list = {}
 
-        post_limit = 10
+        # post_limit = 10
 
-        for crypto in self.market.cryptocurrencies:
-            subreddits_list[crypto] = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting', crypto]
+        # for crypto in self.market.cryptocurrencies:
+        #     subreddits_list[crypto] = ['CryptoCurrency', 'CryptoTrading', 'CryptoInvesting', crypto]
 
         # *** Precomputar los sentimientos antes de iniciar la simulación ***
         for crypto in self.market.cryptocurrencies:
             # Obtener todos los sentimientos de una sola vez
-            sentiment = Process(
-                self.sentiment_analyzer,
-                self.reddit_instance,
-                subreddits_list[crypto],
-                post_limit,
-                crypto
-            )
+            # sentiment = Process(
+            #     self.sentiment_analyzer,
+            #     self.reddit_instance,
+            #     subreddits_list[crypto],
+            #     post_limit,
+            #     crypto
+            # )
             # Almacenar el sentimiento precomputado para todos los pasos
-            self.precomputed_sentiments[crypto] = [sentiment] * self.num_steps
+            # self.precomputed_sentiments[crypto] = [sentiment] * self.num_steps
+            self.precomputed_sentiments[crypto] = np.random.normal(-1,1)
+
 
         for step in range(self.num_steps):
             # Asignar los sentimientos precomputados en lugar de calcularlos
             for crypto in self.market.cryptocurrencies:
-                self.sentiment_history[crypto].append(self.precomputed_sentiments[crypto][step])
+                self.sentiment_history[crypto].append(self.precomputed_sentiments[crypto])
 
             # *** Actualizar las creencias de los agentes con el estado actual del mercado ***
             for agent in self.agents:
