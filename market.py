@@ -55,6 +55,7 @@ class Market:
     def __init__(self, cryptocurrencies: List[Cryptocurrency]):
         # Inicializa el mercado con una lista de criptomonedas
         self.cryptocurrencies = {crypto.name: crypto for crypto in cryptocurrencies}
+        self.data = {crypto: crypto for crypto in cryptocurrencies}
         self.timestamp = datetime.now()
 
     def update(self,sentiment_history):

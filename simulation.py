@@ -50,6 +50,10 @@ class Simulation:
             for crypto in self.market.cryptocurrencies:
                 self.sentiment_history[crypto].append(self.precomputed_sentiments[crypto][step])
 
+            # *** Actualizar las creencias de los agentes con el estado actual del mercado ***
+            for agent in self.agents:
+                agent.update_beliefs(self.market, self.sentiment_history)
+
             # Los agentes toman decisiones y ejecutan operaciones
             for agent in self.agents:
                 accion, resultado, crypto_decision = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
@@ -168,7 +172,6 @@ class Simulation:
             return False
 
     def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
-
         nuevos_agentes = []
 
         # Evaluar desempeño de cada agente
@@ -193,7 +196,12 @@ class Simulation:
 
             # Validar reglas y generar un nuevo agente para reemplazar al peor
             if self.validar_regla(" ".join(nuevas_reglas_padre2)):
-                nuevo_agente = Agente(f'agente {peor_agente[0].nombre}', nuevas_reglas_padre2, self.parser)
+                nuevo_agente = Agente(
+                    f'agente {peor_agente[0].nombre}',
+                    nuevas_reglas_padre2,
+                    self.parser,
+                    capital_inicial=peor_agente[0].capital_inicial  # Mantener el capital inicial
+                )
                 nuevos_agentes.append(nuevo_agente)
 
             # Retornar el nuevo agente creado y el agente reemplazado
@@ -222,17 +230,28 @@ class Simulation:
 
                 # Validar reglas y crear nuevos agentes
                 if self.validar_regla(" ".join(nuevas_reglas_padre1)):
-                    nuevo_agente1 = Agente(f'agente {len(nuevos_agentes)}', nuevas_reglas_padre1, self.parser)
+                    nuevo_agente1 = Agente(
+                        f'agente {len(nuevos_agentes)}',
+                        nuevas_reglas_padre1,
+                        self.parser,
+                        capital_inicial=padre1.capital_inicial  # Mantener el capital inicial
+                    )
                     nuevos_agentes.append(nuevo_agente1)
                     self.agent_performances[nuevo_agente1.nombre] = []  # Inicializa el desempeño
 
                 if self.validar_regla(" ".join(nuevas_reglas_padre2)):
-                    nuevo_agente2 = Agente(f'agente {len(nuevos_agentes)}', nuevas_reglas_padre2, self.parser)
+                    nuevo_agente2 = Agente(
+                        f'agente {len(nuevos_agentes)}',
+                        nuevas_reglas_padre2,
+                        self.parser,
+                        capital_inicial=padre2.capital_inicial  # Mantener el capital inicial
+                    )
                     nuevos_agentes.append(nuevo_agente2)
                     self.agent_performances[nuevo_agente2.nombre] = []  # Inicializa el desempeño
 
             # Retornar los nuevos agentes creados y los agentes que fueron reemplazados
             return nuevos_agentes, [agente[0] for agente in peores]
+
 
     def _print_step_info(self, step):
         print(f"Step {step}: Timestamp = {self.market.timestamp}")
