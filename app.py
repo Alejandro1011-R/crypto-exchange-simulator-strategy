@@ -132,7 +132,7 @@ if st.sidebar.button("Iniciar Simulación"):
     brokers = [
         Agente('Estrategia Guiado Por Sentimiento del Mercado', rules_sentiment, parser_reglas),
         Agente('Estrategia Comprar Bajo y Vender Alto', rules_buy_low_sell_high, parser_reglas),
-        Agente('Estrategia Inversor', rules_inversor, parser_reglas)
+        Agente('Estrategia Inversor', rules_inversor, parser_reglas),
     ]
     agentes = brokers  # Ya son los brokers especificados
 

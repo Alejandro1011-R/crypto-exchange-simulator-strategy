@@ -254,9 +254,9 @@ class Map:
         self.pertenencia_map = {
             "Bitcoin": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=15000, limite_superior=30000),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=30000, limite_superior=45000),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=45000, limite_superior=60000)
+                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=0, limite_superior=45000),
+                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=45000, limite_superior=60000),
+                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=60000, limite_superior=80000)
                 },
                 "volumen": {
                     "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
