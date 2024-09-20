@@ -159,7 +159,6 @@ class Agente:
             ganancia += contexto.cryptocurrencies[crypto].price * value
         ganancia += self.capital
         desempeño = (ganancia - self.capital_inicial) / self.capital_inicial * 100  # Rendimiento porcentual
-        self.ciclo += 1
         return (self.nombre, desempeño)
 
     def actualizar_ganancia(self, contexto):

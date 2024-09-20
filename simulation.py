@@ -61,6 +61,7 @@ class Simulation:
                 accion, resultado, crypto_decision = agent.tomar_decision(self.market)  # Usar el método tomar_decision de Agente
                 agent.ejecutar_accion(accion, self.market, crypto_decision)  # Cambiar
                 agent.actualizar_ganancia(self.market)
+                agent.ciclo = agent.ciclo+1
                 self.agent_performances[agent.nombre].append(agent.historia_ganancia[-1])
 
                 # Ejecutar la acción basada en la decisión tomada por el agente
@@ -173,11 +174,18 @@ class Simulation:
             print(f"Regla inválida: {regla}. Error: {e}")
             return False
 
+  
+
+    # Función de Supervivencia Sigmoide Basada en Edad
+    def probabilidad_supervivencia(age, fitness, k=0.1, t=50):
+        
+        return fitness / (1 + np.exp(k * (age - t)))
+
     def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
         nuevos_agentes = []
 
         # Evaluar desempeño de cada agente
-        desempeno_agentes = [(agente, agente.evaluar_desempeno(contexto)) for agente in agentes]
+        desempeno_agentes = [(agente,probabilidad_supervivencia(agente.ciclo,agente.evaluar_desempeno(contexto)))for agente in agentes]
 
         # Ordenar los agentes por desempeño (mayor desempeño primero)
         desempeno_agentes.sort(key=lambda x: x[1][1], reverse=True)  # Asumiendo que evaluar_desempeno devuelve (nombre, desempeño)
