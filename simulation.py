@@ -188,7 +188,7 @@ class Simulation:
         desempeno_agentes = [(agente,probabilidad_supervivencia(agente.ciclo,agente.evaluar_desempeno(contexto)))for agente in agentes]
 
         # Ordenar los agentes por desempeño (mayor desempeño primero)
-        desempeno_agentes.sort(key=lambda x: x[1][1], reverse=True)  # Asumiendo que evaluar_desempeno devuelve (nombre, desempeño)
+        desempeno_agentes.sort(key=lambda x: x[1], reverse=True)  # Asumiendo que evaluar_desempeno devuelve (nombre, desempeño)
 
         # Caso especial: Solo hay dos agentes
         if len(agentes) <= 3:
