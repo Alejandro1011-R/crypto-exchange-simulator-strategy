@@ -74,7 +74,7 @@ class Simulation:
             # Algoritmo Genético cada 10 pasos
             if count == 10:
                 count = 1
-                nuevos, peores = self.algoritmo_genetico(self.market, self.agents, count)
+                nuevos, peores = self.algoritmo_genetico(self.market, self.agents)
                 # Registra datos para análisis posterior
                 print("**** Nuevos agentes y reglas *****")
                 for agente in nuevos:
@@ -142,8 +142,6 @@ class Simulation:
     def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegúrate de que ambos padres tengan el mismo tamaño
 
-        '''if len(parent1) != len(parent2):
-            raise ValueError("Los padres deben tener el mismo tamaño")'''
         # Trunca las listas al tamaño del padre más corto si no tienen el mismo tamaño
         min_len = min(len(parent1), len(parent2))
         parent1, parent2 = parent1[:min_len], parent2[:min_len]
@@ -177,7 +175,7 @@ class Simulation:
   
 
     # Función de Supervivencia Sigmoide Basada en Edad
-    def probabilidad_supervivencia(age, fitness, k=0.1, t=50):
+    def probabilidad_supervivencia(self,age, fitness, k=0.1, t=600):
         
         return fitness / (1 + np.exp(k * (age - t)))
 
@@ -185,7 +183,7 @@ class Simulation:
         nuevos_agentes = []
 
         # Evaluar desempeño de cada agente
-        desempeno_agentes = [(agente,probabilidad_supervivencia(agente.ciclo,agente.evaluar_desempeno(contexto)))for agente in agentes]
+        desempeno_agentes = [(agente,self.probabilidad_supervivencia(agente.ciclo,agente.evaluar_desempeno(contexto)))for agente in agentes]
 
         # Ordenar los agentes por desempeño (mayor desempeño primero)
         desempeno_agentes.sort(key=lambda x: x[1], reverse=True)  # Asumiendo que evaluar_desempeno devuelve (nombre, desempeño)
