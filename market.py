@@ -7,7 +7,8 @@ class Cryptocurrency:
     def __init__(self, name: str, initial_price: float, initial_volatility: float):
         self.name = name
         self.price = initial_price
-        self.volatility = initial_volatility
+        self.initial_price = initial_price  # Almacenar el precio inicial para mean reversion
+        self.volatility = initial_volatility  # Expresada como desviación estándar porcentual (e.g., 10.0 para 10%)
         self.last_sentiment = 0.0
         self.volume = 0
         self.order_book = {"buy": {}, "sell": {}}
@@ -16,41 +17,78 @@ class Cryptocurrency:
     def update_price(self, market_sentiment, trades: List[float]):
         """
         Actualiza el precio basado en el sentimiento del mercado, las operaciones y la volatilidad.
+        Implementa límites para evitar cambios de precios extremos y añade reversión a la media.
         """
         self.last_sentiment = market_sentiment
 
-        # Aumentar significativamente el impacto de la volatilidad
-        price_change = np.random.normal(0, self.volatility * 10)  # Factor aumentado a 10
+        # Cambio de precio aleatorio basado en volatilidad
+        price_change_percentage = np.random.normal(0, self.volatility / 100)
+        price_change_percentage = np.clip(price_change_percentage, -0.02, 0.02)  # Limitar a +/-2%
+        price_change = self.price * price_change_percentage
 
-        # Aumentar significativamente el impacto de las operaciones y el sentimiento
-        trade_impact = sum(trades) * 2.0  # Multiplicador aumentado a 2.0
-        sentiment_impact = market_sentiment * 2.0  # Multiplicador aumentado a 2.0
+        # Impacto de las operaciones
+        trade_impact_percentage = sum(trades) * 0.005  # Multiplicador reducido a 0.5%
+        trade_impact_percentage = np.clip(trade_impact_percentage, -0.02, 0.02)  # Limitar a +/-2%
 
-        self.price += price_change + trade_impact + sentiment_impact
+        # Impacto del sentimiento del mercado
+        sentiment_impact_percentage = market_sentiment * 0.005  # Multiplicador reducido a 0.5%
+        sentiment_impact_percentage = np.clip(sentiment_impact_percentage, -0.02, 0.02)  # Limitar a +/-2%
+
+        # Reversión a la media hacia el precio inicial
+        mean_reversion_strength = 0.01  # Fuerza de reversión a la media (ajustable)
+        mean_reversion = (self.initial_price - self.price) * mean_reversion_strength
+
+        # Actualizar el precio
+        self.price += self.price * (price_change_percentage + trade_impact_percentage + sentiment_impact_percentage) + mean_reversion
         self.price = max(0.01, self.price)  # Evita precios negativos
         self.price_history.append(self.price)
 
         if len(self.price_history) > 100:
             self.price_history.pop(0)
 
-        self.update_volatility()
+        self.update_volatility(trades)
 
-    def update_volatility(self):
+        # Depuración
+        # print(f"{self.name} - Precio actualizado: {self.price:.2f}, Volatilidad: {self.volatility:.2f}%")
+
+    def update_volatility(self, trades: List[float]):
         """
-        Actualiza la volatilidad basada en el historial de precios reciente.
+        Actualiza la volatilidad basada en el historial de precios reciente y la actividad de trading.
+        Reduce la volatilidad a medida que aumenta la estabilidad (más operaciones).
         """
         if len(self.price_history) > 1:
             returns = np.diff(np.log(self.price_history))
-            self.volatility = np.std(returns) * np.sqrt(len(returns))
-        # Aumentar el límite superior de la volatilidad a 10.0
-        self.volatility = max(0.001, min(10.0, self.volatility))  # Limita la volatilidad entre 0.1% y 1000%
+            new_volatility = np.std(returns) * np.sqrt(len(returns)) * 100  # Convertir a porcentaje
+
+            # Ajustar la volatilidad:
+            # - Más operaciones (mayor volumen) => menor volatilidad
+            # - Menos operaciones => mayor volatilidad
+            trade_volume = sum(abs(trade) for trade in trades)
+            adjustment_factor = 1 / (1 + trade_volume / 1000)  # Ajustar según el volumen de operaciones
+
+            # Actualizar volatilidad con ajuste basado en operaciones
+            adjusted_volatility = new_volatility * adjustment_factor
+
+            # Limitar la volatilidad dentro de rangos realistas
+            if self.price > 1000:
+                self.volatility = max(0.1, min(5.0, adjusted_volatility * 0.9))
+            elif self.price > 100:
+                self.volatility = max(0.1, min(10.0, adjusted_volatility * 0.95))
+            else:
+                self.volatility = max(0.1, min(20.0, adjusted_volatility))
+
+            # Depuración
+            # print(f"{self.name} - Nueva volatilidad: {self.volatility:.2f}%")
+        else:
+            # Mantener la volatilidad inicial si no hay suficientes datos
+            pass
 
     def update_volume(self, new_volume: float):
         """
         Actualiza el volumen de transacciones.
         """
         self.volume += new_volume
-        print(f"Volumen de {self.name}: {self.volume}")
+        # print(f"Volumen de {self.name}: {self.volume}")
 
     def add_order(self, order_type: str, price: float, amount: float):
         """
@@ -69,22 +107,25 @@ class Cryptocurrency:
             del self.order_book[order_type][price]
 
 class Market:
-    def __init__(self, cryptocurrencies: List[Cryptocurrency]):
+    def __init__(self, initial_prices: Dict[str, float], initial_volatilities: Dict[str, float]):
         """
-        Inicializa el mercado con una lista de criptomonedas.
+        Inicializa el mercado con una lista de criptomonedas usando los precios y volatilidades iniciales proporcionados.
         """
-        self.cryptocurrencies = {crypto.name: crypto for crypto in cryptocurrencies}
+        self.cryptocurrencies = {
+            name: Cryptocurrency(name, price, initial_volatility)
+            for name, price, initial_volatility in zip(initial_prices.keys(), initial_prices.values(), initial_volatilities.values())
+        }
         self.timestamp = datetime.now()
 
     def update(self, sentiment_history):
         """
         Actualiza el estado del mercado.
         """
-        print(f"Actualizando el mercado en {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}...")
+        # print(f"Actualizando el mercado en {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}...")
         self.timestamp += timedelta(minutes=1)
         for crypto in self.cryptocurrencies.values():
             trades = self.match_orders(crypto)
-            print(f"Trades en {crypto.name}: {trades}")
+            # print(f"Trades en {crypto.name}: {trades}")
             sentiment = sentiment_history.get(crypto.name, [0.0])[-1]
             crypto.update_price(sentiment, trades)
             crypto.update_volume(sum(abs(trade) for trade in trades))
