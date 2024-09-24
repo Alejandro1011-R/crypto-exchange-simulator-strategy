@@ -1,341 +1,433 @@
+import numpy as np
+import math
+import operator
 import re
-# Funciones de pertenencia con parámetros personalizados
 
-# Función para calcular la pertenencia al conjunto "precio bajo"
-def pertenencia_precio_bajo(precio, limite_inferior, limite_superior):
-    if precio < limite_inferior:
-        return 1  # Pertenece completamente al conjunto "bajo" si está por debajo del límite inferior
-    elif limite_inferior <= precio <= limite_superior:
-        # Pertenece parcialmente al conjunto "bajo" si está entre el límite inferior y superior
-        return (limite_superior - precio) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "bajo" si está por encima del límite superior
 
-# Función para calcular la pertenencia al conjunto "precio medio"
-def pertenencia_precio_medio(precio, limite_inferior, limite_superior):
-    if limite_inferior <= precio <= limite_superior:
-        # Pertenece parcialmente al conjunto "medio" si está dentro de los límites
-        return (precio - limite_inferior) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "medio" si está fuera de los límites
-
-# Función para calcular la pertenencia al conjunto "precio alto"
-def pertenencia_precio_alto(precio, limite_inferior, limite_superior):
-    if precio > limite_superior:
-        return 1  # Pertenece completamente al conjunto "alto" si está por encima del límite superior
-    elif limite_inferior <= precio <= limite_superior:
-        # Pertenece parcialmente al conjunto "alto" si está entre el límite inferior y superior
-        return (precio - limite_inferior) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "alto" si está por debajo del límite inferior
-
-# Función para calcular la pertenencia al conjunto "volumen bajo"
-def pertenencia_volumen_bajo(volumen, limite_inferior, limite_superior):
-    if volumen < limite_inferior:
-        return 1  # Pertenece completamente al conjunto "bajo" si está por debajo del límite inferior
-    elif limite_inferior <= volumen <= limite_superior:
-        # Pertenece parcialmente al conjunto "bajo" si está entre el límite inferior y superior
-        return (limite_superior - volumen) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "bajo" si está por encima del límite superior
-
-# Función para calcular la pertenencia al conjunto "volumen medio"
-def pertenencia_volumen_medio(volumen, limite_inferior, limite_superior):
-    if limite_inferior <= volumen <= limite_superior:
-        # Pertenece parcialmente al conjunto "medio" si está dentro de los límites
-        return (volumen - limite_inferior) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "medio" si está fuera de los límites
-
-# Función para calcular la pertenencia al conjunto "volumen alto"
-def pertenencia_volumen_alto(volumen, limite_inferior, limite_superior):
-    if volumen > limite_superior:
-        return 1  # Pertenece completamente al conjunto "alto" si está por encima del límite superior
-    elif limite_inferior <= volumen <= limite_superior:
-        # Pertenece parcialmente al conjunto "alto" si está entre el límite inferior y superior
-        return (volumen - limite_inferior) / (limite_superior - limite_inferior)
-    else:
-        return 0  # No pertenece al conjunto "alto" si está por debajo del límite inferior
-
-# Función para calcular la pertenencia al conjunto "sentimiento negativo"
-def pertenencia_sentimiento_negativo(sentimiento):
-    return max(0, (0 - sentimiento) / 1)  # Pertenece más al conjunto "negativo" cuanto más cerca de -1 esté
-
-# Función para calcular la pertenencia al conjunto "sentimiento neutro"
-def pertenencia_sentimiento_neutro(sentimiento):
-    if -0.5 <= sentimiento <= 0.5:
-        return 1 - abs(sentimiento)  # Pertenece al conjunto "neutro" si está cerca de 0
-    else:
-        return 0  # No pertenece al conjunto "neutro" si está fuera del rango de -0.5 a 0.5
-
-# Función para calcular la pertenencia al conjunto "sentimiento positivo"
-def pertenencia_sentimiento_positivo(sentimiento):
-    return max(0, (sentimiento - 0) / 1)  # Pertenece más al conjunto "positivo" cuanto más cerca de 1 esté
-
-# Definición de la clase ParserReglas
 class ParserReglas:
     def __init__(self, pertenencia_map):
-        # Inicializa el parser con un mapa de funciones de pertenencia para cada variable y criptomoneda
         self.pertenencia_map = pertenencia_map
+        self.operators = {
+            '>': operator.gt,
+            '<': operator.lt,
+            '>=': operator.ge,
+            '<=': operator.le,
+            '==': operator.eq,
+            '!=': operator.ne
+        }
 
     def parse_rule(self, rule):
-        # Define el patrón para dividir la regla en condiciones y acción
-        pattern = r"SI (.+) ENTONCES (.+)"
+        # Patrón para extraer la condición y la acción
+        pattern = r'SI (.+) ENTONCES (\w+)'
         match = re.match(pattern, rule)
         if not match:
-            raise ValueError("Formato de regla no válido")  # Lanza un error si la regla no tiene el formato correcto
+            raise ValueError(f'Regla mal formada: {rule}')
+        condition_str, action_str = match.groups()
 
-        # Extrae las condiciones y la acción de la regla
-        conditions_str = match.group(1)
-        action_str = match.group(2).strip()
+        # Parsear la acción
+        if action_str.lower() == 'comprar':
+            accion = 1
+        elif action_str.lower() == 'vender':
+            accion = -1
+        else:
+            accion = 0  # Mantener
 
-        # Analiza las condiciones y la acción por separado
-        parsed_conditions = self.parse_conditions(conditions_str)
-        action = self.parse_action(action_str)
-
-        return parsed_conditions, action
-
-
-    def parse_conditions(self, conditions_str):
+        # Parsear las condiciones
+        # Soportar conectores lógicos AND (Y) y OR (O)
+        conditions = re.split(r'\s+Y\s+|\s+O\s+', condition_str)
+        connectors = re.findall(r'\s+(Y|O)\s+', condition_str)
         parsed_conditions = []
-        if " NO " in conditions_str or " Y " in conditions_str or " O " in conditions_str :
-            #nt("*******************REGLA COMPLEJA*************************")
-            # Reemplaza "NO", "Y", "O" para manejarlos como operadores lógicos
-            conditions_str = conditions_str.replace(" NO ", " NOT ").replace(" Y ", " AND ").replace(" O ", " OR ")
+        for cond in conditions:
+            # Patrón para extraer variable, operador y valor
+            # Soporta operadores 'es', 'no es', '>', '<', '>=', '<=', '==', '!='
+            pattern_cond = r'(\w+)\s*(es|no es|>|<|>=|<=|==|!=)\s*(\w+|\d+(\.\d+)?)'
+            match_cond = re.match(pattern_cond, cond.strip())
+            if not match_cond:
+                raise ValueError(f'Condición mal formada: {cond}')
+            var, operator, val, _ = match_cond.groups()
+            parsed_conditions.append((var.lower(), operator, val.lower()))
+        return (parsed_conditions, connectors), accion
 
-            if "SI NO" in conditions_str:
-                conditions_str = conditions_str.replace("SI NO", "IF NOT")  # Maneja la negación "SI NO"
-
-            # Divide las condiciones por "OR" y luego por "AND" para analizarlas
-            or_conditions = re.split(r'\sOR\s', conditions_str)
-            #parsed_conditions = []
-
-            for or_cond in or_conditions:
-                # Divide las condiciones por "AND" dentro de cada condición "OR"
-                and_conditions = re.split(r'\sAND\s', or_cond)
-                and_parsed = []
-
-                for condition in and_conditions:
-                    if "NOT" in condition:
-                        # Si la condición incluye "NOT", marca la condición como negada
-                        condition = condition.replace("NOT", "").strip()  # Elimina "NOT" para su análisis
-                        negated = True
-                    else:
-                        negated = False
-
-                    # Analiza cada condición individualmente
-                    parsed_condition = self.parse_single_condition(condition)
-                    if negated:
-                        parsed_condition = ("NOT", parsed_condition)  # Marca la condición como negada
-
-                    and_parsed.append(parsed_condition)
-
-                parsed_conditions.append(and_parsed)
-        else:
-            parsed_condition = self.parse_single_condition(conditions_str)
-            parsed_conditions.append([parsed_condition])
-
-        return parsed_conditions
-
-
-    def parse_single_condition(self, condition):
-        # Expresión regular para analizar condiciones del tipo "variable de criptomoneda es valor"
-        pattern = r"(\w+)\s(es|es mayor que|es menor que|es aproximadamente igual a|está entre)\s(.+)"
-        match = re.match(pattern, condition)
-        if not match:
-            raise ValueError(f"Condición no válida: {condition}")  # Lanza un error si la condición no tiene el formato correcto
-
-        # Extrae las partes de la condición: variable, operador, valor
-        var, operator, val = match.groups()
-        var, operator, val = var.strip(), operator.strip(), val.strip()
-
-
-        return (var, operator, val)
-
-    def parse_action(self, action_str):
-        # Asigna una acción numérica según la cadena de acción
-        if action_str == "comprar":
-            return 1
-        elif action_str == "vender":
-            return -1
-        elif action_str == "mantener":
-            return 0
-        else:
-            raise ValueError(f"Acción no válida: {action_str}")  # Lanza un error si la acción no es reconocida
-
-    def aplicar_regla(self, parsed_conditions, action, contexto):
-        resultados = {}
-        for cripto, datos in contexto.cryptocurrencies.items():
-            or_results = []
-            for and_conditions in parsed_conditions:
-                and_results = []
-                for condition in and_conditions:
-                    if condition[0] == "NOT":
-                        # Verificar que la condición negada tenga tres elementos
-                        if len(condition) < 2 or len(condition[1]) < 3:
-                            print(f"Advertencia: Condición inválida {condition} para {cripto}. Se omite.")
-                            continue
-                        var, operator, val = condition[1]
-                        pertenencia_valor = self.evaluate_condition(var, operator, val, cripto, datos)
-                        pertenencia_valor = 1 - pertenencia_valor
-                    else:
-                        # Verificar que la condición tenga tres elementos
-                        if len(condition) < 3:
-                            print(f"Advertencia: Condición inválida {condition} para {cripto}. Se omite.")
-                            continue
-                        var, operator, val = condition
-                        pertenencia_valor = self.evaluate_condition(var, operator, val, cripto, datos)
-
-                    and_results.append(pertenencia_valor)
-
-                # Manejar caso donde and_results está vacío
-                if and_results:
-                    and_result = min(and_results)
-                    or_results.append(and_result)
-                else:
-                    # Asignar un valor predeterminado si no hay condiciones que se cumplan
-                    or_results.append(0)
-
-            # Manejar caso donde or_results está vacío
-            if or_results:
-                final_pert = max(or_results)
+    def aplicar_regla(self, parsed_conditions, accion, cripto, datos):
+        (conditions, connectors) = parsed_conditions
+        resultado = None
+        idx = 0
+        for var, operator, val in conditions:
+            pertenencia_valor = self.evaluate_condition(var, operator, val, cripto, datos)
+            if resultado is None:
+                resultado = pertenencia_valor
             else:
-                final_pert = 0
-
-            resultado = final_pert * action
-            resultados[cripto] = resultado
-
-        # Determinar la criptomoneda con el mayor impacto positivo
-        if resultados:
-            mejor_cripto = max(resultados, key=resultados.get)
-            mejor_resultado = resultados[mejor_cripto]
-        else:
-            mejor_cripto = None
-            mejor_resultado = 0
-
-        return (mejor_resultado, mejor_cripto)
-
-
-    def evaluate_operator(self, current_value, operator, val):
-        # Evalúa operadores relacionales en las condiciones
-        if operator == "igual a":
-            return 1 if current_value == float(val) else 0
-        elif operator == "mayor que":
-            return 1 if current_value > float(val) else 0
-        elif operator == "menor que":
-            return 1 if current_value < float(val) else 0
-        elif operator == "aproximadamente igual a":
-            return 1 if abs(current_value - float(val)) <= 0.05 * float(val) else 0
-        elif operator == "está entre":
-            # Divide el valor en límites inferior y superior, y verifica si el valor actual está entre ellos
-            lower, upper = map(float, val.split(' y '))
-            return 1 if lower <= current_value <= upper else 0
+                connector = connectors[idx - 1]
+                if connector == 'Y':
+                    resultado = min(resultado, pertenencia_valor)
+                elif connector == 'O':
+                    resultado = max(resultado, pertenencia_valor)
+            idx += 1
+        return resultado, accion
 
     def evaluate_condition(self, var, operator, val, cripto, datos):
-        if var == "precio" or var == "volumen" or var == "sentimiento":
-            if val == "alto" or val == "medio" or val == "bajo":
-              if var == "precio":
-                  return self.pertenencia_map[cripto][var][val](datos.price)
-              else:
-                  return self.pertenencia_map[cripto][var][val](datos.volume)
-            elif val =="positivo" or val =="neutro" or val =="negativo":
-                return self.pertenencia_map[cripto][var][val](datos.last_sentiment)
-            else:
-                chucks = val.rsplit(' ', 1)  # Solo dividir en el último espacio
-                if var == "precio":
-                    return self.evaluate_operator(datos.price, chucks[0], operator,float(chucks[1]))
+        if var in datos:
+            valor_actual = datos[var]
+            # Si el valor actual es numérico
+            if isinstance(valor_actual, (int, float)):
+                if operator in self.operators:
+                    val_num = float(val)
+                    oper = self.operators[operator]
+                    return 1 if oper(valor_actual, val_num) else 0
+                elif operator == 'es':
+                    # Usar funciones de pertenencia
+                    if val in self.pertenencia_map[cripto][var]:
+                        funcion_pertenencia = self.pertenencia_map[cripto][var][val]
+                        return funcion_pertenencia(valor_actual)
+                    else:
+                        return 0
                 else:
-                    return self.evaluate_operator(datos.volume, chucks[0], operator,float(chucks[1]))
+                    return 0
+            # Si el valor actual es una cadena
+            elif isinstance(valor_actual, str):
+                if operator == 'es':
+                    return 1 if valor_actual.lower() == val.lower() else 0
+                elif operator == 'no es':
+                    return 1 if valor_actual.lower() != val.lower() else 0
+                else:
+                    return 0
+            # Si el valor actual es booleano
+            elif isinstance(valor_actual, bool):
+                val_bool = val.lower() in ['verdadero', 'true']
+                if operator == 'es':
+                    return 1 if valor_actual == val_bool else 0
+                elif operator == 'no es':
+                    return 1 if valor_actual != val_bool else 0
+                else:
+                    return 0
+            else:
+                return 0
         else:
-            print(f"Advertencia: Parámetro {var} desconocido.. Se omite.")
+            print(f"Advertencia: Parámetro {var} desconocido. Se omite.")
             return 0
+
 class Map:
     def __init__(self):
         self.pertenencia_map = {
             "Bitcoin": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=0, limite_superior=45000),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=45000, limite_superior=60000),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=60000, limite_superior=80000)
+                    "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=0, limite_superior=45000),
+                    "medio": lambda precio: self.pertenencia_precio_medio(precio, limite_inferior=45000, limite_superior=60000),
+                    "alto": lambda precio: self.pertenencia_precio_alto(precio, limite_inferior=60000, limite_superior=80000)
                 },
                 "volumen": {
-                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
-                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
-                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+                    "bajo": lambda volumen: self.pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+                    "medio": lambda volumen: self.pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+                    "alto": lambda volumen: self.pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
                 },
                 "sentimiento": {
-                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
-                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
-                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                    "negativo": lambda sentimiento: self.pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: self.pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: self.pertenencia_sentimiento_positivo(sentimiento)
+                },
+                "tendencia_precio": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0,
+                    "estable": lambda x: 1 if x == 'estable' else 0
+                },
+                "rsi": {
+                    "alto": lambda x: self.pertenencia_rsi_alto(x),
+                    "medio": lambda x: self.pertenencia_rsi_medio(x),
+                    "bajo": lambda x: self.pertenencia_rsi_bajo(x),
+                    "sobrecompra": lambda x: 1 if x > 70 else 0,
+                    "sobreventa": lambda x: 1 if x < 30 else 0
+                },
+                "macd_tendencia": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0
+                },
+                "sobrecompra": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "sobreventa": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "bollinger": {
+                    "sobrecompra": lambda x: 1 if x == 'sobrecompra' else 0,
+                    "sobreventa": lambda x: 1 if x == 'sobreventa' else 0,
+                    "normal": lambda x: 1 if x == 'normal' else 0
                 }
             },
             "Ethereum": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1000, limite_superior=2000),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2000, limite_superior=3000),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3000, limite_superior=5000)
+                    "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=1000, limite_superior=2000),
+                    "medio": lambda precio: self.pertenencia_precio_medio(precio, limite_inferior=2000, limite_superior=3000),
+                    "alto": lambda precio: self.pertenencia_precio_alto(precio, limite_inferior=3000, limite_superior=5000)
                 },
                 "volumen": {
-                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
-                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
-                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
+                    "bajo": lambda volumen: self.pertenencia_volumen_bajo(volumen, limite_inferior=1000, limite_superior=5000),
+                    "medio": lambda volumen: self.pertenencia_volumen_medio(volumen, limite_inferior=5000, limite_superior=10000),
+                    "alto": lambda volumen: self.pertenencia_volumen_alto(volumen, limite_inferior=10000, limite_superior=15000)
                 },
                 "sentimiento": {
-                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
-                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
-                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                    "negativo": lambda sentimiento: self.pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: self.pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: self.pertenencia_sentimiento_positivo(sentimiento)
+                },
+                "tendencia_precio": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0,
+                    "estable": lambda x: 1 if x == 'estable' else 0
+                },
+                "rsi": {
+                    "alto": lambda x: self.pertenencia_rsi_alto(x),
+                    "medio": lambda x: self.pertenencia_rsi_medio(x),
+                    "bajo": lambda x: self.pertenencia_rsi_bajo(x),
+                    "sobrecompra": lambda x: 1 if x > 70 else 0,
+                    "sobreventa": lambda x: 1 if x < 30 else 0
+                },
+                "macd_tendencia": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0
+                },
+                "sobrecompra": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "sobreventa": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "bollinger": {
+                    "sobrecompra": lambda x: 1 if x == 'sobrecompra' else 0,
+                    "sobreventa": lambda x: 1 if x == 'sobreventa' else 0,
+                    "normal": lambda x: 1 if x == 'normal' else 0
                 }
             },
-            # Añadir más criptomonedas aquí
             "Ripple": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=0.5, limite_superior=1.0),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=1.0, limite_superior=1.5),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=1.5, limite_superior=2.0)
+                    "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=0.5, limite_superior=1.0),
+                    "medio": lambda precio: self.pertenencia_precio_medio(precio, limite_inferior=1.0, limite_superior=1.5),
+                    "alto": lambda precio: self.pertenencia_precio_alto(precio, limite_inferior=1.5, limite_superior=2.0)
                 },
                 "volumen": {
-                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=500, limite_superior=2000),
-                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=2000, limite_superior=5000),
-                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=5000, limite_superior=10000)
+                    "bajo": lambda volumen: self.pertenencia_volumen_bajo(volumen, limite_inferior=500, limite_superior=2000),
+                    "medio": lambda volumen: self.pertenencia_volumen_medio(volumen, limite_inferior=2000, limite_superior=5000),
+                    "alto": lambda volumen: self.pertenencia_volumen_alto(volumen, limite_inferior=5000, limite_superior=10000)
                 },
                 "sentimiento": {
-                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
-                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
-                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                    "negativo": lambda sentimiento: self.pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: self.pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: self.pertenencia_sentimiento_positivo(sentimiento)
+                },
+                "tendencia_precio": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0,
+                    "estable": lambda x: 1 if x == 'estable' else 0
+                },
+                "rsi": {
+                    "alto": lambda x: self.pertenencia_rsi_alto(x),
+                    "medio": lambda x: self.pertenencia_rsi_medio(x),
+                    "bajo": lambda x: self.pertenencia_rsi_bajo(x),
+                    "sobrecompra": lambda x: 1 if x > 70 else 0,
+                    "sobreventa": lambda x: 1 if x < 30 else 0
+                },
+                "macd_tendencia": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0
+                },
+                "sobrecompra": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "sobreventa": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "bollinger": {
+                    "sobrecompra": lambda x: 1 if x == 'sobrecompra' else 0,
+                    "sobreventa": lambda x: 1 if x == 'sobreventa' else 0,
+                    "normal": lambda x: 1 if x == 'normal' else 0
                 }
             },
             "Litecoin": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=100, limite_superior=200),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=200, limite_superior=300),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=300, limite_superior=400)
+                    "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=100, limite_superior=200),
+                    "medio": lambda precio: self.pertenencia_precio_medio(precio, limite_inferior=200, limite_superior=300),
+                    "alto": lambda precio: self.pertenencia_precio_alto(precio, limite_inferior=300, limite_superior=400)
                 },
                 "volumen": {
-                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=300, limite_superior=1000),
-                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=1000, limite_superior=3000),
-                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=3000, limite_superior=6000)
+                    "bajo": lambda volumen: self.pertenencia_volumen_bajo(volumen, limite_inferior=300, limite_superior=1000),
+                    "medio": lambda volumen: self.pertenencia_volumen_medio(volumen, limite_inferior=1000, limite_superior=3000),
+                    "alto": lambda volumen: self.pertenencia_volumen_alto(volumen, limite_inferior=3000, limite_superior=6000)
                 },
                 "sentimiento": {
-                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
-                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
-                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                    "negativo": lambda sentimiento: self.pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: self.pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: self.pertenencia_sentimiento_positivo(sentimiento)
+                },
+                "tendencia_precio": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0,
+                    "estable": lambda x: 1 if x == 'estable' else 0
+                },
+                "rsi": {
+                    "alto": lambda x: self.pertenencia_rsi_alto(x),
+                    "medio": lambda x: self.pertenencia_rsi_medio(x),
+                    "bajo": lambda x: self.pertenencia_rsi_bajo(x),
+                    "sobrecompra": lambda x: 1 if x > 70 else 0,
+                    "sobreventa": lambda x: 1 if x < 30 else 0
+                },
+                "macd_tendencia": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0
+                },
+                "sobrecompra": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "sobreventa": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "bollinger": {
+                    "sobrecompra": lambda x: 1 if x == 'sobrecompra' else 0,
+                    "sobreventa": lambda x: 1 if x == 'sobreventa' else 0,
+                    "normal": lambda x: 1 if x == 'normal' else 0
                 }
             },
             "Cardano": {
                 "precio": {
-                    "bajo": lambda precio: pertenencia_precio_bajo(precio, limite_inferior=1.0, limite_superior=2.0),
-                    "medio": lambda precio: pertenencia_precio_medio(precio, limite_inferior=2.0, limite_superior=3.0),
-                    "alto": lambda precio: pertenencia_precio_alto(precio, limite_inferior=3.0, limite_superior=4.0)
+                    "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=1.0, limite_superior=2.0),
+                    "medio": lambda precio: self.pertenencia_precio_medio(precio, limite_inferior=2.0, limite_superior=3.0),
+                    "alto": lambda precio: self.pertenencia_precio_alto(precio, limite_inferior=3.0, limite_superior=4.0)
                 },
                 "volumen": {
-                    "bajo": lambda volumen: pertenencia_volumen_bajo(volumen, limite_inferior=800, limite_superior=2500),
-                    "medio": lambda volumen: pertenencia_volumen_medio(volumen, limite_inferior=2500, limite_superior=6000),
-                    "alto": lambda volumen: pertenencia_volumen_alto(volumen, limite_inferior=6000, limite_superior=12000)
+                    "bajo": lambda volumen: self.pertenencia_volumen_bajo(volumen, limite_inferior=800, limite_superior=2500),
+                    "medio": lambda volumen: self.pertenencia_volumen_medio(volumen, limite_inferior=2500, limite_superior=6000),
+                    "alto": lambda volumen: self.pertenencia_volumen_alto(volumen, limite_inferior=6000, limite_superior=12000)
                 },
                 "sentimiento": {
-                    "negativo": lambda sentimiento: pertenencia_sentimiento_negativo(sentimiento),
-                    "neutro": lambda sentimiento: pertenencia_sentimiento_neutro(sentimiento),
-                    "positivo": lambda sentimiento: pertenencia_sentimiento_positivo(sentimiento)
+                    "negativo": lambda sentimiento: self.pertenencia_sentimiento_negativo(sentimiento),
+                    "neutro": lambda sentimiento: self.pertenencia_sentimiento_neutro(sentimiento),
+                    "positivo": lambda sentimiento: self.pertenencia_sentimiento_positivo(sentimiento)
+                },
+                "tendencia_precio": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0,
+                    "estable": lambda x: 1 if x == 'estable' else 0
+                },
+                "rsi": {
+                    "alto": lambda x: self.pertenencia_rsi_alto(x),
+                    "medio": lambda x: self.pertenencia_rsi_medio(x),
+                    "bajo": lambda x: self.pertenencia_rsi_bajo(x),
+                    "sobrecompra": lambda x: 1 if x > 70 else 0,
+                    "sobreventa": lambda x: 1 if x < 30 else 0
+                },
+                "macd_tendencia": {
+                    "alcista": lambda x: 1 if x == 'alcista' else 0,
+                    "bajista": lambda x: 1 if x == 'bajista' else 0
+                },
+                "sobrecompra": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "sobreventa": {
+                    "verdadero": lambda x: 1 if x else 0,
+                    "falso": lambda x: 1 if not x else 0
+                },
+                "bollinger": {
+                    "sobrecompra": lambda x: 1 if x == 'sobrecompra' else 0,
+                    "sobreventa": lambda x: 1 if x == 'sobreventa' else 0,
+                    "normal": lambda x: 1 if x == 'normal' else 0
                 }
             }
         }
+
+    # Funciones de pertenencia para 'precio'
+    def pertenencia_precio_bajo(self, precio, limite_inferior, limite_superior):
+        if precio < limite_inferior:
+            return 1
+        elif limite_inferior <= precio <= limite_superior:
+            return (limite_superior - precio) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    def pertenencia_precio_medio(self, precio, limite_inferior, limite_superior):
+        # Suponiendo que 'medio' es un pico en el rango medio
+        if limite_inferior <= precio <= limite_superior:
+            return 1
+        elif limite_superior < precio < limite_superior + (limite_superior - limite_inferior):
+            return (precio - limite_superior) / (limite_superior - limite_inferior)
+        elif limite_inferior - (limite_superior - limite_inferior) < precio < limite_inferior:
+            return (limite_inferior - precio) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    def pertenencia_precio_alto(self, precio, limite_inferior, limite_superior):
+        if precio > limite_superior:
+            return 1
+        elif limite_inferior <= precio <= limite_superior:
+            return (precio - limite_inferior) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    # Funciones de pertenencia para 'volumen'
+    def pertenencia_volumen_bajo(self, volumen, limite_inferior, limite_superior):
+        if volumen < limite_inferior:
+            return 1
+        elif limite_inferior <= volumen <= limite_superior:
+            return (limite_superior - volumen) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    def pertenencia_volumen_medio(self, volumen, limite_inferior, limite_superior):
+        # Suponiendo que 'medio' es un pico en el rango medio
+        if limite_inferior <= volumen <= limite_superior:
+            return 1
+        elif limite_superior < volumen < limite_superior + (limite_superior - limite_inferior):
+            return (volumen - limite_superior) / (limite_superior - limite_inferior)
+        elif limite_inferior - (limite_superior - limite_inferior) < volumen < limite_inferior:
+            return (limite_inferior - volumen) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    def pertenencia_volumen_alto(self, volumen, limite_inferior, limite_superior):
+        if volumen > limite_superior:
+            return 1
+        elif limite_inferior <= volumen <= limite_superior:
+            return (volumen - limite_inferior) / (limite_superior - limite_inferior)
+        else:
+            return 0
+
+    # Funciones de pertenencia para 'sentimiento'
+    def pertenencia_sentimiento_negativo(self, sentimiento):
+        return 1 if sentimiento == 'negativo' else 0
+
+    def pertenencia_sentimiento_neutro(self, sentimiento):
+        return 1 if sentimiento == 'neutro' else 0
+
+    def pertenencia_sentimiento_positivo(self, sentimiento):
+        return 1 if sentimiento == 'positivo' else 0
+
+    # Funciones de pertenencia para 'rsi'
+    def pertenencia_rsi_alto(self, x):
+        if x > 70:
+            return 1
+        elif x > 50:
+            return (x - 50) / 20
+        else:
+            return 0
+
+    def pertenencia_rsi_medio(self, x):
+        if 30 < x <= 50:
+            return (x - 30) / 20
+        elif 50 < x <= 70:
+            return (70 - x) / 20
+        else:
+            return 0
+
+    def pertenencia_rsi_bajo(self, x):
+        if x < 30:
+            return 1
+        elif x < 50:
+            return (50 - x) / 20
+        else:
+            return 0
