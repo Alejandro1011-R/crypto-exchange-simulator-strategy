@@ -225,7 +225,7 @@ class Agente:
         """
         if sentiment_history and crypto_name in sentiment_history:
             return sentiment_history[crypto_name][-1]
-        return 'neutral'  # Ajustar según el formato de tus datos
+        return 0  # Ajustar según el formato de tus datos
 
     def ejecutar_accion(self, accion, contexto, cripto):
         """

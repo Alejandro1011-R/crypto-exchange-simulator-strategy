@@ -1,8 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import seaborn as sns
+import plotly.graph_objects as go
 import logging
 from io import StringIO
 import base64
@@ -10,6 +9,9 @@ from simulation import *
 from rules_interpreter import *  # Asegúrate de que este módulo exista
 import time
 from scipy.stats import pearsonr
+from llm import *
+import plotly.express as px
+import seaborn as sns
 
 # Configurar el estilo de los gráficos
 sns.set(style="whitegrid")
@@ -46,16 +48,6 @@ st.title("Simulación de Mercado de Criptomonedas")
 # Sección de Configuración de la Simulación
 st.sidebar.header("Configuración de la Simulación")
 
-# Número de Pasos (Días) por Simulación con clave única
-# num_steps = st.sidebar.slider(
-#     "Número de Pasos (Días)",
-#     min_value=50,
-#     max_value=500,
-#     value=100,
-#     step=10,
-#     key='num_steps_slider'  # Clave única añadida
-# )
-
 # Número de Simulaciones con clave única
 num_simulations = st.sidebar.slider(
     "Número de Simulaciones",
@@ -66,131 +58,361 @@ num_simulations = st.sidebar.slider(
     key='num_simulations_slider'  # Clave única añadida
 )
 
-# Definir estrategias fijas
-estrategias_disponibles = {
-    "Comprar cuando el precio es bajo": [
-        "SI precio es bajo ENTONCES comprar",
-        "SI precio es alto ENTONCES mantener",
-        "SI precio es medio ENTONCES mantener"
-    ],
-    "Vender cuando el precio es alto": [
-        "SI precio es alto ENTONCES vender",
-        "SI precio es bajo ENTONCES mantener",
-        "SI precio es medio ENTONCES mantener"
-    ],
-    "Mantener cuando el precio es medio": [
-        "SI precio es medio ENTONCES mantener",
-        "SI precio es bajo ENTONCES comprar",
-        "SI precio es alto ENTONCES vender"
-    ]
-}
+# Verificar si los datos ya están en el estado de sesión o si se necesita recomputar
+if 'data_loaded' not in st.session_state or not st.session_state['data_loaded']:
+    if st.sidebar.button("Iniciar Simulación"):
+        initial_prices = {
+            "Bitcoin": 30000.0,
+            "Ethereum": 2000.0,
+            "Ripple": 1.0,
+            "Litecoin": 150.0,
+            "Cardano": 2.0,
+        }
 
-# Botón para Iniciar la Simulación
-if st.sidebar.button("Iniciar Simulación"):
+        initial_volatilities = {
+            "Bitcoin": 0.01,
+            "Ethereum": 0.02,
+            "Ripple": 0.07,
+            "Litecoin": 0.04,
+            "Cardano": 0.03,
+        }
 
-    initial_prices = {
-        "Bitcoin": 30000.0,
-        "Ethereum": 2000.0,
-        "Ripple": 1.0,
-        "Litecoin": 150.0,
-        "Cardano": 2.0,
-        # Añadir más criptomonedas según sea necesario
-    }
+        # Crear instancia de Map y obtener pertenencia_map
+        map_obj = Map()
+        pertenencia_map = map_obj.pertenencia_map
 
-    initial_volatilities = {
-        "Bitcoin": 0.01,
-        "Ethereum": 0.02,
-        "Ripple": 0.07,
-        "Litecoin": 0.04,
-        "Cardano": 0.03,
-        # Añadir más criptomonedas según sea necesario
-    }
-    # Crear instancia de Map y obtener pertenencia_map
-    map_obj = Map()
-    pertenencia_map = map_obj.pertenencia_map
+        # Crear instancia del ParserReglas
+        parser_reglas = ParserReglas(pertenencia_map=pertenencia_map)
 
-    # Crear instancia del ParserReglas
-    parser_reglas = ParserReglas(pertenencia_map=pertenencia_map)
+        # Definir criptomonedas predefinidas
+        criptos = []
+        for nombre in pertenencia_map.keys():
+            precio_inicial = initial_prices.get(nombre, 1000.0)
+            volatilidad = initial_volatilities.get(nombre, 0.05)
+            criptos.append(Cryptocurrency(name=nombre, initial_price=precio_inicial, initial_volatility=volatilidad))
 
-    # Definir criptomonedas predefinidas desde `pertenencia_map` con valores numéricos
-    criptos = []
-    for nombre in pertenencia_map.keys():
-        precio_inicial = initial_prices.get(nombre, 1000.0)        # Valor por defecto si no está definido
-        volatilidad = initial_volatilities.get(nombre, 0.05)      # Valor por defecto si no está definido
-        criptos.append(Cryptocurrency(name=nombre, initial_price=precio_inicial, initial_volatility=volatilidad))
+        # Crear instancia del Mercado
+        market = Market(initial_prices, initial_volatilities)
 
-    # Crear instancia del Mercado
-    market = Market(initial_prices,initial_volatilities)
+        # Cargar reglas desde archivos de texto
+        rules_buy_low_sell_high = load_rules_from_file('rules/rules_buy_low_sell_high.txt')
+        rules_sentiment = load_rules_from_file('rules/rules_sentiment.txt')
+        rules_inversor = load_rules_from_file('rules/rules_inversor.txt')
 
-    # Cargar reglas desde archivos de texto
-    rules_buy_low_sell_high = load_rules_from_file('rules/rules_buy_low_sell_high.txt')
-    rules_sentiment = load_rules_from_file('rules/rules_sentiment.txt')
-    rules_inversor = load_rules_from_file('rules/rules_inversor.txt')
+        # Crear agentes según las estrategias seleccionadas
+        brokers = [
+            Agente('Estrategia Guiado Por Sentimiento del Mercado', rules_sentiment, parser_reglas),
+            Agente('Estrategia Comprar Bajo y Vender Alto', rules_buy_low_sell_high, parser_reglas),
+            Agente('Estrategia Inversor', rules_inversor, parser_reglas),
+        ]
 
-    # Crear agentes según las estrategias seleccionadas
-    brokers = [
-        Agente('Estrategia Guiado Por Sentimiento del Mercado', rules_sentiment, parser_reglas),
-        Agente('Estrategia Comprar Bajo y Vender Alto', rules_buy_low_sell_high, parser_reglas),
-        Agente('Estrategia Inversor', rules_inversor, parser_reglas),
-    ]
-    agentes = brokers  # Ya son los brokers especificados
+        # Crear instancia de SentimentAnalyzer y CryptoTradingAgent
+        trainer = SentimentAnalyzer('.env')
+        reddit_instance = CryptoTradingAgent('.env')
 
-    # Crear instancia de SentimentAnalyzer y CryptoTradingAgent una sola vez
-    # trainer = SentimentAnalyzer('.env')
-    # reddit_instance = CryptoTradingAgent('.env')
+        # Crear instancia de la Simulación
+        simulation = Simulation(
+            num_steps=num_simulations,
+            agents=brokers,
+            market=market,
+            parser=parser_reglas,
+            sentiment_analyzer=trainer,
+            reddit_instance=reddit_instance
+        )
 
-    # Crear instancia de la Simulación pasando las instancias de SentimentAnalyzer y CryptoTradingAgent
-    simulation = Simulation(
-        num_steps=num_simulations,
-        agents=agentes,
-        market=market,
-        parser=parser_reglas,
-        # sentiment_analyzer=None,
-        # reddit_instance=None
-    )
-
-    # Ejecutar la simulación
-    with st.spinner('Ejecutando simulaciones...'):
-        for _ in range(1):
+        # Ejecutar la simulación
+        # Ejecutar la simulación
+        with st.spinner('Ejecutando simulaciones...'):
             simulation.run()
-        logger.info("Simulaciones completadas.")
+            logger.info("Simulaciones completadas.")
 
-    # Asegurar que todas las listas en agent_performances tengan la misma longitud
-    max_length = max(len(lst) for lst in simulation.agent_performances.values())
-    for key, lst in simulation.agent_performances.items():
-        if len(lst) < max_length:
-            lst.extend([np.nan] * (max_length - len(lst)))
+        # Asegurar que todas las listas en agent_performances tengan la misma longitud
+        max_length = max(len(lst) for lst in simulation.agent_performances.values())
+        for key, lst in simulation.agent_performances.items():
+            if len(lst) < max_length:
+                lst.extend([np.nan] * (max_length - len(lst)))
 
-    # Convertir los resultados a un DataFrame
-    df_resultados = pd.DataFrame(simulation.agent_performances)
+        max_length = max(len(lst) for lst in simulation.agent_performances.values())
+        for key, lst in simulation.agent_performances.items():
+            if len(lst) < max_length:
+                lst.extend([np.nan] * (max_length - len(lst)))
 
-    # Guardar resultados en un archivo CSV
-    df_resultados.to_csv("simulation_results.csv", index=False)
+        # Convertir los resultados a un DataFrame
+        df_resultados = pd.DataFrame(simulation.agent_performances)
 
-    # Obtener el mejor agente usando el método get_performance()
-    mejor_agente = simulation.get_performance()
+        # Guardar resultados en un archivo CSV
+        df_resultados.to_csv("simulation_results.csv", index=False)
 
-    # Obtener el rendimiento total de los agentes para el gráfico de pastel
-    rendimiento_total = df_resultados.sum().dropna()
+        # Obtener el mejor agente usando el método get_performance()
+        mejor_agente = simulation.get_performance()
 
-    # Filtrar valores negativos y cero para evitar errores en el gráfico de pastel
-    rendimiento_total = rendimiento_total[rendimiento_total > 0]
+        # Obtener el rendimiento total de los agentes para el gráfico de pastel
+        rendimiento_total = df_resultados.sum().dropna()
 
-    # Visualizaciones de Resultados
-    st.header("Visualización de Resultados")
+        # Filtrar valores negativos y cero para evitar errores en el gráfico de pastel
+        rendimiento_total = rendimiento_total[rendimiento_total > 0]
 
-    # a. Historial de Precios
-    st.subheader("Historial de Precios de las Criptomonedas")
-    fig1 = px.line(
-        simulation.price_history,
-        labels={"value": "Precio ($)", "index": "Pasos de Tiempo", "variable": "Criptomoneda"},
-        title="Evolución de los Precios de las Criptomonedas"
+        # Convertir los resultados a un DataFrame y guardar en el estado de la sesión
+        st.session_state['price_history_df'] = simulation.price_history_df
+        st.session_state['rendimiento_total'] = rendimiento_total
+        st.session_state['agentes'] = simulation.agents
+        st.session_state['sentiment_history_df'] = simulation.sentiment_history_df
+        st.session_state['df_resultados'] = df_resultados
+        st.session_state['data_loaded'] = True
+        st.session_state['mejor_agente'] = mejor_agente
+        st.session_state['summary'] = simulation.get_summary()
+
+
+
+# Si los datos están cargados, mostrar resultados sin recalcular
+if 'data_loaded' in st.session_state and st.session_state['data_loaded']:
+    # Filter columns to exclude 'Time' or any other non-cryptocurrency columns
+    crypto_columns = [col.split('_')[0] for col in st.session_state['price_history_df'].columns if '_' in col]
+    crypto_options = sorted(set(crypto_columns))
+
+    # Selectbox for user to choose which cryptocurrency's data to display
+    crypto_to_plot = st.selectbox(
+        "Selecciona la Criptomoneda para Visualizar Precios",
+        options=crypto_options,
+        index=0
     )
-    fig1.update_traces(mode='lines+markers')
-    st.plotly_chart(fig1, use_container_width=True)
-    st.markdown("""
-    **Este gráfico muestra la evolución de los precios de cada criptomoneda a lo largo de los pasos de tiempo de la simulación. Las líneas representan el cambio en el precio, permitiendo observar tendencias y volatilidad.**
+
+    # You can now use 'crypto_to_plot' to filter and display data accordingly
+
+
+    # Gráfico de precios usando datos del estado de sesión
+    df_crypto = st.session_state['price_history_df']
+    print(df_crypto.head())
+    fig = go.Figure(data=[go.Candlestick(
+        x=df_crypto['Time'],
+        open=df_crypto[f'{crypto_to_plot}_open'],
+        high=df_crypto[f'{crypto_to_plot}_high'],
+        low=df_crypto[f'{crypto_to_plot}_low'],
+        close=df_crypto[f'{crypto_to_plot}_close'],
+        increasing_line_color='green',
+        decreasing_line_color='red'
+    )])
+    fig.update_layout(title=f"Evolución de los Precios de {crypto_to_plot}", xaxis_title='Tiempo', yaxis_title='Precio ($)')
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Historial de Sentimiento del Mercado")
+
+    # Assume 'crypto_to_plot' is selected from a selectbox or another method
+    crypto_to_plot = st.selectbox(
+        "Selecciona la Criptomoneda para Visualizar el Sentimiento",
+        options=[col.split('_')[0] for col in st.session_state['sentiment_history_df'].columns if '_' in col],
+        index=0
+    )
+
+    df_sentiment = st.session_state['sentiment_history_df'].reset_index().rename(columns={'index': 'Time'})
+
+    fig2 = go.Figure()
+
+    # Define colors based on the sentiment
+    colors = ['green' if val > 0 else 'red' if val < 0 else 'gray' for val in df_sentiment[f'{crypto_to_plot}_sentiment']]
+
+    # Add the sentiment bar chart
+    fig2.add_trace(go.Bar(
+        x=df_sentiment['Time'],
+        y=df_sentiment[f'{crypto_to_plot}_sentiment'],
+        marker_color=colors,  # Set color of bars based on sentiment values
+        name='Sentimiento'
+    ))
+
+    # Add a horizontal line at 0 for reference
+    fig2.add_trace(go.Scatter(
+        x=df_sentiment['Time'],
+        y=[0]*len(df_sentiment),
+        mode='lines',
+        line=dict(color='black', width=1, dash='dash'),
+        name='Neutral'
+    ))
+
+    # Configure layout
+    fig2.update_layout(
+        title=f"Evolución del Sentimiento del Mercado para {crypto_to_plot}",
+        xaxis_title='Tiempo',
+        yaxis_title='Sentimiento',
+        hovermode='x unified',
+        template="plotly_dark",  # You can choose another template like "plotly_white" etc.
+        xaxis=dict(showline=True, showgrid=False),
+        yaxis=dict(showline=True, showgrid=True)
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig2, use_container_width=True)
+
+    st.markdown(f"""
+    **Este gráfico de barras muestra cómo varió el sentimiento del mercado para {crypto_to_plot} durante la simulación. Un sentimiento positivo indica una percepción favorable (verde), mientras que uno negativo refleja una percepción desfavorable (rojo). El color gris indica un sentimiento neutral. La línea negra punteada en 0 sirve como referencia neutral.**
     """)
+
+
+    st.header("Distribución de Rendimiento de los Agentes")
+
+    if st.session_state['rendimiento_total'].empty:
+        st.warning("No hay rendimientos positivos para mostrar en el gráfico de pastel.")
+    else:
+        # Obtener las reglas de cada agente
+        reglas_agentes = {agente.nombre: agente.reglas for agente in st.session_state['agentes'] if agente.nombre in st.session_state['rendimiento_total'].index}
+
+        # Crear hover text con las reglas
+        hover_text = []
+        for agente in st.session_state['rendimiento_total'].index:
+            reglas = reglas_agentes.get(agente, ["No hay reglas disponibles"])
+            reglas_formateadas = '<br>'.join(reglas)
+            hover_text.append(f"{agente}<br><br><b>Reglas:</b><br>{reglas_formateadas}")
+
+        # Crear el gráfico de pastel
+        fig_pastel = go.Figure(data=[go.Pie(
+            labels=st.session_state['rendimiento_total'].index,
+            values=st.session_state['rendimiento_total'].values,
+            hovertext=hover_text,
+            hoverinfo="text",
+            textinfo='percent+label',
+            textposition='inside',
+            marker=dict(colors=px.colors.qualitative.Plotly)
+        )])
+
+        # Configurar el layout
+        fig_pastel.update_layout(
+            title="Distribución de Rendimiento de los Agentes",
+        )
+
+        # Mostrar el gráfico en Streamlit
+        st.plotly_chart(fig_pastel, use_container_width=True)
+
+        st.markdown("""
+        **Este gráfico de pastel muestra la distribución del rendimiento total de los agentes. Al pasar el cursor sobre cada sección, se muestran las reglas que cada agente utilizó en su estrategia de trading.**
+        """)
+
+    st.subheader("Rendimiento de los Agentes")
+
+    # Crear el gráfico de líneas
+    fig3 = go.Figure()
+
+    # Definir colores para cada agente
+    colors = px.colors.qualitative.Plotly  # Puedes elegir otro esquema de colores si lo prefieres
+
+    for idx, agent in enumerate(st.session_state['df_resultados'].columns):
+        fig3.add_trace(go.Scatter(
+            x=st.session_state['df_resultados'].index,
+            y=st.session_state['df_resultados'][agent],
+            mode='lines+markers',
+            name=agent,
+            line=dict(color=colors[idx % len(colors)], width=2),
+            marker=dict(size=6)
+        ))
+
+    # Configurar el layout
+    fig3.update_layout(
+        title="Rendimiento Acumulado de los Agentes",
+        xaxis_title='Pasos de Tiempo',
+        yaxis_title='Rendimiento (%)',
+        hovermode='x unified'
+    )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig3, use_container_width=True)
+
+    st.markdown("""
+    **Este gráfico muestra el rendimiento acumulado de cada agente a lo largo de la simulación. Las líneas representan el crecimiento o decrecimiento de las estrategias de trading de cada agente, permitiendo una comparación visual de su efectividad.**
+    """)
+
+    # *** Identificar y Mostrar el Mejor Agente y su Estrategia ***
+    # Obtener el mejor agente y sus reglas
+    summary = st.session_state['summary']
+    mejor_agente_nombre = st.session_state['mejor_agente']
+    mejor_agente_data = summary['agent_performance'][mejor_agente_nombre]
+    mejor_agente_reglas = mejor_agente_data.get('rules', "No disponible")
+
+    # Mostrar el mejor agente y su estrategia de forma no HTML, usando Streamlit components
+    st.header("Mejor Agente de la Simulación")
+    st.write(f"**Nombre del Agente:** {mejor_agente_nombre}")
+    st.write(f"**Rendimiento:** {mejor_agente_data['performance']:.2f}%")
+    st.write(f"**Capital al culminar la simulación:** {mejor_agente_data['capital']:.2f} USD")
+    st.write("**Estrategia:**")
+    for regla in mejor_agente_reglas:
+        st.write(f"- {regla}")
+
+    st.write("**Portafolio:**")
+    st.json(mejor_agente_data.get('portfolio', {}))
+
+
+    # Mostrar las creencias (beliefs) del mejor agente
+    st.write("**Creencias del Mejor Agente:**")
+    st.json(mejor_agente_data.get('beliefs', {}))
+
+    # Mostrar todas las intenciones con su ciclo de acción
+    st.write("**Historial de Intenciones del Mejor Agente:**")
+    historial_intenciones = mejor_agente_data.get('intentions', [])
+    for ciclo, intenciones in historial_intenciones:
+        st.write(f"Ciclo {ciclo}:")
+        for accion, cripto in intenciones:
+            st.write(f"- {accion} {cripto}")
+
+    # Si deseas mostrar los deseos actuales
+    st.write("**Deseos del Mejor Agente al culminar la simulación:**")
+    for deseo in mejor_agente_data.get('desires', []):
+        accion, cripto = deseo
+        st.write(f"- {accion} {cripto}")
+
+    # Exportar Resultados
+    st.header("Exportación de Datos")
+    st.markdown(get_table_download_link(df_resultados), unsafe_allow_html=True)
+
+    # *** Eliminado la sección de Logs de la Simulación ***
+
+
+
+    # Agent performance visualization
+    # st.header("Distribución de Rendimiento de los Agentes")
+
+    # # This assumes you have 'rendimiento_total' calculated and stored in session_state
+    # # You would calculate this once your simulation runs and store it in session_state
+    # if 'rendimiento_total' not in st.session_state or st.session_state['rendimiento_total'].empty:
+    #     st.warning("No hay rendimientos positivos para mostrar en el gráfico de pastel.")
+    # else:
+    #     rendimiento_total = st.session_state['rendimiento_total']
+    #     # Obtener las reglas de cada agente
+    #     reglas_agentes = {agente.nombre: agente.reglas for agente in st.session_state['agentes'] if agente.nombre in rendimiento_total.index}
+
+    #     # Crear hover text con las reglas
+    #     hover_text = []
+    #     for agente in rendimiento_total.index:
+    #         reglas = reglas_agentes.get(agente, ["No hay reglas disponibles"])
+    #         reglas_formateadas = '<br>'.join(reglas)
+    #         hover_text.append(f"{agente}<br><br><b>Reglas:</b><br>{reglas_formateadas}")
+
+    #     # Crear el gráfico de pastel
+    #     fig_pastel = go.Figure(data=[go.Pie(
+    #         labels=rendimiento_total.index,
+    #         values=rendimiento_total.values,
+    #         hovertext=hover_text,
+    #         hoverinfo="text",
+    #         textinfo='percent+label',
+    #         textposition='inside',
+    #         marker=dict(colors=px.colors.qualitative.Plotly)
+    #     )])
+
+    #     # Configurar el layout
+    #     fig_pastel.update_layout(
+    #         title="Distribución de Rendimiento de los Agentes",
+    #     )
+
+    #     # Mostrar el gráfico en Streamlit
+    #     st.plotly_chart(fig_pastel, use_container_width=True)
+
+    #     st.markdown("""
+    #     **Este gráfico de pastel muestra la distribución del rendimiento total de los agentes. Al pasar el cursor sobre cada sección, se muestran las reglas que cada agente utilizó en su estrategia de trading.**
+    #     """)
+
+
+# Opción para resetear la simulación
+if st.sidebar.button('Resetear Simulación'):
+    st.session_state['data_loaded'] = False
+
+
+
 
     # # **Análisis Estadístico para Historial de Precios**
     # st.subheader("Análisis Estadístico de los Precios de las Criptomonedas")
@@ -229,17 +451,73 @@ if st.sidebar.button("Iniciar Simulación"):
     # ))
 
     # b. Historial de Sentimiento
-    st.subheader("Historial de Sentimiento del Mercado")
-    fig2 = px.line(
-        simulation.sentiment_history,
-        labels={"value": "Sentimiento", "index": "Pasos de Tiempo", "variable": "Criptomoneda"},
-        title="Evolución del Sentimiento del Mercado"
-    )
-    fig2.update_traces(mode='lines+markers')
-    st.plotly_chart(fig2, use_container_width=True)
-    st.markdown("""
-    **Este gráfico muestra cómo varió el sentimiento del mercado para cada criptomoneda durante la simulación. Un sentimiento positivo indica una percepción favorable, mientras que uno negativo refleja lo contrario.**
-    """)
+    # st.subheader("Historial de Sentimiento del Mercado")
+    # fig2 = px.line(
+    #     simulation.sentiment_history,
+    #     labels={"value": "Sentimiento", "index": "Pasos de Tiempo", "variable": "Criptomoneda"},
+    #     title="Evolución del Sentimiento del Mercado"
+    # )
+    # fig2.update_traces(mode='lines+markers')
+    # st.plotly_chart(fig2, use_container_width=True)
+    # st.markdown("""
+    # **Este gráfico muestra cómo varió el sentimiento del mercado para cada criptomoneda durante la simulación. Un sentimiento positivo indica una percepción favorable, mientras que uno negativo refleja lo contrario.**
+    # """)
+    # b. Historial de Sentimiento - Gráfico de Líneas con Colores Condicionales
+
+
+    # st.subheader("Historial de Sentimiento del Mercado")
+
+    # # Seleccionar la criptomoneda a visualizar
+    # crypto_to_plot = 'Bitcoin'  # Puedes hacerlo dinámico usando st.selectbox
+
+    # # Preparar los datos
+    # df_sentiment = simulation.sentiment_history_df.reset_index().rename(columns={'index': 'Time'})
+    # df_sentiment['Time'] = df_sentiment['Time']  # Asegúrate de que 'Time' esté correctamente formateado
+
+    # # Crear el gráfico de líneas con colores condicionales
+    # fig2 = go.Figure()
+
+    # # Definir colores basados en el sentimiento
+    # colors = df_sentiment[f'{crypto_to_plot}_sentiment'].apply(
+    #     lambda x: 'green' if x > 0 else ('red' if x < 0 else 'gray')
+    # )
+
+    # # Añadir la línea de sentimiento
+    # fig2.add_trace(go.Scatter(
+    #     x=df_sentiment['Time'],
+    #     y=df_sentiment[f'{crypto_to_plot}_sentiment'],
+    #     mode='lines+markers',
+    #     line=dict(color='blue', width=2),
+    #     marker=dict(color=colors),
+    #     name='Sentimiento'
+    # ))
+
+    # # Añadir una línea horizontal en 0 para referencia
+    # fig2.add_trace(go.Scatter(
+    #     x=df_sentiment['Time'],
+    #     y=[0]*len(df_sentiment),
+    #     mode='lines',
+    #     line=dict(color='black', width=1, dash='dash'),
+    #     name='Neutral'
+    # ))
+
+    # # Configurar el layout
+    # fig2.update_layout(
+    #     title=f"Evolución del Sentimiento del Mercado para {crypto_to_plot}",
+    #     xaxis_title='Tiempo',
+    #     yaxis_title='Sentimiento',
+    #     hovermode='x unified'
+    # )
+
+    # # Mejorar el diseño de las marcas y líneas
+    # fig2.update_traces(marker=dict(size=6))
+
+    # # Mostrar el gráfico en Streamlit
+    # st.plotly_chart(fig2, use_container_width=True)
+
+    # st.markdown("""
+    # **Este gráfico muestra cómo varió el sentimiento del mercado para {crypto} durante la simulación. Un sentimiento positivo indica una percepción favorable (verde), mientras que uno negativo refleja una percepción desfavorable (rojo). El color gris indica un sentimiento neutral. La línea negra punteada en 0 sirve como referencia neutral.**
+    # """.format(crypto=crypto_to_plot))
 
     # # **Análisis Estadístico para Historial de Sentimiento**
     # st.subheader("Análisis Estadístico del Sentimiento del Mercado")
@@ -277,17 +555,17 @@ if st.sidebar.button("Iniciar Simulación"):
     # ))
 
     # c. Rendimiento de los Agentes
-    st.subheader("Rendimiento de los Agentes")
-    fig3 = px.line(
-        df_resultados,
-        labels={"value": "Rendimiento (%)", "index": "Pasos de Tiempo", "variable": "Agente"},
-        title="Rendimiento Acumulado de los Agentes"
-    )
-    fig3.update_traces(mode='lines+markers')
-    st.plotly_chart(fig3, use_container_width=True)
-    st.markdown("""
-    **Este gráfico muestra el rendimiento acumulado de cada agente a lo largo de la simulación. Permite comparar qué agentes han sido más exitosos en sus estrategias de trading.**
-    """)
+    # st.subheader("Rendimiento de los Agentes")
+    # fig3 = px.line(
+    #     df_resultados,
+    #     labels={"value": "Rendimiento (%)", "index": "Pasos de Tiempo", "variable": "Agente"},
+    #     title="Rendimiento Acumulado de los Agentes"
+    # )
+    # fig3.update_traces(mode='lines+markers')
+    # st.plotly_chart(fig3, use_container_width=True)
+    # st.markdown("""
+    # **Este gráfico muestra el rendimiento acumulado de cada agente a lo largo de la simulación. Permite comparar qué agentes han sido más exitosos en sus estrategias de trading.**
+    # """)
 
     # # **Análisis Estadístico para Rendimiento de los Agentes**
     # st.subheader("Análisis Estadístico del Rendimiento de los Agentes")
@@ -320,21 +598,21 @@ if st.sidebar.button("Iniciar Simulación"):
     # ))
 
     # d. Distribución de Ganancias
-    st.subheader("Distribución de Ganancias de los Agentes")
-    fig4 = px.histogram(
-        df_resultados,
-        nbins=20,
-        title="Distribución de Ganancias por Agente",
-        labels={"value": "Ganancia (%)", "variable": "Agente"},
-        histnorm='probability density'
-    )
-    fig4.update_traces(opacity=0.6)
-    st.plotly_chart(fig4, use_container_width=True)
-    st.markdown("""
-    **Este histograma muestra la distribución de las ganancias obtenidas por cada agente durante la simulación. Permite visualizar la frecuencia de diferentes niveles de ganancia y evaluar la consistencia de las estrategias.**
-    """)
+    # st.subheader("Distribución de Ganancias de los Agentes")
+    # fig4 = px.histogram(
+    #     df_resultados,
+    #     nbins=20,
+    #     title="Distribución de Ganancias por Agente",
+    #     labels={"value": "Ganancia (%)", "variable": "Agente"},
+    #     histnorm='probability density'
+    # )
+    # fig4.update_traces(opacity=0.6)
+    # st.plotly_chart(fig4, use_container_width=True)
+    # st.markdown("""
+    # **Este histograma muestra la distribución de las ganancias obtenidas por cada agente durante la simulación. Permite visualizar la frecuencia de diferentes niveles de ganancia y evaluar la consistencia de las estrategias.**
+    # """)
 
-    # # **Análisis Estadístico para Distribución de Ganancias**
+    # # # **Análisis Estadístico para Distribución de Ganancias**
     # st.subheader("Análisis Estadístico de la Distribución de Ganancias")
 
     # # Calcular estadísticas descriptivas
@@ -369,30 +647,103 @@ if st.sidebar.button("Iniciar Simulación"):
     #     top_agents_conclusion="su combinación de reglas les permitió adaptarse mejor al mercado"
     # ))
 
-    # *** Gráficas de Pastel sin Filtrado ***
+
     st.header("Distribución de Rendimiento de los Agentes")
 
     if rendimiento_total.empty:
         st.warning("No hay rendimientos positivos para mostrar en el gráfico de pastel.")
     else:
-        # Crear gráfica de pastel con las reglas en hover
         # Obtener las reglas de cada agente
         reglas_agentes = {agente.nombre: agente.reglas for agente in simulation.agents if agente.nombre in rendimiento_total.index}
 
-        hover_text = [f"{agente}<br>{'<br>'.join(reglas_agentes.get(agente, []))}" for agente in rendimiento_total.index]
+        # Crear hover text con las reglas
+        hover_text = []
+        for agente in rendimiento_total.index:
+            reglas = reglas_agentes.get(agente, ["No hay reglas disponibles"])
+            reglas_formateadas = '<br>'.join(reglas)
+            hover_text.append(f"{agente}<br><br><b>Reglas:</b><br>{reglas_formateadas}")
 
-        fig_pastel = px.pie(
-            names=rendimiento_total.index,
+        # Crear el gráfico de pastel
+        fig_pastel = go.Figure(data=[go.Pie(
+            labels=rendimiento_total.index,
             values=rendimiento_total.values,
+            hovertext=hover_text,
+            hoverinfo="text",
+            textinfo='percent+label',
+            textposition='inside',
+            marker=dict(colors=px.colors.qualitative.Plotly)
+        )])
+
+        # Configurar el layout
+        fig_pastel.update_layout(
             title="Distribución de Rendimiento de los Agentes",
-            hover_data={'Reglas': hover_text},
-            labels={"Reglas": "Reglas de la Estrategia"}
         )
-        fig_pastel.update_traces(textposition='inside', textinfo='percent+label')
+
+        # Mostrar el gráfico en Streamlit
         st.plotly_chart(fig_pastel, use_container_width=True)
+
         st.markdown("""
         **Este gráfico de pastel muestra la distribución del rendimiento total de los agentes. Al pasar el cursor sobre cada sección, se muestran las reglas que cada agente utilizó en su estrategia de trading.**
         """)
+    # *** Gráficas de Pastel sin Filtrado ***
+    # st.header("Distribución de Rendimiento de los Agentes")
+
+    # if rendimiento_total.empty:
+    #     st.warning("No hay rendimientos positivos para mostrar en el gráfico de pastel.")
+    # else:
+    #     # Crear gráfica de pastel con las reglas en hover
+    #     # Obtener las reglas de cada agente
+    #     reglas_agentes = {agente.nombre: agente.reglas for agente in simulation.agents if agente.nombre in rendimiento_total.index}
+
+    #     hover_text = [f"{agente}<br>{'<br>'.join(reglas_agentes.get(agente, []))}" for agente in rendimiento_total.index]
+
+    #     fig_pastel = px.pie(
+    #         names=rendimiento_total.index,
+    #         values=rendimiento_total.values,
+    #         title="Distribución de Rendimiento de los Agentes",
+    #         hover_data={'Reglas': hover_text},
+    #         labels={"Reglas": "Reglas de la Estrategia"}
+    #     )
+    #     fig_pastel.update_traces(textposition='inside', textinfo='percent+label')
+    #     st.plotly_chart(fig_pastel, use_container_width=True)
+    #     st.markdown("""
+    #     **Este gráfico de pastel muestra la distribución del rendimiento total de los agentes. Al pasar el cursor sobre cada sección, se muestran las reglas que cada agente utilizó en su estrategia de trading.**
+    #     """)
+    # c. Rendimiento de los Agentes - Gráfico de Líneas con Colores Personalizados
+
+
+    st.subheader("Rendimiento de los Agentes")
+
+    # Crear el gráfico de líneas
+    fig3 = go.Figure()
+
+    # Definir colores para cada agente
+    colors = px.colors.qualitative.Plotly  # Puedes elegir otro esquema de colores si lo prefieres
+
+    for idx, agent in enumerate(df_resultados.columns):
+        fig3.add_trace(go.Scatter(
+            x=df_resultados.index,
+            y=df_resultados[agent],
+            mode='lines+markers',
+            name=agent,
+            line=dict(color=colors[idx % len(colors)], width=2),
+            marker=dict(size=6)
+        ))
+
+    # Configurar el layout
+    fig3.update_layout(
+        title="Rendimiento Acumulado de los Agentes",
+        xaxis_title='Pasos de Tiempo',
+        yaxis_title='Rendimiento (%)',
+        hovermode='x unified'
+    )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig3, use_container_width=True)
+
+    st.markdown("""
+    **Este gráfico muestra el rendimiento acumulado de cada agente a lo largo de la simulación. Las líneas representan el crecimiento o decrecimiento de las estrategias de trading de cada agente, permitiendo una comparación visual de su efectividad.**
+    """)
 
         # # **Análisis Estadístico para Distribución de Rendimiento de los Agentes**
         # st.subheader("Análisis Estadístico de la Distribución de Rendimiento de los Agentes")
