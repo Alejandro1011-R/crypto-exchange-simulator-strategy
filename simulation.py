@@ -81,27 +81,27 @@ class Simulation:
         #     self.precomputed_sentiments[crypto] = [sentiment] * self.num_steps
 
         # Precomputar los sentimientos antes de iniciar la simulación
-        # for crypto in self.market.cryptocurrencies:
-        #     self.precomputed_sentiments[crypto] = [random.uniform(-1, 1) for _ in range(self.num_steps)]
+        for crypto in self.market.cryptocurrencies:
+            self.precomputed_sentiments[crypto] = [random.uniform(-1, 1) for _ in range(self.num_steps)]
 
         # Iterar sobre cada paso de la simulación
         for step in range(1, self.num_steps + 1):  # Empezar desde 1 porque 0 es la fila inicial
             # Asignar los sentimientos precomputados
 
-            if step%100 == 0 or step == 1:
-                self.precomputed_sentiments = {crypto: [] for crypto in self.market.cryptocurrencies}
+            # if step%100 == 0 or step == 1:
+            #     self.precomputed_sentiments = {crypto: [] for crypto in self.market.cryptocurrencies}
 
-                for crypto in self.market.cryptocurrencies:
-                    # Obtener todos los sentimientos de una sola vez
-                    sentiment = Process(
-                        self.sentiment_analyzer,
-                        self.reddit_instance,
-                        subreddits_list[crypto],
-                        post_limit,
-                        crypto
-                    )
+            #     for crypto in self.market.cryptocurrencies:
+            #         # Obtener todos los sentimientos de una sola vez
+            #         sentiment = Process(
+            #             self.sentiment_analyzer,
+            #             self.reddit_instance,
+            #             subreddits_list[crypto],
+            #             post_limit,
+            #             crypto
+            #         )
 
-                    self.precomputed_sentiments[crypto] =  [float(sentiment) for _ in range(self.num_steps)]
+            #         self.precomputed_sentiments[crypto] =  [float(sentiment) for _ in range(self.num_steps)]
 
 
 
@@ -124,7 +124,7 @@ class Simulation:
                 agent.action(self.market, self.sentiment_history)
 
                 # Actualizar el rendimiento del agente
-                agent.actualizar_ganancia(self.market)
+                # agent.actualizar_ganancia(self.market)
                 ganancia_actual = agent.historia_ganancia[-1]
                 self.agent_performances[agent.nombre].append(ganancia_actual)
 
