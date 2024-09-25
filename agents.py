@@ -1,30 +1,32 @@
-from typing import List, Dict
-from market import *
+from typing import List, Dict, Tuple
+from market import *  # Asegúrate de que este módulo exista y esté correctamente implementado
 import random
 import numpy as np
-from rules_interpreter import *
+from rules_interpreter import *  # Asegúrate de que este módulo exista y esté correctamente implementado
 import talib
+from collections import deque, defaultdict
 
 class Agente:
-    def __init__(self, nombre, reglas, parser_reglas, capital_inicial=100000.0):
+    def __init__(self, nombre: str, reglas: List[str], parser_reglas: ParserReglas, capital_inicial: float = 100000.0):
         self.nombre = nombre
         self.capital_inicial = float(capital_inicial)
         self.capital = float(capital_inicial)
         self.reglas = reglas
         self.parser_reglas = parser_reglas
         self.historia_ganancia = []
-        self.portafolio = {}  # Portafolio para almacenar las criptomonedas compradas
+        self.portafolio: Dict[str, float] = {}  # Portafolio para almacenar las criptomonedas compradas
         self.ciclo = 1
 
         # **Componentes BDI**
-        self.beliefs = {}          # Creencias: Información del agente sobre su ambiente y predicciones
-        self.desires = set()       # Deseos: Objetivos que el agente quiere lograr
-        self.intentions = set()    # Intenciones: Acciones que el agente se compromete a realizar
+        self.beliefs: Dict[str, Dict] = {}    # Creencias: Información del agente sobre su ambiente y predicciones
+        self.desires: set = set()             # Deseos: Objetivos que el agente quiere lograr
+        self.intentions: deque = deque()      # Intenciones: Acciones que el agente se compromete a realizar (FIFO)
 
         # Lista para registrar todas las intenciones a lo largo de la simulación
-        self.historial_intenciones = []
+        self.historial_intenciones: List[Tuple[int, List[Tuple[str, str]]]] = []
+        self.historia_ganancia.append(0)
 
-    def brf(self, market_context, sentiment_history):
+    def brf(self, market_context: Market, sentiment_history: Dict[str, List[float]]):
         """
         Función de Revisión de Creencias (Belief Revision Function - brf):
         Actualiza las creencias del agente con el nuevo contexto del mercado y el historial de sentimientos.
@@ -110,154 +112,229 @@ class Agente:
         """
         Función de Generación de Opciones:
         Genera posibles deseos basados en las creencias actuales y las reglas definidas.
+        Ordena los deseos derivados de reglas por su resultado y añade los deseos basados en contexto al final.
+        Mantiene 'self.desires' como un conjunto para evitar duplicados.
         """
         self.desires.clear()
+
+        deseos = []
+        deseos_contexto = []
         for cripto, datos in self.beliefs.items():
 
+            deseos_con_resultado = []
             matched = 0
-            # Utiliza el parser de reglas para evaluar las reglas en el contexto actual
+            # Evaluar las reglas y almacenar los deseos con su resultado
             for regla in self.reglas:
                 parsed_conditions, accion = self.parser_reglas.parse_rule(regla)
                 resultado, _ = self.parser_reglas.aplicar_regla(parsed_conditions, accion, cripto, datos)
-                # Si el resultado es positivo, agrega el deseo correspondiente
+                # Si el resultado es positivo, agregar a la lista temporal
                 if resultado > 0:
                     if accion == 1:
-                        self.desires.add(('comprar', cripto))
+                        deseos_con_resultado.append((resultado, 'comprar', cripto))
                         matched = 1
                     elif accion == -1:
-                        self.desires.add(('vender', cripto))
+                        deseos_con_resultado.append((resultado, 'vender', cripto))
                         matched = 1
                     elif accion == 0:
-                        self.desires.add(('mantener', cripto))
+                        deseos_con_resultado.append((resultado, 'mantener', cripto))
+                        matched = 1
+
+            # Ordenar los deseos derivados de reglas por resultado descendente
+            deseos_con_resultado_sorted = sorted(deseos_con_resultado, key=lambda x: x[0], reverse=True)
 
             if matched:
+                for resultado, accion, cripto in deseos_con_resultado_sorted:
+                    deseos.append((resultado, accion, cripto))
+                    break
                 continue
 
-            # Generar deseos basados en análisis técnico
-            if datos['tendencia_precio'] == 'alcista' and not datos['sobrecompra']:
-                self.desires.add(('comprar', cripto))
-            # Si el RSI indica sobreventa, desear comprar
-            elif datos['sobreventa']:
-                self.desires.add(('comprar', cripto))
-            # Si el MACD indica tendencia alcista, desear comprar
-            elif datos['macd_tendencia'] == 'alcista':
-                self.desires.add(('comprar', cripto))
-            # Si el RSI indica sobrecompra, desear vender
-            elif datos['sobrecompra']:
-                self.desires.add(('vender', cripto))
-            # Si el MACD indica tendencia bajista, desear vender
-            elif datos['macd_tendencia'] == 'bajista':
-                self.desires.add(('vender', cripto))
-            # Si el precio está por encima de la banda superior de Bollinger, desear vender
-            elif datos['bollinger'] == 'sobrecompra':
-                self.desires.add(('vender', cripto))
-            else:
-                self.desires.add(('mantener', cripto))
 
+            # Generar deseos basados en análisis técnico y añadirlos a la lista temporal
+            if datos['tendencia_precio'] == 'alcista' and not datos['sobrecompra']:
+                deseos_contexto.append(('comprar', cripto))
+            elif datos['sobreventa']:
+                deseos_contexto.append(('comprar', cripto))
+            elif datos['macd_tendencia'] == 'alcista':
+                deseos_contexto.append(('comprar', cripto))
+            elif datos['sobrecompra']:
+                deseos_contexto.append(('vender', cripto))
+            elif datos['macd_tendencia'] == 'bajista':
+                deseos_contexto.append(('vender', cripto))
+            elif datos['bollinger'] == 'sobrecompra':
+                deseos_contexto.append(('vender', cripto))
+            else:
+                deseos_contexto.append(('mantener', cripto))
+
+        deseos_sorted = sorted(deseos, key=lambda x: x[0], reverse=True)
+        for _, accion, cripto in deseos_sorted:
+            self.desires.add((accion, cripto))
+            break
+        for accion, cripto in deseos_contexto:
+            self.desires.add((accion, cripto))
+            break
+
+        # Opcional: Registrar los deseos generados para depuración
         # print(f"Deseos generados: {self.desires}")
 
-    def filter(self):
+
+    def filter_desires(self):
         """
-        Función de Filtrado (Deliberación):
-        Filtra los deseos para actualizar las intenciones basadas en las creencias, deseos e intenciones actuales.
-        - Elimina intenciones que ya no son válidas o cuyo costo supera los beneficios esperados.
-        - Mantiene intenciones no logradas con posibles beneficios.
-        - Adopta nuevas intenciones basadas en los deseos.
+        Filtra las intenciones actuales para mantener solo aquellas que están presentes en los deseos.
+        Elimina las intenciones que ya no están en los deseos y añade nuevas intenciones basadas en los deseos restantes.
+        Evita tener acciones conflictivas para la misma criptomoneda: solo una de 'comprar', 'vender', 'mantener'.
         """
-        nuevas_intenciones = set()
 
-        # Evaluar las intenciones actuales
-        for accion, cripto in self.intentions:
-            if accion == 'comprar':
-                # Verificar si aún es factible y beneficioso comprar
-                if self.capital >= self.beliefs[cripto]['precio']:
-                    nuevas_intenciones.add((accion, cripto))
-                else:
-                    print(f"Intención de comprar {cripto} eliminada: capital insuficiente.")
-            elif accion == 'vender':
-                # Verificar si aún posee el activo
-                if self.portafolio.get(cripto, 0.0) > 0.0:
-                    nuevas_intenciones.add((accion, cripto))
-                else:
-                    print(f"Intención de vender {cripto} eliminada: no posee unidades.")
+        # Diccionario para mantener la acción con mayor prioridad por criptomoneda
+        acciones_por_cripto = {}
 
-        # Adoptar nuevas intenciones basadas en deseos
-        for deseo in self.desires:
-            accion, cripto = deseo
-            if accion == 'comprar' and self.capital >= self.beliefs[cripto]['precio']:
-                nuevas_intenciones.add(deseo)
-            elif accion == 'vender' and self.portafolio.get(cripto, 0.0) > 0.0:
-                nuevas_intenciones.add(deseo)
+        # Paso 1: Procesar las intenciones existentes y seleccionar la acción con mayor prioridad por cripto
+        while self.intentions:
+            accion, cripto = self.intentions.popleft()
+            if cripto not in acciones_por_cripto:
+                acciones_por_cripto[cripto] = accion
+            else:
+                if prioridad.get(accion, 0) > prioridad.get(acciones_por_cripto[cripto], 0):
+                    acciones_por_cripto[cripto] = accion
 
-        self.intentions = nuevas_intenciones
-        # print(f"Intenciones después del filtrado: {self.intentions}")
+        # Paso 2: Crear una nueva cola de intenciones basada en las acciones seleccionadas
+        nuevas_intenciones = deque()
+        criptos_procesadas = set()
 
-        # Registrar las intenciones en el historial
+        for cripto, accion in acciones_por_cripto.items():
+            if (accion, cripto) in self.desires:
+                # Verificar condiciones antes de añadir la intención
+                if accion == 'comprar' and self.capital > 0:
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                elif accion == 'vender' and self.portafolio.get(cripto, 0.0) > 0.0:
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                elif accion == 'mantener':
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                criptos_procesadas.add(cripto)
+            else:
+                # Eliminar intenciones que ya no están en los deseos
+                print(f"Intención eliminada: {accion} {cripto}")
+
+        # Paso 3: Añadir nuevas intenciones desde los deseos restantes, asegurando que no haya conflictos
+        for accion, cripto in list(self.desires):
+            if cripto not in criptos_procesadas:
+                if accion == 'comprar' and self.capital > 0:
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                elif accion == 'vender' and self.portafolio.get(cripto, 0.0) > 0.0:
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                elif accion == 'mantener':
+                    nuevas_intenciones.append((accion, cripto))
+                    self.desires.remove((accion, cripto))
+                criptos_procesadas.add(cripto)
+            else:
+                # Si ya existe una intención para esta cripto, reemplazarla si la nueva acción tiene mayor prioridad
+                existing_accion = acciones_por_cripto.get(cripto)
+                # Reemplazar la intención existente
+                nuevas_intenciones = deque(
+                    [(a, c) if c != cripto else (accion, cripto) for a, c in nuevas_intenciones]
+                )
+                self.desires.remove((accion, cripto))
+                acciones_por_cripto[cripto] = accion
+
+        # Paso 4: Limpiar los deseos ya procesados
+        self.desires.clear()
+
+        # Paso 5: Actualizar la cola de intenciones
+        self.intentions.extend(nuevas_intenciones)
+
+        # Paso 6: Registrar las intenciones actuales en el historial
         if self.intentions:
-            self.historial_intenciones.append((self.ciclo, self.intentions.copy()))
+            self.historial_intenciones.append((self.ciclo, list(self.intentions)))
+            print(f"Intenciones registradas en el historial para el ciclo {self.ciclo}: {list(self.intentions)}")
+        else:
+            print(f"No hay intenciones actuales para el ciclo {self.ciclo}.")
 
-    def execute(self, market_context):
+
+    def execute_intention(self, market_context: Market, sentiment_history: Dict[str, List[float]]):
         """
-        Función de Ejecución:
-        Determina y ejecuta acciones basadas en las intenciones actuales.
+        Ejecuta todas las intenciones en la cola FIFO.
+        Verifica si cada intención sigue siendo válida antes de ejecutarla.
         """
-        for accion, cripto in self.intentions:
+        count = 0
+        while self.intentions:
+            count+=1
+            accion, cripto = self.intentions.popleft()
+            # Ejecutar la acción
             self.ejecutar_accion(accion, market_context, cripto)
-        # Después de ejecutar, limpia las intenciones (asumiendo que se ejecutaron)
-        self.intentions.clear()
+            # Actualizar el mercado después de ejecutar la acción
+            market_context.update(sentiment_history)
+            # Actualizar ganancia
+            self.actualizar_ganancia(market_context)
+            # Revisar creencias después de actualizar el mercado
+            self.brf(market_context, sentiment_history)
+            # Actualizar deseos
+            self.options()
+            # Volver a filtrar las intenciones después de la actualización
+            self.filter_desires()
 
-    def action(self, market_context, sentiment_history):
+            if count == 10: break
+
+
+    def action(self, market_context: Market, sentiment_history: Dict[str, List[float]]):
         """
         Función principal de acción del agente BDI.
-        Sigue el ciclo BDI: brf -> options -> filter -> execute
+        Sigue el ciclo BDI: brf -> options -> filter_desires -> execute_intention
         """
         print(f"\nCiclo {self.ciclo} del agente {self.nombre}:")
         self.brf(market_context, sentiment_history)
         self.options()
-        self.filter()
-        self.execute(market_context)
-        self.actualizar_ganancia(market_context)
+        self.filter_desires()
+        self.execute_intention(market_context, sentiment_history)
         self.ciclo += 1
 
-    def get_sentiment(self, crypto_name, sentiment_history):
+    def get_sentiment(self, crypto_name: str, sentiment_history: Dict[str, List[float]]) -> float:
         """
         Obtiene el sentimiento actual para una criptomoneda específica.
         """
         if sentiment_history and crypto_name in sentiment_history:
             return sentiment_history[crypto_name][-1]
-        return 0  # Ajustar según el formato de tus datos
+        return 0.0  # Ajustar según el formato de tus datos
 
-    def ejecutar_accion(self, accion, contexto, cripto):
+    def ejecutar_accion(self, accion: str, contexto: Market, cripto: str):
         """
-        Ejecuta la acción determinada ('comprar' o 'vender') para una criptomoneda específica.
+        Ejecuta la acción determinada ('comprar', 'vender' o 'mantener') para una criptomoneda específica.
         """
         precio = float(contexto.cryptocurrencies[cripto].price)
         if accion == "comprar":
             cantidad_a_comprar = self.calcular_cantidad_a_comprar(precio, cripto)
-            if self.capital >= (cantidad_a_comprar * precio):
+            # Validar que la cantidad a comprar sea mayor que un umbral mínimo
+            if cantidad_a_comprar > 0 and self.capital >= cantidad_a_comprar * precio:
                 # Realizar la compra
                 self.capital -= cantidad_a_comprar * precio
                 self.portafolio[cripto] = self.portafolio.get(cripto, 0.0) + cantidad_a_comprar
-                print(f"{self.nombre} compró {cantidad_a_comprar:.8f} unidades de {cripto} a {precio:.2f} USD cada una, gastando un total de {(cantidad_a_comprar * precio):.2f}..")
+                print(f"{self.nombre} compró {cantidad_a_comprar:.8f} unidades de {cripto} a {precio:.2f} USD cada una, gastando un total de {(cantidad_a_comprar * precio):.2f} USD.")
                 contexto.cryptocurrencies[cripto].add_order("buy", precio, cantidad_a_comprar)
             else:
                 print(f"{self.nombre} no tiene suficiente capital para comprar {cantidad_a_comprar:.8f} unidades de {cripto}.")
+
         elif accion == "vender":
             cantidad_a_vender = self.calcular_cantidad_a_vender(cripto)
-            if self.portafolio.get(cripto, 0.0) >= cantidad_a_vender:
+            # Validar que la cantidad a vender sea mayor que un umbral mínimo
+            if cantidad_a_vender > 0 and self.portafolio.get(cripto, 0.0) >= cantidad_a_vender:
                 # Realizar la venta
                 self.capital += cantidad_a_vender * precio
                 self.portafolio[cripto] -= cantidad_a_vender
-                print(f"{self.nombre} vendió {cantidad_a_vender:.8f} unidades de {cripto} a {precio:.2f} USD cada una, ganando un total de {(cantidad_a_vender * precio):.2f}.")
+                print(f"{self.nombre} vendió {cantidad_a_vender:.8f} unidades de {cripto} a {precio:.2f} USD cada una, ganando un total de {(cantidad_a_vender * precio):.2f} USD.")
                 contexto.cryptocurrencies[cripto].add_order("sell", precio, cantidad_a_vender)
             else:
                 print(f"{self.nombre} no tiene suficientes unidades de {cripto} para vender {cantidad_a_vender:.8f} unidades.")
-        # elif accion == "mantener":
-        #     print(f"{self.nombre} mantiene su posición en {cripto}.")
-        # else:
-        #     print(f"Acción '{accion}' desconocida para {cripto}.")
 
-    def calcular_cantidad_a_comprar(self, precio, cripto):
+        elif accion == "mantener":
+            print(f"{self.nombre} mantiene su posición en {cripto}.")
+
+        else:
+            print(f"Acción '{accion}' desconocida para {cripto}.")
+
+    def calcular_cantidad_a_comprar(self, precio: float, cripto: str) -> float:
         """
         Calcula la cantidad de criptomoneda a comprar basada en métricas como RSI.
         Estrategia:
@@ -282,9 +359,14 @@ class Agente:
         monto_a_invertir = self.capital * porcentaje_inversion
         cantidad = monto_a_invertir / precio
         cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
+
+        # Validar que la cantidad no sea demasiado pequeña
+        if cantidad < 0.0001:
+            cantidad = 0.0
+
         return cantidad
 
-    def calcular_cantidad_a_vender(self, cripto):
+    def calcular_cantidad_a_vender(self, cripto: str) -> float:
         """
         Calcula la cantidad de criptomoneda a vender basada en métricas como RSI.
         Estrategia:
@@ -309,9 +391,14 @@ class Agente:
 
         cantidad = cantidad_actual * porcentaje_vender
         cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
+
+        # Validar que la cantidad no sea demasiado pequeña
+        if cantidad < 0.0001:
+            cantidad = 0.0
+
         return cantidad
 
-    def actualizar_ganancia(self, contexto):
+    def actualizar_ganancia(self, contexto: Market):
         """
         Actualiza el historial de ganancias del agente.
         """
@@ -323,7 +410,7 @@ class Agente:
         self.historia_ganancia.append(ganancia_actual)
         print(f"Ganancia actual de {self.nombre}: {ganancia_actual:.2f} USD")
 
-    def evaluar_desempeno(self, contexto):
+    def evaluar_desempeno(self, contexto: Market) -> float:
         """
         Evalúa el desempeño del agente basado en las ganancias obtenidas.
         """
