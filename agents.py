@@ -120,12 +120,22 @@ class Agente:
         deseos = []
         deseos_contexto = []
         for cripto, datos in self.beliefs.items():
+            belief_action = 0
+
+            if (datos['tendencia_precio'] == 'alcista' and not datos['sobrecompra']) or datos['sobreventa'] or datos['macd_tendencia'] == 'alcista':
+                belief_action = 1
+            elif datos['sobrecompra'] or datos['macd_tendencia'] == 'bajista' or datos['bollinger'] == 'sobrecompra':
+                belief_action = -1
+            else:
+                belief_action = 0
 
             deseos_con_resultado = []
             matched = 0
             # Evaluar las reglas y almacenar los deseos con su resultado
             for regla in self.reglas:
                 parsed_conditions, accion = self.parser_reglas.parse_rule(regla)
+                if accion != belief_action:
+                    continue
                 resultado, _ = self.parser_reglas.aplicar_regla(parsed_conditions, accion, cripto, datos)
                 # Si el resultado es positivo, agregar a la lista temporal
                 if resultado > 0:
@@ -148,21 +158,11 @@ class Agente:
                     break
                 continue
 
-
-            # Generar deseos basados en análisis técnico y añadirlos a la lista temporal
-            if datos['tendencia_precio'] == 'alcista' and not datos['sobrecompra']:
+            if belief_action == 1:
                 deseos_contexto.append(('comprar', cripto))
-            elif datos['sobreventa']:
-                deseos_contexto.append(('comprar', cripto))
-            elif datos['macd_tendencia'] == 'alcista':
-                deseos_contexto.append(('comprar', cripto))
-            elif datos['sobrecompra']:
+            elif belief_action == -1:
                 deseos_contexto.append(('vender', cripto))
-            elif datos['macd_tendencia'] == 'bajista':
-                deseos_contexto.append(('vender', cripto))
-            elif datos['bollinger'] == 'sobrecompra':
-                deseos_contexto.append(('vender', cripto))
-            else:
+            elif belief_action == 0:
                 deseos_contexto.append(('mantener', cripto))
 
         deseos_sorted = sorted(deseos, key=lambda x: x[0], reverse=True)
