@@ -1,0 +1,672 @@
+Grammar:
+
+Rule 0     S' -> statement
+Rule 1     statement -> SI condiciones ENTONCES accion
+Rule 2     condiciones -> condicion
+Rule 3     condiciones -> condicion OR condiciones  [precedence=left, level=1]
+Rule 4     condiciones -> condicion AND condiciones  [precedence=left, level=2]
+Rule 5     condicion -> expresion comparador expresion
+Rule 6     comparador -> MENOR_IGUAL_QUE
+Rule 7     comparador -> MAYOR_IGUAL_QUE
+Rule 8     comparador -> MENOR_QUE
+Rule 9     comparador -> MAYOR_QUE
+Rule 10    comparador -> NO_ES
+Rule 11    comparador -> ES
+Rule 12    expresion -> variable
+Rule 13    expresion -> variable MULT NUMBER
+Rule 14    variable -> NEGATIVO
+Rule 15    variable -> NEUTRO
+Rule 16    variable -> POSITIVO
+Rule 17    variable -> BAJO
+Rule 18    variable -> MEDIO
+Rule 19    variable -> ALTO
+Rule 20    variable -> SENTIMIENTO
+Rule 21    variable -> CAPITAL
+Rule 22    variable -> PRECIO_COMPRA
+Rule 23    variable -> PRECIO
+Rule 24    accion -> MANTENER
+Rule 25    accion -> VENDER accion_cantidad
+Rule 26    accion -> COMPRAR accion_capital
+Rule 27    accion_capital -> CAPITAL
+Rule 28    accion_capital -> CAPITAL MULT NUMBER
+Rule 29    accion_cantidad -> TODO
+Rule 30    accion_cantidad -> CANTIDAD_COMPRADA
+Rule 31    accion_cantidad -> TODO MULT NUMBER
+Rule 32    accion_cantidad -> CANTIDAD_COMPRADA MULT NUMBER
+
+Terminals, with rules where they appear:
+
+ALTO                 : 19
+AND                  : 4
+BAJO                 : 17
+CANTIDAD_COMPRADA    : 30 32
+CAPITAL              : 21 27 28
+COMPRAR              : 26
+ENTONCES             : 1
+ES                   : 11
+MANTENER             : 24
+MAYOR_IGUAL_QUE      : 7
+MAYOR_QUE            : 9
+MEDIO                : 18
+MENOR_IGUAL_QUE      : 6
+MENOR_QUE            : 8
+MULT                 : 13 28 31 32
+NEGATIVO             : 14
+NEUTRO               : 15
+NO_ES                : 10
+NUMBER               : 13 28 31 32
+OR                   : 3
+POSITIVO             : 16
+PRECIO               : 23
+PRECIO_COMPRA        : 22
+SENTIMIENTO          : 20
+SI                   : 1
+TODO                 : 29 31
+VENDER               : 25
+error                : 
+
+Nonterminals, with rules where they appear:
+
+accion               : 1
+accion_cantidad      : 25
+accion_capital       : 26
+comparador           : 5
+condicion            : 2 3 4
+condiciones          : 1 3 4
+expresion            : 5 5
+statement            : 0
+variable             : 12 13
+
+
+state 0
+
+    (0) S' -> . statement
+    (1) statement -> . SI condiciones ENTONCES accion
+    SI              shift and go to state 2
+
+    statement                      shift and go to state 1
+
+state 1
+
+    (0) S' -> statement .
+
+
+state 2
+
+    (1) statement -> SI . condiciones ENTONCES accion
+    (2) condiciones -> . condicion
+    (3) condiciones -> . condicion OR condiciones
+    (4) condiciones -> . condicion AND condiciones
+    (5) condicion -> . expresion comparador expresion
+    (12) expresion -> . variable
+    (13) expresion -> . variable MULT NUMBER
+    (14) variable -> . NEGATIVO
+    (15) variable -> . NEUTRO
+    (16) variable -> . POSITIVO
+    (17) variable -> . BAJO
+    (18) variable -> . MEDIO
+    (19) variable -> . ALTO
+    (20) variable -> . SENTIMIENTO
+    (21) variable -> . CAPITAL
+    (22) variable -> . PRECIO_COMPRA
+    (23) variable -> . PRECIO
+    NEGATIVO        shift and go to state 7
+    NEUTRO          shift and go to state 8
+    POSITIVO        shift and go to state 9
+    BAJO            shift and go to state 10
+    MEDIO           shift and go to state 11
+    ALTO            shift and go to state 12
+    SENTIMIENTO     shift and go to state 13
+    CAPITAL         shift and go to state 14
+    PRECIO_COMPRA   shift and go to state 15
+    PRECIO          shift and go to state 16
+
+    condiciones                    shift and go to state 3
+    condicion                      shift and go to state 4
+    expresion                      shift and go to state 5
+    variable                       shift and go to state 6
+
+state 3
+
+    (1) statement -> SI condiciones . ENTONCES accion
+    ENTONCES        shift and go to state 17
+
+
+state 4
+
+    (2) condiciones -> condicion .
+    (3) condiciones -> condicion . OR condiciones
+    (4) condiciones -> condicion . AND condiciones
+    ENTONCES        reduce using rule 2 (condiciones -> condicion .)
+    OR              shift and go to state 18
+    AND             shift and go to state 19
+
+
+state 5
+
+    (5) condicion -> expresion . comparador expresion
+    (6) comparador -> . MENOR_IGUAL_QUE
+    (7) comparador -> . MAYOR_IGUAL_QUE
+    (8) comparador -> . MENOR_QUE
+    (9) comparador -> . MAYOR_QUE
+    (10) comparador -> . NO_ES
+    (11) comparador -> . ES
+    MENOR_IGUAL_QUE shift and go to state 21
+    MAYOR_IGUAL_QUE shift and go to state 22
+    MENOR_QUE       shift and go to state 23
+    MAYOR_QUE       shift and go to state 24
+    NO_ES           shift and go to state 25
+    ES              shift and go to state 26
+
+    comparador                     shift and go to state 20
+
+state 6
+
+    (12) expresion -> variable .
+    (13) expresion -> variable . MULT NUMBER
+    MENOR_IGUAL_QUE reduce using rule 12 (expresion -> variable .)
+    MAYOR_IGUAL_QUE reduce using rule 12 (expresion -> variable .)
+    MENOR_QUE       reduce using rule 12 (expresion -> variable .)
+    MAYOR_QUE       reduce using rule 12 (expresion -> variable .)
+    NO_ES           reduce using rule 12 (expresion -> variable .)
+    ES              reduce using rule 12 (expresion -> variable .)
+    OR              reduce using rule 12 (expresion -> variable .)
+    AND             reduce using rule 12 (expresion -> variable .)
+    ENTONCES        reduce using rule 12 (expresion -> variable .)
+    MULT            shift and go to state 27
+
+
+state 7
+
+    (14) variable -> NEGATIVO .
+    MULT            reduce using rule 14 (variable -> NEGATIVO .)
+    MENOR_IGUAL_QUE reduce using rule 14 (variable -> NEGATIVO .)
+    MAYOR_IGUAL_QUE reduce using rule 14 (variable -> NEGATIVO .)
+    MENOR_QUE       reduce using rule 14 (variable -> NEGATIVO .)
+    MAYOR_QUE       reduce using rule 14 (variable -> NEGATIVO .)
+    NO_ES           reduce using rule 14 (variable -> NEGATIVO .)
+    ES              reduce using rule 14 (variable -> NEGATIVO .)
+    OR              reduce using rule 14 (variable -> NEGATIVO .)
+    AND             reduce using rule 14 (variable -> NEGATIVO .)
+    ENTONCES        reduce using rule 14 (variable -> NEGATIVO .)
+
+
+state 8
+
+    (15) variable -> NEUTRO .
+    MULT            reduce using rule 15 (variable -> NEUTRO .)
+    MENOR_IGUAL_QUE reduce using rule 15 (variable -> NEUTRO .)
+    MAYOR_IGUAL_QUE reduce using rule 15 (variable -> NEUTRO .)
+    MENOR_QUE       reduce using rule 15 (variable -> NEUTRO .)
+    MAYOR_QUE       reduce using rule 15 (variable -> NEUTRO .)
+    NO_ES           reduce using rule 15 (variable -> NEUTRO .)
+    ES              reduce using rule 15 (variable -> NEUTRO .)
+    OR              reduce using rule 15 (variable -> NEUTRO .)
+    AND             reduce using rule 15 (variable -> NEUTRO .)
+    ENTONCES        reduce using rule 15 (variable -> NEUTRO .)
+
+
+state 9
+
+    (16) variable -> POSITIVO .
+    MULT            reduce using rule 16 (variable -> POSITIVO .)
+    MENOR_IGUAL_QUE reduce using rule 16 (variable -> POSITIVO .)
+    MAYOR_IGUAL_QUE reduce using rule 16 (variable -> POSITIVO .)
+    MENOR_QUE       reduce using rule 16 (variable -> POSITIVO .)
+    MAYOR_QUE       reduce using rule 16 (variable -> POSITIVO .)
+    NO_ES           reduce using rule 16 (variable -> POSITIVO .)
+    ES              reduce using rule 16 (variable -> POSITIVO .)
+    OR              reduce using rule 16 (variable -> POSITIVO .)
+    AND             reduce using rule 16 (variable -> POSITIVO .)
+    ENTONCES        reduce using rule 16 (variable -> POSITIVO .)
+
+
+state 10
+
+    (17) variable -> BAJO .
+    MULT            reduce using rule 17 (variable -> BAJO .)
+    MENOR_IGUAL_QUE reduce using rule 17 (variable -> BAJO .)
+    MAYOR_IGUAL_QUE reduce using rule 17 (variable -> BAJO .)
+    MENOR_QUE       reduce using rule 17 (variable -> BAJO .)
+    MAYOR_QUE       reduce using rule 17 (variable -> BAJO .)
+    NO_ES           reduce using rule 17 (variable -> BAJO .)
+    ES              reduce using rule 17 (variable -> BAJO .)
+    OR              reduce using rule 17 (variable -> BAJO .)
+    AND             reduce using rule 17 (variable -> BAJO .)
+    ENTONCES        reduce using rule 17 (variable -> BAJO .)
+
+
+state 11
+
+    (18) variable -> MEDIO .
+    MULT            reduce using rule 18 (variable -> MEDIO .)
+    MENOR_IGUAL_QUE reduce using rule 18 (variable -> MEDIO .)
+    MAYOR_IGUAL_QUE reduce using rule 18 (variable -> MEDIO .)
+    MENOR_QUE       reduce using rule 18 (variable -> MEDIO .)
+    MAYOR_QUE       reduce using rule 18 (variable -> MEDIO .)
+    NO_ES           reduce using rule 18 (variable -> MEDIO .)
+    ES              reduce using rule 18 (variable -> MEDIO .)
+    OR              reduce using rule 18 (variable -> MEDIO .)
+    AND             reduce using rule 18 (variable -> MEDIO .)
+    ENTONCES        reduce using rule 18 (variable -> MEDIO .)
+
+
+state 12
+
+    (19) variable -> ALTO .
+    MULT            reduce using rule 19 (variable -> ALTO .)
+    MENOR_IGUAL_QUE reduce using rule 19 (variable -> ALTO .)
+    MAYOR_IGUAL_QUE reduce using rule 19 (variable -> ALTO .)
+    MENOR_QUE       reduce using rule 19 (variable -> ALTO .)
+    MAYOR_QUE       reduce using rule 19 (variable -> ALTO .)
+    NO_ES           reduce using rule 19 (variable -> ALTO .)
+    ES              reduce using rule 19 (variable -> ALTO .)
+    OR              reduce using rule 19 (variable -> ALTO .)
+    AND             reduce using rule 19 (variable -> ALTO .)
+    ENTONCES        reduce using rule 19 (variable -> ALTO .)
+
+
+state 13
+
+    (20) variable -> SENTIMIENTO .
+    MULT            reduce using rule 20 (variable -> SENTIMIENTO .)
+    MENOR_IGUAL_QUE reduce using rule 20 (variable -> SENTIMIENTO .)
+    MAYOR_IGUAL_QUE reduce using rule 20 (variable -> SENTIMIENTO .)
+    MENOR_QUE       reduce using rule 20 (variable -> SENTIMIENTO .)
+    MAYOR_QUE       reduce using rule 20 (variable -> SENTIMIENTO .)
+    NO_ES           reduce using rule 20 (variable -> SENTIMIENTO .)
+    ES              reduce using rule 20 (variable -> SENTIMIENTO .)
+    OR              reduce using rule 20 (variable -> SENTIMIENTO .)
+    AND             reduce using rule 20 (variable -> SENTIMIENTO .)
+    ENTONCES        reduce using rule 20 (variable -> SENTIMIENTO .)
+
+
+state 14
+
+    (21) variable -> CAPITAL .
+    MULT            reduce using rule 21 (variable -> CAPITAL .)
+    MENOR_IGUAL_QUE reduce using rule 21 (variable -> CAPITAL .)
+    MAYOR_IGUAL_QUE reduce using rule 21 (variable -> CAPITAL .)
+    MENOR_QUE       reduce using rule 21 (variable -> CAPITAL .)
+    MAYOR_QUE       reduce using rule 21 (variable -> CAPITAL .)
+    NO_ES           reduce using rule 21 (variable -> CAPITAL .)
+    ES              reduce using rule 21 (variable -> CAPITAL .)
+    OR              reduce using rule 21 (variable -> CAPITAL .)
+    AND             reduce using rule 21 (variable -> CAPITAL .)
+    ENTONCES        reduce using rule 21 (variable -> CAPITAL .)
+
+
+state 15
+
+    (22) variable -> PRECIO_COMPRA .
+    MULT            reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    MENOR_IGUAL_QUE reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    MAYOR_IGUAL_QUE reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    MENOR_QUE       reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    MAYOR_QUE       reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    NO_ES           reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    ES              reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    OR              reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    AND             reduce using rule 22 (variable -> PRECIO_COMPRA .)
+    ENTONCES        reduce using rule 22 (variable -> PRECIO_COMPRA .)
+
+
+state 16
+
+    (23) variable -> PRECIO .
+    MULT            reduce using rule 23 (variable -> PRECIO .)
+    MENOR_IGUAL_QUE reduce using rule 23 (variable -> PRECIO .)
+    MAYOR_IGUAL_QUE reduce using rule 23 (variable -> PRECIO .)
+    MENOR_QUE       reduce using rule 23 (variable -> PRECIO .)
+    MAYOR_QUE       reduce using rule 23 (variable -> PRECIO .)
+    NO_ES           reduce using rule 23 (variable -> PRECIO .)
+    ES              reduce using rule 23 (variable -> PRECIO .)
+    OR              reduce using rule 23 (variable -> PRECIO .)
+    AND             reduce using rule 23 (variable -> PRECIO .)
+    ENTONCES        reduce using rule 23 (variable -> PRECIO .)
+
+
+state 17
+
+    (1) statement -> SI condiciones ENTONCES . accion
+    (24) accion -> . MANTENER
+    (25) accion -> . VENDER accion_cantidad
+    (26) accion -> . COMPRAR accion_capital
+    MANTENER        shift and go to state 29
+    VENDER          shift and go to state 30
+    COMPRAR         shift and go to state 31
+
+    accion                         shift and go to state 28
+
+state 18
+
+    (3) condiciones -> condicion OR . condiciones
+    (2) condiciones -> . condicion
+    (3) condiciones -> . condicion OR condiciones
+    (4) condiciones -> . condicion AND condiciones
+    (5) condicion -> . expresion comparador expresion
+    (12) expresion -> . variable
+    (13) expresion -> . variable MULT NUMBER
+    (14) variable -> . NEGATIVO
+    (15) variable -> . NEUTRO
+    (16) variable -> . POSITIVO
+    (17) variable -> . BAJO
+    (18) variable -> . MEDIO
+    (19) variable -> . ALTO
+    (20) variable -> . SENTIMIENTO
+    (21) variable -> . CAPITAL
+    (22) variable -> . PRECIO_COMPRA
+    (23) variable -> . PRECIO
+    NEGATIVO        shift and go to state 7
+    NEUTRO          shift and go to state 8
+    POSITIVO        shift and go to state 9
+    BAJO            shift and go to state 10
+    MEDIO           shift and go to state 11
+    ALTO            shift and go to state 12
+    SENTIMIENTO     shift and go to state 13
+    CAPITAL         shift and go to state 14
+    PRECIO_COMPRA   shift and go to state 15
+    PRECIO          shift and go to state 16
+
+    condicion                      shift and go to state 4
+    condiciones                    shift and go to state 32
+    expresion                      shift and go to state 5
+    variable                       shift and go to state 6
+
+state 19
+
+    (4) condiciones -> condicion AND . condiciones
+    (2) condiciones -> . condicion
+    (3) condiciones -> . condicion OR condiciones
+    (4) condiciones -> . condicion AND condiciones
+    (5) condicion -> . expresion comparador expresion
+    (12) expresion -> . variable
+    (13) expresion -> . variable MULT NUMBER
+    (14) variable -> . NEGATIVO
+    (15) variable -> . NEUTRO
+    (16) variable -> . POSITIVO
+    (17) variable -> . BAJO
+    (18) variable -> . MEDIO
+    (19) variable -> . ALTO
+    (20) variable -> . SENTIMIENTO
+    (21) variable -> . CAPITAL
+    (22) variable -> . PRECIO_COMPRA
+    (23) variable -> . PRECIO
+    NEGATIVO        shift and go to state 7
+    NEUTRO          shift and go to state 8
+    POSITIVO        shift and go to state 9
+    BAJO            shift and go to state 10
+    MEDIO           shift and go to state 11
+    ALTO            shift and go to state 12
+    SENTIMIENTO     shift and go to state 13
+    CAPITAL         shift and go to state 14
+    PRECIO_COMPRA   shift and go to state 15
+    PRECIO          shift and go to state 16
+
+    condicion                      shift and go to state 4
+    condiciones                    shift and go to state 33
+    expresion                      shift and go to state 5
+    variable                       shift and go to state 6
+
+state 20
+
+    (5) condicion -> expresion comparador . expresion
+    (12) expresion -> . variable
+    (13) expresion -> . variable MULT NUMBER
+    (14) variable -> . NEGATIVO
+    (15) variable -> . NEUTRO
+    (16) variable -> . POSITIVO
+    (17) variable -> . BAJO
+    (18) variable -> . MEDIO
+    (19) variable -> . ALTO
+    (20) variable -> . SENTIMIENTO
+    (21) variable -> . CAPITAL
+    (22) variable -> . PRECIO_COMPRA
+    (23) variable -> . PRECIO
+    NEGATIVO        shift and go to state 7
+    NEUTRO          shift and go to state 8
+    POSITIVO        shift and go to state 9
+    BAJO            shift and go to state 10
+    MEDIO           shift and go to state 11
+    ALTO            shift and go to state 12
+    SENTIMIENTO     shift and go to state 13
+    CAPITAL         shift and go to state 14
+    PRECIO_COMPRA   shift and go to state 15
+    PRECIO          shift and go to state 16
+
+    expresion                      shift and go to state 34
+    variable                       shift and go to state 6
+
+state 21
+
+    (6) comparador -> MENOR_IGUAL_QUE .
+    NEGATIVO        reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    NEUTRO          reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    POSITIVO        reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    BAJO            reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    MEDIO           reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    ALTO            reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    SENTIMIENTO     reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    CAPITAL         reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    PRECIO_COMPRA   reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+    PRECIO          reduce using rule 6 (comparador -> MENOR_IGUAL_QUE .)
+
+
+state 22
+
+    (7) comparador -> MAYOR_IGUAL_QUE .
+    NEGATIVO        reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    NEUTRO          reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    POSITIVO        reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    BAJO            reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    MEDIO           reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    ALTO            reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    SENTIMIENTO     reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    CAPITAL         reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    PRECIO_COMPRA   reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+    PRECIO          reduce using rule 7 (comparador -> MAYOR_IGUAL_QUE .)
+
+
+state 23
+
+    (8) comparador -> MENOR_QUE .
+    NEGATIVO        reduce using rule 8 (comparador -> MENOR_QUE .)
+    NEUTRO          reduce using rule 8 (comparador -> MENOR_QUE .)
+    POSITIVO        reduce using rule 8 (comparador -> MENOR_QUE .)
+    BAJO            reduce using rule 8 (comparador -> MENOR_QUE .)
+    MEDIO           reduce using rule 8 (comparador -> MENOR_QUE .)
+    ALTO            reduce using rule 8 (comparador -> MENOR_QUE .)
+    SENTIMIENTO     reduce using rule 8 (comparador -> MENOR_QUE .)
+    CAPITAL         reduce using rule 8 (comparador -> MENOR_QUE .)
+    PRECIO_COMPRA   reduce using rule 8 (comparador -> MENOR_QUE .)
+    PRECIO          reduce using rule 8 (comparador -> MENOR_QUE .)
+
+
+state 24
+
+    (9) comparador -> MAYOR_QUE .
+    NEGATIVO        reduce using rule 9 (comparador -> MAYOR_QUE .)
+    NEUTRO          reduce using rule 9 (comparador -> MAYOR_QUE .)
+    POSITIVO        reduce using rule 9 (comparador -> MAYOR_QUE .)
+    BAJO            reduce using rule 9 (comparador -> MAYOR_QUE .)
+    MEDIO           reduce using rule 9 (comparador -> MAYOR_QUE .)
+    ALTO            reduce using rule 9 (comparador -> MAYOR_QUE .)
+    SENTIMIENTO     reduce using rule 9 (comparador -> MAYOR_QUE .)
+    CAPITAL         reduce using rule 9 (comparador -> MAYOR_QUE .)
+    PRECIO_COMPRA   reduce using rule 9 (comparador -> MAYOR_QUE .)
+    PRECIO          reduce using rule 9 (comparador -> MAYOR_QUE .)
+
+
+state 25
+
+    (10) comparador -> NO_ES .
+    NEGATIVO        reduce using rule 10 (comparador -> NO_ES .)
+    NEUTRO          reduce using rule 10 (comparador -> NO_ES .)
+    POSITIVO        reduce using rule 10 (comparador -> NO_ES .)
+    BAJO            reduce using rule 10 (comparador -> NO_ES .)
+    MEDIO           reduce using rule 10 (comparador -> NO_ES .)
+    ALTO            reduce using rule 10 (comparador -> NO_ES .)
+    SENTIMIENTO     reduce using rule 10 (comparador -> NO_ES .)
+    CAPITAL         reduce using rule 10 (comparador -> NO_ES .)
+    PRECIO_COMPRA   reduce using rule 10 (comparador -> NO_ES .)
+    PRECIO          reduce using rule 10 (comparador -> NO_ES .)
+
+
+state 26
+
+    (11) comparador -> ES .
+    NEGATIVO        reduce using rule 11 (comparador -> ES .)
+    NEUTRO          reduce using rule 11 (comparador -> ES .)
+    POSITIVO        reduce using rule 11 (comparador -> ES .)
+    BAJO            reduce using rule 11 (comparador -> ES .)
+    MEDIO           reduce using rule 11 (comparador -> ES .)
+    ALTO            reduce using rule 11 (comparador -> ES .)
+    SENTIMIENTO     reduce using rule 11 (comparador -> ES .)
+    CAPITAL         reduce using rule 11 (comparador -> ES .)
+    PRECIO_COMPRA   reduce using rule 11 (comparador -> ES .)
+    PRECIO          reduce using rule 11 (comparador -> ES .)
+
+
+state 27
+
+    (13) expresion -> variable MULT . NUMBER
+    NUMBER          shift and go to state 35
+
+
+state 28
+
+    (1) statement -> SI condiciones ENTONCES accion .
+    $end            reduce using rule 1 (statement -> SI condiciones ENTONCES accion .)
+
+
+state 29
+
+    (24) accion -> MANTENER .
+    $end            reduce using rule 24 (accion -> MANTENER .)
+
+
+state 30
+
+    (25) accion -> VENDER . accion_cantidad
+    (29) accion_cantidad -> . TODO
+    (30) accion_cantidad -> . CANTIDAD_COMPRADA
+    (31) accion_cantidad -> . TODO MULT NUMBER
+    (32) accion_cantidad -> . CANTIDAD_COMPRADA MULT NUMBER
+    TODO            shift and go to state 37
+    CANTIDAD_COMPRADA shift and go to state 38
+
+    accion_cantidad                shift and go to state 36
+
+state 31
+
+    (26) accion -> COMPRAR . accion_capital
+    (27) accion_capital -> . CAPITAL
+    (28) accion_capital -> . CAPITAL MULT NUMBER
+    CAPITAL         shift and go to state 40
+
+    accion_capital                 shift and go to state 39
+
+state 32
+
+    (3) condiciones -> condicion OR condiciones .
+    ENTONCES        reduce using rule 3 (condiciones -> condicion OR condiciones .)
+
+
+state 33
+
+    (4) condiciones -> condicion AND condiciones .
+    ENTONCES        reduce using rule 4 (condiciones -> condicion AND condiciones .)
+
+
+state 34
+
+    (5) condicion -> expresion comparador expresion .
+    OR              reduce using rule 5 (condicion -> expresion comparador expresion .)
+    AND             reduce using rule 5 (condicion -> expresion comparador expresion .)
+    ENTONCES        reduce using rule 5 (condicion -> expresion comparador expresion .)
+
+
+state 35
+
+    (13) expresion -> variable MULT NUMBER .
+    MENOR_IGUAL_QUE reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    MAYOR_IGUAL_QUE reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    MENOR_QUE       reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    MAYOR_QUE       reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    NO_ES           reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    ES              reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    OR              reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    AND             reduce using rule 13 (expresion -> variable MULT NUMBER .)
+    ENTONCES        reduce using rule 13 (expresion -> variable MULT NUMBER .)
+
+
+state 36
+
+    (25) accion -> VENDER accion_cantidad .
+    $end            reduce using rule 25 (accion -> VENDER accion_cantidad .)
+
+
+state 37
+
+    (29) accion_cantidad -> TODO .
+    (31) accion_cantidad -> TODO . MULT NUMBER
+    $end            reduce using rule 29 (accion_cantidad -> TODO .)
+    MULT            shift and go to state 41
+
+
+state 38
+
+    (30) accion_cantidad -> CANTIDAD_COMPRADA .
+    (32) accion_cantidad -> CANTIDAD_COMPRADA . MULT NUMBER
+    $end            reduce using rule 30 (accion_cantidad -> CANTIDAD_COMPRADA .)
+    MULT            shift and go to state 42
+
+
+state 39
+
+    (26) accion -> COMPRAR accion_capital .
+    $end            reduce using rule 26 (accion -> COMPRAR accion_capital .)
+
+
+state 40
+
+    (27) accion_capital -> CAPITAL .
+    (28) accion_capital -> CAPITAL . MULT NUMBER
+    $end            reduce using rule 27 (accion_capital -> CAPITAL .)
+    MULT            shift and go to state 43
+
+
+state 41
+
+    (31) accion_cantidad -> TODO MULT . NUMBER
+    NUMBER          shift and go to state 44
+
+
+state 42
+
+    (32) accion_cantidad -> CANTIDAD_COMPRADA MULT . NUMBER
+    NUMBER          shift and go to state 45
+
+
+state 43
+
+    (28) accion_capital -> CAPITAL MULT . NUMBER
+    NUMBER          shift and go to state 46
+
+
+state 44
+
+    (31) accion_cantidad -> TODO MULT NUMBER .
+    $end            reduce using rule 31 (accion_cantidad -> TODO MULT NUMBER .)
+
+
+state 45
+
+    (32) accion_cantidad -> CANTIDAD_COMPRADA MULT NUMBER .
+    $end            reduce using rule 32 (accion_cantidad -> CANTIDAD_COMPRADA MULT NUMBER .)
+
+
+state 46
+
+    (28) accion_capital -> CAPITAL MULT NUMBER .
+    $end            reduce using rule 28 (accion_capital -> CAPITAL MULT NUMBER .)
