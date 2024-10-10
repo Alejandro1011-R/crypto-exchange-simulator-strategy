@@ -1,2 +1,0 @@
-SI precio es bajo O precio es medio ENTONCES comprar
-SI precio es alto ENTONCES vender
