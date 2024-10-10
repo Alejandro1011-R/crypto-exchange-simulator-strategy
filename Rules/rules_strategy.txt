@@ -1,0 +1,24 @@
+SI ERES terco TIENES LA ESTRATEGIA: SI precio es bajo O precio es medio ENTONCES COMPRAR capital
+SI ERES terco TIENES LA ESTRATEGIA: SI precio es alto ENTONCES VENDER todo
+SI ERES tendencia TIENES LA ESTRATEGIA: SI Analizar Grafico 5 no es 0 ENTONCES COMPRAR capital
+SI ERES impulsivo TIENES LA ESTRATEGIA: SI Analizar Grafico 1 no es 0 ENTONCES VENDER todo
+SI ERES tendencia Y analista TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y capital es bajo ENTONCES VENDER todo * 0.2
+SI ERES tendencia Y analista TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y capital es medio ENTONCES VENDER todo * 0.4
+SI ERES tendencia Y analista TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y capital es alto ENTONCES VENDER todo
+SI ERES analista Y noticias TIENES LA ESTRATEGIA: SI Analizar Grafico 7 menor que 0 Y sentimiento es positivo Y capital es bajo ENTONCES COMPRAR capital
+SI ERES analista Y noticias TIENES LA ESTRATEGIA: SI Analizar Grafico 7 menor que 0 Y sentimiento es positivo Y capital es medio ENTONCES COMPRAR capital * 0.4
+SI ERES analista Y noticias TIENES LA ESTRATEGIA: SI Analizar Grafico 7 menor que 0 Y sentimiento es positivo Y capital es alto ENTONCES COMPRAR capital * 0.2
+SI ERES analista Y noticias TIENES LA ESTRATEGIA: SI sentimiento es neutro Y Analizar Grafico 1 mayor que 0 ENTONCES COMPRAR capital * 0.1
+SI ERES noticias TIENES LA ESTRATEGIA: SI sentimiento es positivo ENTONCES COMPRAR capital
+SI ERES noticias TIENES LA ESTRATEGIA: SI sentimiento es negativo ENTONCES VENDER todo
+SI ERES fasttrader TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y Analizar Grafico 3 menor que 0 Y sentimiento es positivo Y capital es bajo ENTONCES COMPRAR capital
+SI ERES fasttrader TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y Analizar Grafico 3 menor que 0 Y sentimiento es positivo Y capital es medio ENTONCES COMPRAR capital * 0.4
+SI ERES fasttrader TIENES LA ESTRATEGIA: SI Analizar Grafico 7 mayor que 0 Y Analizar Grafico 3 menor que 0 Y sentimiento es positivo Y capital es alto ENTONCES COMPRAR capital * 0.2
+SI ERES fasttrader TIENES LA ESTRATEGIA: SI Analizar Grafico 3 mayor que 10 ENTONCES VENDER todo
+SI ERES fasttrader TIENES LA ESTRATEGIA: SI Analizar Grafico 1 menor que 0 ENTONCES VENDER todo * 0.2
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 30 mayor que 20 ENTONCES VENDER todo
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 60 mayor que 40 ENTONCES VENDER todo
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 30 menor que 20 Y sentimiento es positivo Y capital es alto ENTONCES COMPRAR capital * 0.5
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 30 menor que 20 Y sentimiento es positivo Y capital es medio ENTONCES COMPRAR capital * 0.75
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 30 menor que 20 Y sentimiento es positivo Y capital es bajo ENTONCES COMPRAR capital
+SI ERES inversor TIENES LA ESTRATEGIA: SI Analizar Grafico 60 menor que 40 Y sentimiento es positivo ENTONCES COMPRAR capital

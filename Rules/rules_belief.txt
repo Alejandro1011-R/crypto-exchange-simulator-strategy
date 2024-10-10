@@ -1,0 +1,9 @@
+SI ERES novato ENTONCES ERES impulsivo Y tendencia Y terco
+SI ERES avanzado ENTONCES ERES tendencia Y analista Y noticias
+SI ERES experto ENTONCES ERES fasttrader O inversor
+SI ERES avanzado ENTONCES ERES NO novato
+SI ERES novato Y conocimiento es medio ENTONCES ERES avanzado
+SI ERES novato Y experiencia es medio ENTONCES ERES noticias
+SI ERES novato Y conocimiento es alto ENTONCES ERES experto
+SI ERES avanzado Y conocimiento es alto ENTONCES ERES experto
+SI ERES avanzado Y experiencia es alto ENTONCES ERES fasttrader O inversor

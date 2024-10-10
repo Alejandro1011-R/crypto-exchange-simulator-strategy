@@ -2,8 +2,10 @@ from sly import Lexer
 
 class RuleLexer(Lexer):
     tokens = { 
-            SI, ENTONCES, AND, OR, VENDER, MANTENER, COMPRAR ,  
-            PRECIO_COMPRA, CANTIDAD_COMPRADA,SENTIMIENTO, PRECIO,
+            SI,ERES ,ENTONCES,TIENES_LA_ESTRATEGIA, AND, OR,NO, VENDER, MANTENER, COMPRAR ,  
+            SENTIMIENTO, PRECIO,CONOCIMIENTO,EXPERIENCIA,ANALIZAR_GRAFICO,
+            NOVATO,AVANZADO,EXPERTO,IMPULSIVO,TENDENCIA,
+            INVERSOR,ANALISTA,FASTTRADER,TERCO,NOTICIAS,
             ALTO, MEDIO, BAJO, POSITIVO, NEUTRO, NEGATIVO,
             ES, NO_ES, MAYOR_QUE, MENOR_QUE, MAYOR_IGUAL_QUE, MENOR_IGUAL_QUE,
             CAPITAL, TODO, NUMBER,  MULT 
@@ -11,16 +13,32 @@ class RuleLexer(Lexer):
     
     # Palabras clave
     SI = r'SI'
+    ERES=r'ERES'
     ENTONCES = r'ENTONCES'
+    TIENES_LA_ESTRATEGIA=r'TIENES_LA_ESTRATEGIA'
     AND = r'Y'
     OR = r'O'
+    NO= r'NO'
+
+    #tokens de creencias
+    NOVATO=r'novato'
+    AVANZADO=r'avanzado'
+    EXPERTO=r'experto'
+    IMPULSIVO=r'impulsivo'
+    TENDENCIA=r'tendencia'
+    NOTICIAS=r'noticias'
+    INVERSOR=r'inversor'
+    ANALISTA=r'analista'
+    FASTTRADER=r'fasttrader'
+    TERCO=r'terco'
 
     # Tokens específicos para las variables financieras
-    PRECIO_COMPRA = r'precio\s+de\s+alguna\s+compra'
-    CANTIDAD_COMPRADA = r'cantidad\s+comprada'
     CAPITAL = r'capital'
     TODO = r'todo'
     PRECIO = r'precio'
+    CONOCIMIENTO=r'conocimiento'
+    EXPERIENCIA=r'experiencia'
+    ANALIZAR_GRAFICO=r'Analizar\s+Grafico'
 
     # Tokens para sentimiento y valores
     SENTIMIENTO = r'sentimiento'
