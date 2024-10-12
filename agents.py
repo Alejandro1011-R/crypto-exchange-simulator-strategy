@@ -33,81 +33,92 @@ class Agente:
         Incluye análisis técnicos para predicciones más realistas.
         """
         self.beliefs = {}
-        for name, crypto in market_context.cryptocurrencies.items():
-            # Obtener historial de precios para análisis técnico
-            price_history = crypto.price_history[-30:]  # Últimos 30 precios para mayor precisión
 
-            # Asegurarse de tener suficientes datos para los indicadores técnicos
-            if len(price_history) >= 14:
-                prices = np.array(price_history)
+        #llamar metodo para generar belief ****************************************
+        """ Obtain belief(motor,market_context,agente)
 
-                # Cálculo de indicadores técnicos
-                # 1. Media Móvil Simple (SMA)
-                sma_5 = talib.SMA(prices, timeperiod=5)[-1]
-                sma_10 = talib.SMA(prices, timeperiod=10)[-1]
+        retorna lista de creeencias y lista de reglas
 
-                # 2. Índice de Fuerza Relativa (RSI)
-                rsi = talib.RSI(prices, timeperiod=14)[-1]
+        """
 
-                # 3. MACD
-                macd, macdsignal, macdhist = talib.MACD(prices, fastperiod=12, slowperiod=26, signalperiod=9)
-                macd_current = macd[-1]
-                macd_signal_current = macdsignal[-1]
+        # for name, crypto in market_context.cryptocurrencies.items():
+        #     # Obtener historial de precios para análisis técnico
+        #     price_history = crypto.price_history[-30:]  # Últimos 30 precios para mayor precisión
 
-                # 4. Bandas de Bollinger
-                upperband, middleband, lowerband = talib.BBANDS(prices, timeperiod=20)
+        #     # Asegurarse de tener suficientes datos para los indicadores técnicos
+        #     if len(price_history) >= 14:
+        #         prices = np.array(price_history)
 
-                # Interpretación básica de los indicadores
-                tendencia = 'desconocida'
+        #         # Cálculo de indicadores técnicos
+        #         # 1. Media Móvil Simple (SMA)
+        #         sma_5 = talib.SMA(prices, timeperiod=5)[-1]
+        #         sma_10 = talib.SMA(prices, timeperiod=10)[-1]
 
-                # Análisis de cruces de medias móviles
-                if sma_5 > sma_10:
-                    tendencia = 'alcista'
-                elif sma_5 < sma_10:
-                    tendencia = 'bajista'
+        #         # 2. Índice de Fuerza Relativa (RSI)
+        #         rsi = talib.RSI(prices, timeperiod=14)[-1]
 
-                # Análisis del RSI
-                sobrecompra = rsi > 70
-                sobreventa = rsi < 30
+        #         # 3. MACD
+        #         macd, macdsignal, macdhist = talib.MACD(prices, fastperiod=12, slowperiod=26, signalperiod=9)
+        #         macd_current = macd[-1]
+        #         macd_signal_current = macdsignal[-1]
 
-                # Análisis del MACD
-                if macd_current > macd_signal_current:
-                    macd_tendencia = 'alcista'
-                else:
-                    macd_tendencia = 'bajista'
+        #         # 4. Bandas de Bollinger
+        #         upperband, middleband, lowerband = talib.BBANDS(prices, timeperiod=20)
 
-                # Análisis de Bandas de Bollinger
-                precio_actual = prices[-1]
-                if precio_actual > upperband[-1]:
-                    bollinger = 'sobrecompra'
-                elif precio_actual < lowerband[-1]:
-                    bollinger = 'sobreventa'
-                else:
-                    bollinger = 'normal'
-            else:
-                sma_5 = sma_10 = rsi = macd_current = macd_signal_current = None
-                tendencia = 'desconocida'
-                sobrecompra = sobreventa = False
-                macd_tendencia = 'desconocida'
-                bollinger = 'normal'
+        #         # Interpretación básica de los indicadores
+        #         tendencia = 'desconocida'
 
-            # Actualizar creencias con datos actuales y análisis técnico
-            self.beliefs[name] = {
-                'precio': float(crypto.price),
-                'volumen': float(crypto.volume),
-                'sentimiento': self.get_sentiment(name, sentiment_history),
-                'historial_precios': price_history,
-                'tendencia_precio': tendencia,
-                'sma_5': sma_5,
-                'sma_10': sma_10,
-                'rsi': rsi,
-                'macd_tendencia': macd_tendencia,
-                'sobrecompra': sobrecompra,
-                'sobreventa': sobreventa,
-                'bollinger': bollinger
-            }
-        # print(f"Creencias actualizadas: {self.beliefs}")
+        #         # Análisis de cruces de medias móviles
+        #         if sma_5 > sma_10:
+        #             tendencia = 'alcista'
+        #         elif sma_5 < sma_10:
+        #             tendencia = 'bajista'
 
+        #         # Análisis del RSI
+        #         sobrecompra = rsi > 70
+        #         sobreventa = rsi < 30
+
+        #         # Análisis del MACD
+        #         if macd_current > macd_signal_current:
+        #             macd_tendencia = 'alcista'
+        #         else:
+        #             macd_tendencia = 'bajista'
+
+        #         # Análisis de Bandas de Bollinger
+        #         precio_actual = prices[-1]
+        #         if precio_actual > upperband[-1]:
+        #             bollinger = 'sobrecompra'
+        #         elif precio_actual < lowerband[-1]:
+        #             bollinger = 'sobreventa'
+        #         else:
+        #             bollinger = 'normal'
+        #     else:
+        #         sma_5 = sma_10 = rsi = macd_current = macd_signal_current = None
+        #         tendencia = 'desconocida'
+        #         sobrecompra = sobreventa = False
+        #         macd_tendencia = 'desconocida'
+        #         bollinger = 'normal'
+
+        #     # Actualizar creencias con datos actuales y análisis técnico
+        #     self.beliefs[name] = {
+        #         'precio': float(crypto.price),
+        #         'volumen': float(crypto.volume),
+        #         'sentimiento': self.get_sentiment(name, sentiment_history),
+        #         'historial_precios': price_history,
+        #         'tendencia_precio': tendencia,
+        #         'sma_5': sma_5,
+        #         'sma_10': sma_10,
+        #         'rsi': rsi,
+        #         'macd_tendencia': macd_tendencia,
+        #         'sobrecompra': sobrecompra,
+        #         'sobreventa': sobreventa,
+        #         'bollinger': bollinger
+        #     }
+        # # print(f"Creencias actualizadas: {self.beliefs}")
+
+
+    # ES lo clásico por cada criptomoneda evaluar todas las reglas y meter en deseos 
+    # por cada cripto la acción que salió con el mayor valo
     def options(self):
         """
         Función de Generación de Opciones:
@@ -122,6 +133,16 @@ class Agente:
         for cripto, datos in self.beliefs.items():
             belief_action = 0
 
+            #metodo para evaluar reglas
+
+            """Este es el que deberías crear en el caso de que no me de tiempo
+
+                como entrada el agente,el mercado,
+                 
+                salida score,acción
+            
+            """
+            #evaluar reglas
             if (datos['tendencia_precio'] == 'alcista' and not datos['sobrecompra']) or datos['sobreventa'] or datos['macd_tendencia'] == 'alcista':
                 belief_action = 1
             elif datos['sobrecompra'] or datos['macd_tendencia'] == 'bajista' or datos['bollinger'] == 'sobrecompra':
@@ -177,6 +198,7 @@ class Agente:
         # print(f"Deseos generados: {self.desires}")
 
 
+    #Me parece que este se podría hacer ejecutar las acciones con un valor mayor a una cota
     def filter_desires(self):
         """
         Filtra las intenciones actuales para mantener solo aquellas que están presentes en los deseos.
@@ -253,7 +275,7 @@ class Agente:
         else:
             print(f"No hay intenciones actuales para el ciclo {self.ciclo}.")
 
-
+    # aquí tienes que calcular el precio de las compras y las ventas
     def execute_intention(self, market_context: Market, sentiment_history: Dict[str, List[float]]):
         """
         Ejecuta todas las intenciones en la cola FIFO.
@@ -299,6 +321,7 @@ class Agente:
             return sentiment_history[crypto_name][-1]
         return 0.0  # Ajustar según el formato de tus datos
 
+    #cambiar método
     def ejecutar_accion(self, accion: str, contexto: Market, cripto: str):
         """
         Ejecuta la acción determinada ('comprar', 'vender' o 'mantener') para una criptomoneda específica.
@@ -334,69 +357,69 @@ class Agente:
         else:
             print(f"Acción '{accion}' desconocida para {cripto}.")
 
-    def calcular_cantidad_a_comprar(self, precio: float, cripto: str) -> float:
-        """
-        Calcula la cantidad de criptomoneda a comprar basada en métricas como RSI.
-        Estrategia:
-        - RSI < 30: Invertir el 15% del capital disponible
-        - RSI > 70: Invertir el 5% del capital disponible
-        - RSI entre 30 y 70: Invertir el 10% del capital disponible
-        - RSI es None: Invertir el 10% del capital disponible
-        """
-        datos = self.beliefs[cripto]
-        rsi = datos.get('rsi', None)
+    # def calcular_cantidad_a_comprar(self, precio: float, cripto: str) -> float:
+    #     """
+    #     Calcula la cantidad de criptomoneda a comprar basada en métricas como RSI.
+    #     Estrategia:
+    #     - RSI < 30: Invertir el 15% del capital disponible
+    #     - RSI > 70: Invertir el 5% del capital disponible
+    #     - RSI entre 30 y 70: Invertir el 10% del capital disponible
+    #     - RSI es None: Invertir el 10% del capital disponible
+    #     """
+    #     datos = self.beliefs[cripto]
+    #     rsi = datos.get('rsi', None)
 
-        if rsi is not None:
-            if rsi < 30:
-                porcentaje_inversion = 0.15  # 15%
-            elif rsi > 70:
-                porcentaje_inversion = 0.05  # 5%
-            else:
-                porcentaje_inversion = 0.10  # 10%
-        else:
-            porcentaje_inversion = 0.10  # 10% por defecto
+    #     if rsi is not None:
+    #         if rsi < 30:
+    #             porcentaje_inversion = 0.15  # 15%
+    #         elif rsi > 70:
+    #             porcentaje_inversion = 0.05  # 5%
+    #         else:
+    #             porcentaje_inversion = 0.10  # 10%
+    #     else:
+    #         porcentaje_inversion = 0.10  # 10% por defecto
 
-        monto_a_invertir = self.capital * porcentaje_inversion
-        cantidad = monto_a_invertir / precio
-        cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
+    #     monto_a_invertir = self.capital * porcentaje_inversion
+    #     cantidad = monto_a_invertir / precio
+    #     cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
 
-        # Validar que la cantidad no sea demasiado pequeña
-        if cantidad < 0.0001:
-            cantidad = 0.0
+    #     # Validar que la cantidad no sea demasiado pequeña
+    #     if cantidad < 0.0001:
+    #         cantidad = 0.0
 
-        return cantidad
+    #     return cantidad
 
-    def calcular_cantidad_a_vender(self, cripto: str) -> float:
-        """
-        Calcula la cantidad de criptomoneda a vender basada en métricas como RSI.
-        Estrategia:
-        - RSI > 70: Vender el 50% de las holdings
-        - RSI < 30: No vender
-        - RSI entre 30 y 70: Vender el 25% de las holdings
-        - RSI es None: Vender el 25% de las holdings
-        """
-        datos = self.beliefs[cripto]
-        rsi = datos.get('rsi', None)
-        cantidad_actual = self.portafolio.get(cripto, 0.0)
+    # def calcular_cantidad_a_vender(self, cripto: str) -> float:
+    #     """
+    #     Calcula la cantidad de criptomoneda a vender basada en métricas como RSI.
+    #     Estrategia:
+    #     - RSI > 70: Vender el 50% de las holdings
+    #     - RSI < 30: No vender
+    #     - RSI entre 30 y 70: Vender el 25% de las holdings
+    #     - RSI es None: Vender el 25% de las holdings
+    #     """
+    #     datos = self.beliefs[cripto]
+    #     rsi = datos.get('rsi', None)
+    #     cantidad_actual = self.portafolio.get(cripto, 0.0)
 
-        if rsi is not None:
-            if rsi > 70:
-                porcentaje_vender = 0.50  # Vender el 50%
-            elif rsi < 30:
-                porcentaje_vender = 0.0   # No vender
-            else:
-                porcentaje_vender = 0.25  # Vender el 25%
-        else:
-            porcentaje_vender = 0.25  # Vender el 25% por defecto
+    #     if rsi is not None:
+    #         if rsi > 70:
+    #             porcentaje_vender = 0.50  # Vender el 50%
+    #         elif rsi < 30:
+    #             porcentaje_vender = 0.0   # No vender
+    #         else:
+    #             porcentaje_vender = 0.25  # Vender el 25%
+    #     else:
+    #         porcentaje_vender = 0.25  # Vender el 25% por defecto
 
-        cantidad = cantidad_actual * porcentaje_vender
-        cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
+    #     cantidad = cantidad_actual * porcentaje_vender
+    #     cantidad = round(cantidad, 8)  # Redondear a 8 decimales para criptomonedas
 
-        # Validar que la cantidad no sea demasiado pequeña
-        if cantidad < 0.0001:
-            cantidad = 0.0
+    #     # Validar que la cantidad no sea demasiado pequeña
+    #     if cantidad < 0.0001:
+    #         cantidad = 0.0
 
-        return cantidad
+    #     return cantidad
 
     def actualizar_ganancia(self, contexto: Market):
         """
