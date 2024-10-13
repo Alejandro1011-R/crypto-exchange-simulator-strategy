@@ -120,4 +120,3 @@ if __name__ == '__main__':
     result = lex.tokenize(rules)
     for r in result:
         print(r)
-

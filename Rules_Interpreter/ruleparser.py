@@ -1,8 +1,8 @@
 from sly import Parser
-#from Rules_Interpreter.rulelexer import *
+from Rules_Interpreter.rulelexer import *
 #from Rules_Interpreter.ast_1 import *
-from rulelexer import *
-from ast_1 import *
+#from rulelexer import *
+#from ast_1 import *
 
 class RuleParser(Parser):
     tokens = RuleLexer.tokens
