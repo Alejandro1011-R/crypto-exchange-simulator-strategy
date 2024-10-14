@@ -17,10 +17,10 @@ class RuleInterpreter():
                 return min(self.evaluate(node[1], context), self.evaluate(node[2], context))
             elif tipo == "OR":
                 return max(self.evaluate(node[1], context) or self.evaluate(node[2], context))
-            
+
             elif tipo == "*":
                 return self.evaluate(node[1], context) * self.evaluate(node[2], context)
-            
+
             elif tipo == 'es':
                 return 0.9 if self.evaluate(node[1], context) == self.evaluate(node[2], context) else 0.1
 
@@ -57,7 +57,7 @@ class RuleInterpreter():
                 else:
                     print(f"Variable {var_name} no encontrada.")
                     return None
-                
+
             else:
                 print(f"Tipo desconocido: {tipo}")
                 return None
