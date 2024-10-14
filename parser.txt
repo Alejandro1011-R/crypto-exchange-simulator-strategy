@@ -1,0 +1,2821 @@
+Grammar:
+
+Rule 0     S' -> programa
+Rule 1     programa -> instruccion_list
+Rule 2     instruccion_list -> instruccion_list instruccion
+Rule 3     instruccion_list -> instruccion
+Rule 4     instruccion -> creencia_construct
+Rule 5     instruccion -> statement_rule
+Rule 6     instruccion -> statement_construct
+Rule 7     statement_construct -> SI ERES condicion ENTONCES statement_rule_list_comp
+Rule 8     statement_construct -> SI ERES condicion ENTONCES statement_rule_list
+Rule 9     statement_construct -> SI ERES condicion ENTONCES ERES creencia_list_comp
+Rule 10    statement_construct -> SI ERES condicion ENTONCES ERES creencia_list
+Rule 11    statement_rule -> SI condicion ENTONCES accion
+Rule 12    statement_rule_list -> statement_rule_list COMA statement_rule
+Rule 13    statement_rule_list -> statement_rule
+Rule 14    statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list
+Rule 15    creencia_construct -> CUANDO condicion ENTONCES creencia_list
+Rule 16    creencia_list -> creencia_list COMA creencia
+Rule 17    creencia_list -> NO creencia
+Rule 18    creencia_list -> creencia
+Rule 19    creencia_list -> creencia_list COMA creencia LCOR COTA RCOR
+Rule 20    creencia_list -> creencia LCOR COTA RCOR
+Rule 21    creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA creencia_list
+Rule 22    condicion -> NO creencia
+Rule 23    condicion -> creencia
+Rule 24    condicion -> expresion
+Rule 25    condicion -> LPAREN condicion RPAREN
+Rule 26    condicion -> condicion MENOR_IGUAL_QUE condicion  [precedence=left, level=4]
+Rule 27    condicion -> condicion MAYOR_IGUAL_QUE condicion  [precedence=left, level=4]
+Rule 28    condicion -> condicion MENOR_QUE condicion  [precedence=left, level=4]
+Rule 29    condicion -> condicion MAYOR_QUE condicion  [precedence=left, level=4]
+Rule 30    condicion -> condicion NO_ES condicion  [precedence=left, level=3]
+Rule 31    condicion -> condicion ES condicion  [precedence=left, level=3]
+Rule 32    condicion -> condicion OR condicion  [precedence=left, level=1]
+Rule 33    condicion -> condicion AND condicion  [precedence=left, level=2]
+Rule 34    creencia -> ID
+Rule 35    expresion -> funcion
+Rule 36    expresion -> NUMBER
+Rule 37    expresion -> variable
+Rule 38    expresion -> variable MULT NUMBER
+Rule 39    variable -> MACD
+Rule 40    variable -> RSI
+Rule 41    variable -> SMA10
+Rule 42    variable -> SMA5
+Rule 43    variable -> MACDTENDENCIA
+Rule 44    variable -> BAJISTA
+Rule 45    variable -> ALCISTA
+Rule 46    variable -> SMATENDENCIA
+Rule 47    variable -> NORMAL
+Rule 48    variable -> SOBREVENTA
+Rule 49    variable -> SOBRECOMPRA
+Rule 50    variable -> BOLLINGER
+Rule 51    variable -> ANALIZAR_GRAFICO NUMBER
+Rule 52    variable -> NEGATIVO
+Rule 53    variable -> NEUTRO
+Rule 54    variable -> POSITIVO
+Rule 55    variable -> BAJO
+Rule 56    variable -> MEDIO
+Rule 57    variable -> ALTO
+Rule 58    variable -> SENTIMIENTO
+Rule 59    variable -> EXPERIENCIA
+Rule 60    variable -> CONOCIMIENTO
+Rule 61    variable -> CAPITAL
+Rule 62    variable -> PRECIO
+Rule 63    accion -> MANTENER
+Rule 64    accion -> VENDER accion_cantidad
+Rule 65    accion -> COMPRAR accion_capital
+Rule 66    accion_capital -> CAPITAL
+Rule 67    accion_capital -> CAPITAL MULT NUMBER
+Rule 68    accion_cantidad -> TODO
+Rule 69    accion_cantidad -> TODO MULT NUMBER
+Rule 70    funcion -> ID LPAREN parametro_list RPAREN
+Rule 71    funcion -> ID LPAREN RPAREN
+Rule 72    parametro -> expresion
+Rule 73    parametro_list -> parametro_list COMA parametro
+Rule 74    parametro_list -> parametro
+
+Terminals, with rules where they appear:
+
+ALCISTA              : 45
+ALTO                 : 57
+ANALIZAR_GRAFICO     : 51
+AND                  : 33
+BAJISTA              : 44
+BAJO                 : 55
+BOLLINGER            : 50
+CAPITAL              : 61 66 67
+COMA                 : 12 16 19 73
+COMPRAR              : 65
+CONOCIMIENTO         : 60
+COTA                 : 19 20
+CUANDO               : 15
+ELIMINAR             : 14 21
+ENTONCES             : 7 8 9 10 11 15
+ERES                 : 7 8 9 9 10 10
+ES                   : 31
+EXPERIENCIA          : 59
+ID                   : 34 70 71
+LCOR                 : 19 20
+LPAREN               : 25 70 71
+MACD                 : 39
+MACDTENDENCIA        : 43
+MANTENER             : 63
+MAYOR_IGUAL_QUE      : 27
+MAYOR_QUE            : 29
+MEDIO                : 56
+MENOR_IGUAL_QUE      : 26
+MENOR_QUE            : 28
+MULT                 : 38 67 69
+NEGATIVO             : 52
+NEUTRO               : 53
+NO                   : 17 22
+NORMAL               : 47
+NO_ES                : 30
+NUMBER               : 36 38 51 67 69
+OR                   : 32
+POSITIVO             : 54
+PRECIO               : 62
+PUNTOCOMA            : 14 21
+RCOR                 : 19 20
+RPAREN               : 25 70 71
+RSI                  : 40
+SENTIMIENTO          : 58
+SI                   : 7 8 9 10 11
+SMA10                : 41
+SMA5                 : 42
+SMATENDENCIA         : 46
+SOBRECOMPRA          : 49
+SOBREVENTA           : 48
+TODO                 : 68 69
+VENDER               : 64
+error                : 
+
+Nonterminals, with rules where they appear:
+
+accion               : 11
+accion_cantidad      : 64
+accion_capital       : 65
+condicion            : 7 8 9 10 11 15 25 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33
+creencia             : 16 17 18 19 20 22 23
+creencia_construct   : 4
+creencia_list        : 10 15 16 19 21 21
+creencia_list_comp   : 9
+expresion            : 24 72
+funcion              : 35
+instruccion          : 2 3
+instruccion_list     : 1 2
+parametro            : 73 74
+parametro_list       : 70 73
+programa             : 0
+statement_construct  : 6
+statement_rule       : 5 12 13
+statement_rule_list  : 8 12 14 14
+statement_rule_list_comp : 7
+variable             : 37 38
+
+
+state 0
+
+    (0) S' -> . programa
+    (1) programa -> . instruccion_list
+    (2) instruccion_list -> . instruccion_list instruccion
+    (3) instruccion_list -> . instruccion
+    (4) instruccion -> . creencia_construct
+    (5) instruccion -> . statement_rule
+    (6) instruccion -> . statement_construct
+    (15) creencia_construct -> . CUANDO condicion ENTONCES creencia_list
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    (7) statement_construct -> . SI ERES condicion ENTONCES statement_rule_list_comp
+    (8) statement_construct -> . SI ERES condicion ENTONCES statement_rule_list
+    (9) statement_construct -> . SI ERES condicion ENTONCES ERES creencia_list_comp
+    (10) statement_construct -> . SI ERES condicion ENTONCES ERES creencia_list
+    CUANDO          shift and go to state 7
+    SI              shift and go to state 8
+
+    programa                       shift and go to state 1
+    instruccion_list               shift and go to state 2
+    instruccion                    shift and go to state 3
+    creencia_construct             shift and go to state 4
+    statement_rule                 shift and go to state 5
+    statement_construct            shift and go to state 6
+
+state 1
+
+    (0) S' -> programa .
+
+
+state 2
+
+    (1) programa -> instruccion_list .
+    (2) instruccion_list -> instruccion_list . instruccion
+    (4) instruccion -> . creencia_construct
+    (5) instruccion -> . statement_rule
+    (6) instruccion -> . statement_construct
+    (15) creencia_construct -> . CUANDO condicion ENTONCES creencia_list
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    (7) statement_construct -> . SI ERES condicion ENTONCES statement_rule_list_comp
+    (8) statement_construct -> . SI ERES condicion ENTONCES statement_rule_list
+    (9) statement_construct -> . SI ERES condicion ENTONCES ERES creencia_list_comp
+    (10) statement_construct -> . SI ERES condicion ENTONCES ERES creencia_list
+    $end            reduce using rule 1 (programa -> instruccion_list .)
+    CUANDO          shift and go to state 7
+    SI              shift and go to state 8
+
+    instruccion                    shift and go to state 9
+    creencia_construct             shift and go to state 4
+    statement_rule                 shift and go to state 5
+    statement_construct            shift and go to state 6
+
+state 3
+
+    (3) instruccion_list -> instruccion .
+    CUANDO          reduce using rule 3 (instruccion_list -> instruccion .)
+    SI              reduce using rule 3 (instruccion_list -> instruccion .)
+    $end            reduce using rule 3 (instruccion_list -> instruccion .)
+
+
+state 4
+
+    (4) instruccion -> creencia_construct .
+    CUANDO          reduce using rule 4 (instruccion -> creencia_construct .)
+    SI              reduce using rule 4 (instruccion -> creencia_construct .)
+    $end            reduce using rule 4 (instruccion -> creencia_construct .)
+
+
+state 5
+
+    (5) instruccion -> statement_rule .
+    CUANDO          reduce using rule 5 (instruccion -> statement_rule .)
+    SI              reduce using rule 5 (instruccion -> statement_rule .)
+    $end            reduce using rule 5 (instruccion -> statement_rule .)
+
+
+state 6
+
+    (6) instruccion -> statement_construct .
+    CUANDO          reduce using rule 6 (instruccion -> statement_construct .)
+    SI              reduce using rule 6 (instruccion -> statement_construct .)
+    $end            reduce using rule 6 (instruccion -> statement_construct .)
+
+
+state 7
+
+    (15) creencia_construct -> CUANDO . condicion ENTONCES creencia_list
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 10
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 8
+
+    (11) statement_rule -> SI . condicion ENTONCES accion
+    (7) statement_construct -> SI . ERES condicion ENTONCES statement_rule_list_comp
+    (8) statement_construct -> SI . ERES condicion ENTONCES statement_rule_list
+    (9) statement_construct -> SI . ERES condicion ENTONCES ERES creencia_list_comp
+    (10) statement_construct -> SI . ERES condicion ENTONCES ERES creencia_list
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    ERES            shift and go to state 44
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 43
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 9
+
+    (2) instruccion_list -> instruccion_list instruccion .
+    CUANDO          reduce using rule 2 (instruccion_list -> instruccion_list instruccion .)
+    SI              reduce using rule 2 (instruccion_list -> instruccion_list instruccion .)
+    $end            reduce using rule 2 (instruccion_list -> instruccion_list instruccion .)
+
+
+state 10
+
+    (15) creencia_construct -> CUANDO condicion . ENTONCES creencia_list
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        shift and go to state 45
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+    OR              shift and go to state 52
+    AND             shift and go to state 53
+
+
+state 11
+
+    (22) condicion -> NO . creencia
+    (34) creencia -> . ID
+    ID              shift and go to state 55
+
+    creencia                       shift and go to state 54
+
+state 12
+
+    (23) condicion -> creencia .
+    ENTONCES        reduce using rule 23 (condicion -> creencia .)
+    MENOR_IGUAL_QUE reduce using rule 23 (condicion -> creencia .)
+    MAYOR_IGUAL_QUE reduce using rule 23 (condicion -> creencia .)
+    MENOR_QUE       reduce using rule 23 (condicion -> creencia .)
+    MAYOR_QUE       reduce using rule 23 (condicion -> creencia .)
+    NO_ES           reduce using rule 23 (condicion -> creencia .)
+    ES              reduce using rule 23 (condicion -> creencia .)
+    OR              reduce using rule 23 (condicion -> creencia .)
+    AND             reduce using rule 23 (condicion -> creencia .)
+    RPAREN          reduce using rule 23 (condicion -> creencia .)
+
+
+state 13
+
+    (24) condicion -> expresion .
+    ENTONCES        reduce using rule 24 (condicion -> expresion .)
+    MENOR_IGUAL_QUE reduce using rule 24 (condicion -> expresion .)
+    MAYOR_IGUAL_QUE reduce using rule 24 (condicion -> expresion .)
+    MENOR_QUE       reduce using rule 24 (condicion -> expresion .)
+    MAYOR_QUE       reduce using rule 24 (condicion -> expresion .)
+    NO_ES           reduce using rule 24 (condicion -> expresion .)
+    ES              reduce using rule 24 (condicion -> expresion .)
+    OR              reduce using rule 24 (condicion -> expresion .)
+    AND             reduce using rule 24 (condicion -> expresion .)
+    RPAREN          reduce using rule 24 (condicion -> expresion .)
+
+
+state 14
+
+    (25) condicion -> LPAREN . condicion RPAREN
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 56
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 15
+
+    (34) creencia -> ID .
+    (70) funcion -> ID . LPAREN parametro_list RPAREN
+    (71) funcion -> ID . LPAREN RPAREN
+    ENTONCES        reduce using rule 34 (creencia -> ID .)
+    MENOR_IGUAL_QUE reduce using rule 34 (creencia -> ID .)
+    MAYOR_IGUAL_QUE reduce using rule 34 (creencia -> ID .)
+    MENOR_QUE       reduce using rule 34 (creencia -> ID .)
+    MAYOR_QUE       reduce using rule 34 (creencia -> ID .)
+    NO_ES           reduce using rule 34 (creencia -> ID .)
+    ES              reduce using rule 34 (creencia -> ID .)
+    OR              reduce using rule 34 (creencia -> ID .)
+    AND             reduce using rule 34 (creencia -> ID .)
+    RPAREN          reduce using rule 34 (creencia -> ID .)
+    LPAREN          shift and go to state 57
+
+
+state 16
+
+    (35) expresion -> funcion .
+    ENTONCES        reduce using rule 35 (expresion -> funcion .)
+    MENOR_IGUAL_QUE reduce using rule 35 (expresion -> funcion .)
+    MAYOR_IGUAL_QUE reduce using rule 35 (expresion -> funcion .)
+    MENOR_QUE       reduce using rule 35 (expresion -> funcion .)
+    MAYOR_QUE       reduce using rule 35 (expresion -> funcion .)
+    NO_ES           reduce using rule 35 (expresion -> funcion .)
+    ES              reduce using rule 35 (expresion -> funcion .)
+    OR              reduce using rule 35 (expresion -> funcion .)
+    AND             reduce using rule 35 (expresion -> funcion .)
+    RPAREN          reduce using rule 35 (expresion -> funcion .)
+    COMA            reduce using rule 35 (expresion -> funcion .)
+
+
+state 17
+
+    (36) expresion -> NUMBER .
+    ENTONCES        reduce using rule 36 (expresion -> NUMBER .)
+    MENOR_IGUAL_QUE reduce using rule 36 (expresion -> NUMBER .)
+    MAYOR_IGUAL_QUE reduce using rule 36 (expresion -> NUMBER .)
+    MENOR_QUE       reduce using rule 36 (expresion -> NUMBER .)
+    MAYOR_QUE       reduce using rule 36 (expresion -> NUMBER .)
+    NO_ES           reduce using rule 36 (expresion -> NUMBER .)
+    ES              reduce using rule 36 (expresion -> NUMBER .)
+    OR              reduce using rule 36 (expresion -> NUMBER .)
+    AND             reduce using rule 36 (expresion -> NUMBER .)
+    RPAREN          reduce using rule 36 (expresion -> NUMBER .)
+    COMA            reduce using rule 36 (expresion -> NUMBER .)
+
+
+state 18
+
+    (37) expresion -> variable .
+    (38) expresion -> variable . MULT NUMBER
+    ENTONCES        reduce using rule 37 (expresion -> variable .)
+    MENOR_IGUAL_QUE reduce using rule 37 (expresion -> variable .)
+    MAYOR_IGUAL_QUE reduce using rule 37 (expresion -> variable .)
+    MENOR_QUE       reduce using rule 37 (expresion -> variable .)
+    MAYOR_QUE       reduce using rule 37 (expresion -> variable .)
+    NO_ES           reduce using rule 37 (expresion -> variable .)
+    ES              reduce using rule 37 (expresion -> variable .)
+    OR              reduce using rule 37 (expresion -> variable .)
+    AND             reduce using rule 37 (expresion -> variable .)
+    RPAREN          reduce using rule 37 (expresion -> variable .)
+    COMA            reduce using rule 37 (expresion -> variable .)
+    MULT            shift and go to state 58
+
+
+state 19
+
+    (39) variable -> MACD .
+    MULT            reduce using rule 39 (variable -> MACD .)
+    ENTONCES        reduce using rule 39 (variable -> MACD .)
+    MENOR_IGUAL_QUE reduce using rule 39 (variable -> MACD .)
+    MAYOR_IGUAL_QUE reduce using rule 39 (variable -> MACD .)
+    MENOR_QUE       reduce using rule 39 (variable -> MACD .)
+    MAYOR_QUE       reduce using rule 39 (variable -> MACD .)
+    NO_ES           reduce using rule 39 (variable -> MACD .)
+    ES              reduce using rule 39 (variable -> MACD .)
+    OR              reduce using rule 39 (variable -> MACD .)
+    AND             reduce using rule 39 (variable -> MACD .)
+    RPAREN          reduce using rule 39 (variable -> MACD .)
+    COMA            reduce using rule 39 (variable -> MACD .)
+
+
+state 20
+
+    (40) variable -> RSI .
+    MULT            reduce using rule 40 (variable -> RSI .)
+    ENTONCES        reduce using rule 40 (variable -> RSI .)
+    MENOR_IGUAL_QUE reduce using rule 40 (variable -> RSI .)
+    MAYOR_IGUAL_QUE reduce using rule 40 (variable -> RSI .)
+    MENOR_QUE       reduce using rule 40 (variable -> RSI .)
+    MAYOR_QUE       reduce using rule 40 (variable -> RSI .)
+    NO_ES           reduce using rule 40 (variable -> RSI .)
+    ES              reduce using rule 40 (variable -> RSI .)
+    OR              reduce using rule 40 (variable -> RSI .)
+    AND             reduce using rule 40 (variable -> RSI .)
+    RPAREN          reduce using rule 40 (variable -> RSI .)
+    COMA            reduce using rule 40 (variable -> RSI .)
+
+
+state 21
+
+    (41) variable -> SMA10 .
+    MULT            reduce using rule 41 (variable -> SMA10 .)
+    ENTONCES        reduce using rule 41 (variable -> SMA10 .)
+    MENOR_IGUAL_QUE reduce using rule 41 (variable -> SMA10 .)
+    MAYOR_IGUAL_QUE reduce using rule 41 (variable -> SMA10 .)
+    MENOR_QUE       reduce using rule 41 (variable -> SMA10 .)
+    MAYOR_QUE       reduce using rule 41 (variable -> SMA10 .)
+    NO_ES           reduce using rule 41 (variable -> SMA10 .)
+    ES              reduce using rule 41 (variable -> SMA10 .)
+    OR              reduce using rule 41 (variable -> SMA10 .)
+    AND             reduce using rule 41 (variable -> SMA10 .)
+    RPAREN          reduce using rule 41 (variable -> SMA10 .)
+    COMA            reduce using rule 41 (variable -> SMA10 .)
+
+
+state 22
+
+    (42) variable -> SMA5 .
+    MULT            reduce using rule 42 (variable -> SMA5 .)
+    ENTONCES        reduce using rule 42 (variable -> SMA5 .)
+    MENOR_IGUAL_QUE reduce using rule 42 (variable -> SMA5 .)
+    MAYOR_IGUAL_QUE reduce using rule 42 (variable -> SMA5 .)
+    MENOR_QUE       reduce using rule 42 (variable -> SMA5 .)
+    MAYOR_QUE       reduce using rule 42 (variable -> SMA5 .)
+    NO_ES           reduce using rule 42 (variable -> SMA5 .)
+    ES              reduce using rule 42 (variable -> SMA5 .)
+    OR              reduce using rule 42 (variable -> SMA5 .)
+    AND             reduce using rule 42 (variable -> SMA5 .)
+    RPAREN          reduce using rule 42 (variable -> SMA5 .)
+    COMA            reduce using rule 42 (variable -> SMA5 .)
+
+
+state 23
+
+    (43) variable -> MACDTENDENCIA .
+    MULT            reduce using rule 43 (variable -> MACDTENDENCIA .)
+    ENTONCES        reduce using rule 43 (variable -> MACDTENDENCIA .)
+    MENOR_IGUAL_QUE reduce using rule 43 (variable -> MACDTENDENCIA .)
+    MAYOR_IGUAL_QUE reduce using rule 43 (variable -> MACDTENDENCIA .)
+    MENOR_QUE       reduce using rule 43 (variable -> MACDTENDENCIA .)
+    MAYOR_QUE       reduce using rule 43 (variable -> MACDTENDENCIA .)
+    NO_ES           reduce using rule 43 (variable -> MACDTENDENCIA .)
+    ES              reduce using rule 43 (variable -> MACDTENDENCIA .)
+    OR              reduce using rule 43 (variable -> MACDTENDENCIA .)
+    AND             reduce using rule 43 (variable -> MACDTENDENCIA .)
+    RPAREN          reduce using rule 43 (variable -> MACDTENDENCIA .)
+    COMA            reduce using rule 43 (variable -> MACDTENDENCIA .)
+
+
+state 24
+
+    (44) variable -> BAJISTA .
+    MULT            reduce using rule 44 (variable -> BAJISTA .)
+    ENTONCES        reduce using rule 44 (variable -> BAJISTA .)
+    MENOR_IGUAL_QUE reduce using rule 44 (variable -> BAJISTA .)
+    MAYOR_IGUAL_QUE reduce using rule 44 (variable -> BAJISTA .)
+    MENOR_QUE       reduce using rule 44 (variable -> BAJISTA .)
+    MAYOR_QUE       reduce using rule 44 (variable -> BAJISTA .)
+    NO_ES           reduce using rule 44 (variable -> BAJISTA .)
+    ES              reduce using rule 44 (variable -> BAJISTA .)
+    OR              reduce using rule 44 (variable -> BAJISTA .)
+    AND             reduce using rule 44 (variable -> BAJISTA .)
+    RPAREN          reduce using rule 44 (variable -> BAJISTA .)
+    COMA            reduce using rule 44 (variable -> BAJISTA .)
+
+
+state 25
+
+    (45) variable -> ALCISTA .
+    MULT            reduce using rule 45 (variable -> ALCISTA .)
+    ENTONCES        reduce using rule 45 (variable -> ALCISTA .)
+    MENOR_IGUAL_QUE reduce using rule 45 (variable -> ALCISTA .)
+    MAYOR_IGUAL_QUE reduce using rule 45 (variable -> ALCISTA .)
+    MENOR_QUE       reduce using rule 45 (variable -> ALCISTA .)
+    MAYOR_QUE       reduce using rule 45 (variable -> ALCISTA .)
+    NO_ES           reduce using rule 45 (variable -> ALCISTA .)
+    ES              reduce using rule 45 (variable -> ALCISTA .)
+    OR              reduce using rule 45 (variable -> ALCISTA .)
+    AND             reduce using rule 45 (variable -> ALCISTA .)
+    RPAREN          reduce using rule 45 (variable -> ALCISTA .)
+    COMA            reduce using rule 45 (variable -> ALCISTA .)
+
+
+state 26
+
+    (46) variable -> SMATENDENCIA .
+    MULT            reduce using rule 46 (variable -> SMATENDENCIA .)
+    ENTONCES        reduce using rule 46 (variable -> SMATENDENCIA .)
+    MENOR_IGUAL_QUE reduce using rule 46 (variable -> SMATENDENCIA .)
+    MAYOR_IGUAL_QUE reduce using rule 46 (variable -> SMATENDENCIA .)
+    MENOR_QUE       reduce using rule 46 (variable -> SMATENDENCIA .)
+    MAYOR_QUE       reduce using rule 46 (variable -> SMATENDENCIA .)
+    NO_ES           reduce using rule 46 (variable -> SMATENDENCIA .)
+    ES              reduce using rule 46 (variable -> SMATENDENCIA .)
+    OR              reduce using rule 46 (variable -> SMATENDENCIA .)
+    AND             reduce using rule 46 (variable -> SMATENDENCIA .)
+    RPAREN          reduce using rule 46 (variable -> SMATENDENCIA .)
+    COMA            reduce using rule 46 (variable -> SMATENDENCIA .)
+
+
+state 27
+
+    (47) variable -> NORMAL .
+    MULT            reduce using rule 47 (variable -> NORMAL .)
+    ENTONCES        reduce using rule 47 (variable -> NORMAL .)
+    MENOR_IGUAL_QUE reduce using rule 47 (variable -> NORMAL .)
+    MAYOR_IGUAL_QUE reduce using rule 47 (variable -> NORMAL .)
+    MENOR_QUE       reduce using rule 47 (variable -> NORMAL .)
+    MAYOR_QUE       reduce using rule 47 (variable -> NORMAL .)
+    NO_ES           reduce using rule 47 (variable -> NORMAL .)
+    ES              reduce using rule 47 (variable -> NORMAL .)
+    OR              reduce using rule 47 (variable -> NORMAL .)
+    AND             reduce using rule 47 (variable -> NORMAL .)
+    RPAREN          reduce using rule 47 (variable -> NORMAL .)
+    COMA            reduce using rule 47 (variable -> NORMAL .)
+
+
+state 28
+
+    (48) variable -> SOBREVENTA .
+    MULT            reduce using rule 48 (variable -> SOBREVENTA .)
+    ENTONCES        reduce using rule 48 (variable -> SOBREVENTA .)
+    MENOR_IGUAL_QUE reduce using rule 48 (variable -> SOBREVENTA .)
+    MAYOR_IGUAL_QUE reduce using rule 48 (variable -> SOBREVENTA .)
+    MENOR_QUE       reduce using rule 48 (variable -> SOBREVENTA .)
+    MAYOR_QUE       reduce using rule 48 (variable -> SOBREVENTA .)
+    NO_ES           reduce using rule 48 (variable -> SOBREVENTA .)
+    ES              reduce using rule 48 (variable -> SOBREVENTA .)
+    OR              reduce using rule 48 (variable -> SOBREVENTA .)
+    AND             reduce using rule 48 (variable -> SOBREVENTA .)
+    RPAREN          reduce using rule 48 (variable -> SOBREVENTA .)
+    COMA            reduce using rule 48 (variable -> SOBREVENTA .)
+
+
+state 29
+
+    (49) variable -> SOBRECOMPRA .
+    MULT            reduce using rule 49 (variable -> SOBRECOMPRA .)
+    ENTONCES        reduce using rule 49 (variable -> SOBRECOMPRA .)
+    MENOR_IGUAL_QUE reduce using rule 49 (variable -> SOBRECOMPRA .)
+    MAYOR_IGUAL_QUE reduce using rule 49 (variable -> SOBRECOMPRA .)
+    MENOR_QUE       reduce using rule 49 (variable -> SOBRECOMPRA .)
+    MAYOR_QUE       reduce using rule 49 (variable -> SOBRECOMPRA .)
+    NO_ES           reduce using rule 49 (variable -> SOBRECOMPRA .)
+    ES              reduce using rule 49 (variable -> SOBRECOMPRA .)
+    OR              reduce using rule 49 (variable -> SOBRECOMPRA .)
+    AND             reduce using rule 49 (variable -> SOBRECOMPRA .)
+    RPAREN          reduce using rule 49 (variable -> SOBRECOMPRA .)
+    COMA            reduce using rule 49 (variable -> SOBRECOMPRA .)
+
+
+state 30
+
+    (50) variable -> BOLLINGER .
+    MULT            reduce using rule 50 (variable -> BOLLINGER .)
+    ENTONCES        reduce using rule 50 (variable -> BOLLINGER .)
+    MENOR_IGUAL_QUE reduce using rule 50 (variable -> BOLLINGER .)
+    MAYOR_IGUAL_QUE reduce using rule 50 (variable -> BOLLINGER .)
+    MENOR_QUE       reduce using rule 50 (variable -> BOLLINGER .)
+    MAYOR_QUE       reduce using rule 50 (variable -> BOLLINGER .)
+    NO_ES           reduce using rule 50 (variable -> BOLLINGER .)
+    ES              reduce using rule 50 (variable -> BOLLINGER .)
+    OR              reduce using rule 50 (variable -> BOLLINGER .)
+    AND             reduce using rule 50 (variable -> BOLLINGER .)
+    RPAREN          reduce using rule 50 (variable -> BOLLINGER .)
+    COMA            reduce using rule 50 (variable -> BOLLINGER .)
+
+
+state 31
+
+    (51) variable -> ANALIZAR_GRAFICO . NUMBER
+    NUMBER          shift and go to state 59
+
+
+state 32
+
+    (52) variable -> NEGATIVO .
+    MULT            reduce using rule 52 (variable -> NEGATIVO .)
+    ENTONCES        reduce using rule 52 (variable -> NEGATIVO .)
+    MENOR_IGUAL_QUE reduce using rule 52 (variable -> NEGATIVO .)
+    MAYOR_IGUAL_QUE reduce using rule 52 (variable -> NEGATIVO .)
+    MENOR_QUE       reduce using rule 52 (variable -> NEGATIVO .)
+    MAYOR_QUE       reduce using rule 52 (variable -> NEGATIVO .)
+    NO_ES           reduce using rule 52 (variable -> NEGATIVO .)
+    ES              reduce using rule 52 (variable -> NEGATIVO .)
+    OR              reduce using rule 52 (variable -> NEGATIVO .)
+    AND             reduce using rule 52 (variable -> NEGATIVO .)
+    RPAREN          reduce using rule 52 (variable -> NEGATIVO .)
+    COMA            reduce using rule 52 (variable -> NEGATIVO .)
+
+
+state 33
+
+    (53) variable -> NEUTRO .
+    MULT            reduce using rule 53 (variable -> NEUTRO .)
+    ENTONCES        reduce using rule 53 (variable -> NEUTRO .)
+    MENOR_IGUAL_QUE reduce using rule 53 (variable -> NEUTRO .)
+    MAYOR_IGUAL_QUE reduce using rule 53 (variable -> NEUTRO .)
+    MENOR_QUE       reduce using rule 53 (variable -> NEUTRO .)
+    MAYOR_QUE       reduce using rule 53 (variable -> NEUTRO .)
+    NO_ES           reduce using rule 53 (variable -> NEUTRO .)
+    ES              reduce using rule 53 (variable -> NEUTRO .)
+    OR              reduce using rule 53 (variable -> NEUTRO .)
+    AND             reduce using rule 53 (variable -> NEUTRO .)
+    RPAREN          reduce using rule 53 (variable -> NEUTRO .)
+    COMA            reduce using rule 53 (variable -> NEUTRO .)
+
+
+state 34
+
+    (54) variable -> POSITIVO .
+    MULT            reduce using rule 54 (variable -> POSITIVO .)
+    ENTONCES        reduce using rule 54 (variable -> POSITIVO .)
+    MENOR_IGUAL_QUE reduce using rule 54 (variable -> POSITIVO .)
+    MAYOR_IGUAL_QUE reduce using rule 54 (variable -> POSITIVO .)
+    MENOR_QUE       reduce using rule 54 (variable -> POSITIVO .)
+    MAYOR_QUE       reduce using rule 54 (variable -> POSITIVO .)
+    NO_ES           reduce using rule 54 (variable -> POSITIVO .)
+    ES              reduce using rule 54 (variable -> POSITIVO .)
+    OR              reduce using rule 54 (variable -> POSITIVO .)
+    AND             reduce using rule 54 (variable -> POSITIVO .)
+    RPAREN          reduce using rule 54 (variable -> POSITIVO .)
+    COMA            reduce using rule 54 (variable -> POSITIVO .)
+
+
+state 35
+
+    (55) variable -> BAJO .
+    MULT            reduce using rule 55 (variable -> BAJO .)
+    ENTONCES        reduce using rule 55 (variable -> BAJO .)
+    MENOR_IGUAL_QUE reduce using rule 55 (variable -> BAJO .)
+    MAYOR_IGUAL_QUE reduce using rule 55 (variable -> BAJO .)
+    MENOR_QUE       reduce using rule 55 (variable -> BAJO .)
+    MAYOR_QUE       reduce using rule 55 (variable -> BAJO .)
+    NO_ES           reduce using rule 55 (variable -> BAJO .)
+    ES              reduce using rule 55 (variable -> BAJO .)
+    OR              reduce using rule 55 (variable -> BAJO .)
+    AND             reduce using rule 55 (variable -> BAJO .)
+    RPAREN          reduce using rule 55 (variable -> BAJO .)
+    COMA            reduce using rule 55 (variable -> BAJO .)
+
+
+state 36
+
+    (56) variable -> MEDIO .
+    MULT            reduce using rule 56 (variable -> MEDIO .)
+    ENTONCES        reduce using rule 56 (variable -> MEDIO .)
+    MENOR_IGUAL_QUE reduce using rule 56 (variable -> MEDIO .)
+    MAYOR_IGUAL_QUE reduce using rule 56 (variable -> MEDIO .)
+    MENOR_QUE       reduce using rule 56 (variable -> MEDIO .)
+    MAYOR_QUE       reduce using rule 56 (variable -> MEDIO .)
+    NO_ES           reduce using rule 56 (variable -> MEDIO .)
+    ES              reduce using rule 56 (variable -> MEDIO .)
+    OR              reduce using rule 56 (variable -> MEDIO .)
+    AND             reduce using rule 56 (variable -> MEDIO .)
+    RPAREN          reduce using rule 56 (variable -> MEDIO .)
+    COMA            reduce using rule 56 (variable -> MEDIO .)
+
+
+state 37
+
+    (57) variable -> ALTO .
+    MULT            reduce using rule 57 (variable -> ALTO .)
+    ENTONCES        reduce using rule 57 (variable -> ALTO .)
+    MENOR_IGUAL_QUE reduce using rule 57 (variable -> ALTO .)
+    MAYOR_IGUAL_QUE reduce using rule 57 (variable -> ALTO .)
+    MENOR_QUE       reduce using rule 57 (variable -> ALTO .)
+    MAYOR_QUE       reduce using rule 57 (variable -> ALTO .)
+    NO_ES           reduce using rule 57 (variable -> ALTO .)
+    ES              reduce using rule 57 (variable -> ALTO .)
+    OR              reduce using rule 57 (variable -> ALTO .)
+    AND             reduce using rule 57 (variable -> ALTO .)
+    RPAREN          reduce using rule 57 (variable -> ALTO .)
+    COMA            reduce using rule 57 (variable -> ALTO .)
+
+
+state 38
+
+    (58) variable -> SENTIMIENTO .
+    MULT            reduce using rule 58 (variable -> SENTIMIENTO .)
+    ENTONCES        reduce using rule 58 (variable -> SENTIMIENTO .)
+    MENOR_IGUAL_QUE reduce using rule 58 (variable -> SENTIMIENTO .)
+    MAYOR_IGUAL_QUE reduce using rule 58 (variable -> SENTIMIENTO .)
+    MENOR_QUE       reduce using rule 58 (variable -> SENTIMIENTO .)
+    MAYOR_QUE       reduce using rule 58 (variable -> SENTIMIENTO .)
+    NO_ES           reduce using rule 58 (variable -> SENTIMIENTO .)
+    ES              reduce using rule 58 (variable -> SENTIMIENTO .)
+    OR              reduce using rule 58 (variable -> SENTIMIENTO .)
+    AND             reduce using rule 58 (variable -> SENTIMIENTO .)
+    RPAREN          reduce using rule 58 (variable -> SENTIMIENTO .)
+    COMA            reduce using rule 58 (variable -> SENTIMIENTO .)
+
+
+state 39
+
+    (59) variable -> EXPERIENCIA .
+    MULT            reduce using rule 59 (variable -> EXPERIENCIA .)
+    ENTONCES        reduce using rule 59 (variable -> EXPERIENCIA .)
+    MENOR_IGUAL_QUE reduce using rule 59 (variable -> EXPERIENCIA .)
+    MAYOR_IGUAL_QUE reduce using rule 59 (variable -> EXPERIENCIA .)
+    MENOR_QUE       reduce using rule 59 (variable -> EXPERIENCIA .)
+    MAYOR_QUE       reduce using rule 59 (variable -> EXPERIENCIA .)
+    NO_ES           reduce using rule 59 (variable -> EXPERIENCIA .)
+    ES              reduce using rule 59 (variable -> EXPERIENCIA .)
+    OR              reduce using rule 59 (variable -> EXPERIENCIA .)
+    AND             reduce using rule 59 (variable -> EXPERIENCIA .)
+    RPAREN          reduce using rule 59 (variable -> EXPERIENCIA .)
+    COMA            reduce using rule 59 (variable -> EXPERIENCIA .)
+
+
+state 40
+
+    (60) variable -> CONOCIMIENTO .
+    MULT            reduce using rule 60 (variable -> CONOCIMIENTO .)
+    ENTONCES        reduce using rule 60 (variable -> CONOCIMIENTO .)
+    MENOR_IGUAL_QUE reduce using rule 60 (variable -> CONOCIMIENTO .)
+    MAYOR_IGUAL_QUE reduce using rule 60 (variable -> CONOCIMIENTO .)
+    MENOR_QUE       reduce using rule 60 (variable -> CONOCIMIENTO .)
+    MAYOR_QUE       reduce using rule 60 (variable -> CONOCIMIENTO .)
+    NO_ES           reduce using rule 60 (variable -> CONOCIMIENTO .)
+    ES              reduce using rule 60 (variable -> CONOCIMIENTO .)
+    OR              reduce using rule 60 (variable -> CONOCIMIENTO .)
+    AND             reduce using rule 60 (variable -> CONOCIMIENTO .)
+    RPAREN          reduce using rule 60 (variable -> CONOCIMIENTO .)
+    COMA            reduce using rule 60 (variable -> CONOCIMIENTO .)
+
+
+state 41
+
+    (61) variable -> CAPITAL .
+    MULT            reduce using rule 61 (variable -> CAPITAL .)
+    ENTONCES        reduce using rule 61 (variable -> CAPITAL .)
+    MENOR_IGUAL_QUE reduce using rule 61 (variable -> CAPITAL .)
+    MAYOR_IGUAL_QUE reduce using rule 61 (variable -> CAPITAL .)
+    MENOR_QUE       reduce using rule 61 (variable -> CAPITAL .)
+    MAYOR_QUE       reduce using rule 61 (variable -> CAPITAL .)
+    NO_ES           reduce using rule 61 (variable -> CAPITAL .)
+    ES              reduce using rule 61 (variable -> CAPITAL .)
+    OR              reduce using rule 61 (variable -> CAPITAL .)
+    AND             reduce using rule 61 (variable -> CAPITAL .)
+    RPAREN          reduce using rule 61 (variable -> CAPITAL .)
+    COMA            reduce using rule 61 (variable -> CAPITAL .)
+
+
+state 42
+
+    (62) variable -> PRECIO .
+    MULT            reduce using rule 62 (variable -> PRECIO .)
+    ENTONCES        reduce using rule 62 (variable -> PRECIO .)
+    MENOR_IGUAL_QUE reduce using rule 62 (variable -> PRECIO .)
+    MAYOR_IGUAL_QUE reduce using rule 62 (variable -> PRECIO .)
+    MENOR_QUE       reduce using rule 62 (variable -> PRECIO .)
+    MAYOR_QUE       reduce using rule 62 (variable -> PRECIO .)
+    NO_ES           reduce using rule 62 (variable -> PRECIO .)
+    ES              reduce using rule 62 (variable -> PRECIO .)
+    OR              reduce using rule 62 (variable -> PRECIO .)
+    AND             reduce using rule 62 (variable -> PRECIO .)
+    RPAREN          reduce using rule 62 (variable -> PRECIO .)
+    COMA            reduce using rule 62 (variable -> PRECIO .)
+
+
+state 43
+
+    (11) statement_rule -> SI condicion . ENTONCES accion
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        shift and go to state 60
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+    OR              shift and go to state 52
+    AND             shift and go to state 53
+
+
+state 44
+
+    (7) statement_construct -> SI ERES . condicion ENTONCES statement_rule_list_comp
+    (8) statement_construct -> SI ERES . condicion ENTONCES statement_rule_list
+    (9) statement_construct -> SI ERES . condicion ENTONCES ERES creencia_list_comp
+    (10) statement_construct -> SI ERES . condicion ENTONCES ERES creencia_list
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 61
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 45
+
+    (15) creencia_construct -> CUANDO condicion ENTONCES . creencia_list
+    (16) creencia_list -> . creencia_list COMA creencia
+    (17) creencia_list -> . NO creencia
+    (18) creencia_list -> . creencia
+    (19) creencia_list -> . creencia_list COMA creencia LCOR COTA RCOR
+    (20) creencia_list -> . creencia LCOR COTA RCOR
+    (34) creencia -> . ID
+    NO              shift and go to state 64
+    ID              shift and go to state 55
+
+    creencia_list                  shift and go to state 62
+    creencia                       shift and go to state 63
+
+state 46
+
+    (26) condicion -> condicion MENOR_IGUAL_QUE . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 65
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 47
+
+    (27) condicion -> condicion MAYOR_IGUAL_QUE . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 66
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 48
+
+    (28) condicion -> condicion MENOR_QUE . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 67
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 49
+
+    (29) condicion -> condicion MAYOR_QUE . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 68
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 50
+
+    (30) condicion -> condicion NO_ES . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 69
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 51
+
+    (31) condicion -> condicion ES . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 70
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 52
+
+    (32) condicion -> condicion OR . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 71
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 53
+
+    (33) condicion -> condicion AND . condicion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 72
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 54
+
+    (22) condicion -> NO creencia .
+    ENTONCES        reduce using rule 22 (condicion -> NO creencia .)
+    MENOR_IGUAL_QUE reduce using rule 22 (condicion -> NO creencia .)
+    MAYOR_IGUAL_QUE reduce using rule 22 (condicion -> NO creencia .)
+    MENOR_QUE       reduce using rule 22 (condicion -> NO creencia .)
+    MAYOR_QUE       reduce using rule 22 (condicion -> NO creencia .)
+    NO_ES           reduce using rule 22 (condicion -> NO creencia .)
+    ES              reduce using rule 22 (condicion -> NO creencia .)
+    OR              reduce using rule 22 (condicion -> NO creencia .)
+    AND             reduce using rule 22 (condicion -> NO creencia .)
+    RPAREN          reduce using rule 22 (condicion -> NO creencia .)
+
+
+state 55
+
+    (34) creencia -> ID .
+    ENTONCES        reduce using rule 34 (creencia -> ID .)
+    MENOR_IGUAL_QUE reduce using rule 34 (creencia -> ID .)
+    MAYOR_IGUAL_QUE reduce using rule 34 (creencia -> ID .)
+    MENOR_QUE       reduce using rule 34 (creencia -> ID .)
+    MAYOR_QUE       reduce using rule 34 (creencia -> ID .)
+    NO_ES           reduce using rule 34 (creencia -> ID .)
+    ES              reduce using rule 34 (creencia -> ID .)
+    OR              reduce using rule 34 (creencia -> ID .)
+    AND             reduce using rule 34 (creencia -> ID .)
+    RPAREN          reduce using rule 34 (creencia -> ID .)
+    LCOR            reduce using rule 34 (creencia -> ID .)
+    COMA            reduce using rule 34 (creencia -> ID .)
+    CUANDO          reduce using rule 34 (creencia -> ID .)
+    SI              reduce using rule 34 (creencia -> ID .)
+    $end            reduce using rule 34 (creencia -> ID .)
+    PUNTOCOMA       reduce using rule 34 (creencia -> ID .)
+
+
+state 56
+
+    (25) condicion -> LPAREN condicion . RPAREN
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    RPAREN          shift and go to state 73
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+    OR              shift and go to state 52
+    AND             shift and go to state 53
+
+
+state 57
+
+    (70) funcion -> ID LPAREN . parametro_list RPAREN
+    (71) funcion -> ID LPAREN . RPAREN
+    (73) parametro_list -> . parametro_list COMA parametro
+    (74) parametro_list -> . parametro
+    (72) parametro -> . expresion
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    RPAREN          shift and go to state 76
+    NUMBER          shift and go to state 17
+    ID              shift and go to state 74
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    parametro_list                 shift and go to state 75
+    parametro                      shift and go to state 77
+    expresion                      shift and go to state 78
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 58
+
+    (38) expresion -> variable MULT . NUMBER
+    NUMBER          shift and go to state 79
+
+
+state 59
+
+    (51) variable -> ANALIZAR_GRAFICO NUMBER .
+    MULT            reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    ENTONCES        reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    MENOR_IGUAL_QUE reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    MAYOR_IGUAL_QUE reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    MENOR_QUE       reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    MAYOR_QUE       reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    NO_ES           reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    ES              reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    OR              reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    AND             reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    RPAREN          reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+    COMA            reduce using rule 51 (variable -> ANALIZAR_GRAFICO NUMBER .)
+
+
+state 60
+
+    (11) statement_rule -> SI condicion ENTONCES . accion
+    (63) accion -> . MANTENER
+    (64) accion -> . VENDER accion_cantidad
+    (65) accion -> . COMPRAR accion_capital
+    MANTENER        shift and go to state 81
+    VENDER          shift and go to state 82
+    COMPRAR         shift and go to state 83
+
+    accion                         shift and go to state 80
+
+state 61
+
+    (7) statement_construct -> SI ERES condicion . ENTONCES statement_rule_list_comp
+    (8) statement_construct -> SI ERES condicion . ENTONCES statement_rule_list
+    (9) statement_construct -> SI ERES condicion . ENTONCES ERES creencia_list_comp
+    (10) statement_construct -> SI ERES condicion . ENTONCES ERES creencia_list
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        shift and go to state 84
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+    OR              shift and go to state 52
+    AND             shift and go to state 53
+
+
+state 62
+
+    (15) creencia_construct -> CUANDO condicion ENTONCES creencia_list .
+    (16) creencia_list -> creencia_list . COMA creencia
+    (19) creencia_list -> creencia_list . COMA creencia LCOR COTA RCOR
+    CUANDO          reduce using rule 15 (creencia_construct -> CUANDO condicion ENTONCES creencia_list .)
+    SI              reduce using rule 15 (creencia_construct -> CUANDO condicion ENTONCES creencia_list .)
+    $end            reduce using rule 15 (creencia_construct -> CUANDO condicion ENTONCES creencia_list .)
+    COMA            shift and go to state 85
+
+
+state 63
+
+    (18) creencia_list -> creencia .
+    (20) creencia_list -> creencia . LCOR COTA RCOR
+    COMA            reduce using rule 18 (creencia_list -> creencia .)
+    CUANDO          reduce using rule 18 (creencia_list -> creencia .)
+    SI              reduce using rule 18 (creencia_list -> creencia .)
+    $end            reduce using rule 18 (creencia_list -> creencia .)
+    PUNTOCOMA       reduce using rule 18 (creencia_list -> creencia .)
+    LCOR            shift and go to state 86
+
+
+state 64
+
+    (17) creencia_list -> NO . creencia
+    (34) creencia -> . ID
+    ID              shift and go to state 55
+
+    creencia                       shift and go to state 87
+
+state 65
+
+    (26) condicion -> condicion MENOR_IGUAL_QUE condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    MENOR_IGUAL_QUE reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    MAYOR_IGUAL_QUE reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    MENOR_QUE       reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    MAYOR_QUE       reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    NO_ES           reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    ES              reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    OR              reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    AND             reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+    RPAREN          reduce using rule 26 (condicion -> condicion MENOR_IGUAL_QUE condicion .)
+
+
+state 66
+
+    (27) condicion -> condicion MAYOR_IGUAL_QUE condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    MENOR_IGUAL_QUE reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    MAYOR_IGUAL_QUE reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    MENOR_QUE       reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    MAYOR_QUE       reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    NO_ES           reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    ES              reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    OR              reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    AND             reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+    RPAREN          reduce using rule 27 (condicion -> condicion MAYOR_IGUAL_QUE condicion .)
+
+
+state 67
+
+    (28) condicion -> condicion MENOR_QUE condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    MENOR_IGUAL_QUE reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    MAYOR_IGUAL_QUE reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    MENOR_QUE       reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    MAYOR_QUE       reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    NO_ES           reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    ES              reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    OR              reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    AND             reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+    RPAREN          reduce using rule 28 (condicion -> condicion MENOR_QUE condicion .)
+
+
+state 68
+
+    (29) condicion -> condicion MAYOR_QUE condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    MENOR_IGUAL_QUE reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    MAYOR_IGUAL_QUE reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    MENOR_QUE       reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    MAYOR_QUE       reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    NO_ES           reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    ES              reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    OR              reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    AND             reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+    RPAREN          reduce using rule 29 (condicion -> condicion MAYOR_QUE condicion .)
+
+
+state 69
+
+    (30) condicion -> condicion NO_ES condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    NO_ES           reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    ES              reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    OR              reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    AND             reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    RPAREN          reduce using rule 30 (condicion -> condicion NO_ES condicion .)
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+
+
+state 70
+
+    (31) condicion -> condicion ES condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 31 (condicion -> condicion ES condicion .)
+    NO_ES           reduce using rule 31 (condicion -> condicion ES condicion .)
+    ES              reduce using rule 31 (condicion -> condicion ES condicion .)
+    OR              reduce using rule 31 (condicion -> condicion ES condicion .)
+    AND             reduce using rule 31 (condicion -> condicion ES condicion .)
+    RPAREN          reduce using rule 31 (condicion -> condicion ES condicion .)
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+
+
+state 71
+
+    (32) condicion -> condicion OR condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 32 (condicion -> condicion OR condicion .)
+    OR              reduce using rule 32 (condicion -> condicion OR condicion .)
+    RPAREN          reduce using rule 32 (condicion -> condicion OR condicion .)
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+    AND             shift and go to state 53
+
+
+state 72
+
+    (33) condicion -> condicion AND condicion .
+    (26) condicion -> condicion . MENOR_IGUAL_QUE condicion
+    (27) condicion -> condicion . MAYOR_IGUAL_QUE condicion
+    (28) condicion -> condicion . MENOR_QUE condicion
+    (29) condicion -> condicion . MAYOR_QUE condicion
+    (30) condicion -> condicion . NO_ES condicion
+    (31) condicion -> condicion . ES condicion
+    (32) condicion -> condicion . OR condicion
+    (33) condicion -> condicion . AND condicion
+    ENTONCES        reduce using rule 33 (condicion -> condicion AND condicion .)
+    OR              reduce using rule 33 (condicion -> condicion AND condicion .)
+    AND             reduce using rule 33 (condicion -> condicion AND condicion .)
+    RPAREN          reduce using rule 33 (condicion -> condicion AND condicion .)
+    MENOR_IGUAL_QUE shift and go to state 46
+    MAYOR_IGUAL_QUE shift and go to state 47
+    MENOR_QUE       shift and go to state 48
+    MAYOR_QUE       shift and go to state 49
+    NO_ES           shift and go to state 50
+    ES              shift and go to state 51
+
+
+state 73
+
+    (25) condicion -> LPAREN condicion RPAREN .
+    ENTONCES        reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    MENOR_IGUAL_QUE reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    MAYOR_IGUAL_QUE reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    MENOR_QUE       reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    MAYOR_QUE       reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    NO_ES           reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    ES              reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    OR              reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    AND             reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+    RPAREN          reduce using rule 25 (condicion -> LPAREN condicion RPAREN .)
+
+
+state 74
+
+    (70) funcion -> ID . LPAREN parametro_list RPAREN
+    (71) funcion -> ID . LPAREN RPAREN
+    LPAREN          shift and go to state 57
+
+
+state 75
+
+    (70) funcion -> ID LPAREN parametro_list . RPAREN
+    (73) parametro_list -> parametro_list . COMA parametro
+    RPAREN          shift and go to state 88
+    COMA            shift and go to state 89
+
+
+state 76
+
+    (71) funcion -> ID LPAREN RPAREN .
+    ENTONCES        reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    MENOR_IGUAL_QUE reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    MAYOR_IGUAL_QUE reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    MENOR_QUE       reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    MAYOR_QUE       reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    NO_ES           reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    ES              reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    OR              reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    AND             reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    RPAREN          reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+    COMA            reduce using rule 71 (funcion -> ID LPAREN RPAREN .)
+
+
+state 77
+
+    (74) parametro_list -> parametro .
+    RPAREN          reduce using rule 74 (parametro_list -> parametro .)
+    COMA            reduce using rule 74 (parametro_list -> parametro .)
+
+
+state 78
+
+    (72) parametro -> expresion .
+    RPAREN          reduce using rule 72 (parametro -> expresion .)
+    COMA            reduce using rule 72 (parametro -> expresion .)
+
+
+state 79
+
+    (38) expresion -> variable MULT NUMBER .
+    ENTONCES        reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    MENOR_IGUAL_QUE reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    MAYOR_IGUAL_QUE reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    MENOR_QUE       reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    MAYOR_QUE       reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    NO_ES           reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    ES              reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    OR              reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    AND             reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    RPAREN          reduce using rule 38 (expresion -> variable MULT NUMBER .)
+    COMA            reduce using rule 38 (expresion -> variable MULT NUMBER .)
+
+
+state 80
+
+    (11) statement_rule -> SI condicion ENTONCES accion .
+    CUANDO          reduce using rule 11 (statement_rule -> SI condicion ENTONCES accion .)
+    SI              reduce using rule 11 (statement_rule -> SI condicion ENTONCES accion .)
+    $end            reduce using rule 11 (statement_rule -> SI condicion ENTONCES accion .)
+    COMA            reduce using rule 11 (statement_rule -> SI condicion ENTONCES accion .)
+    PUNTOCOMA       reduce using rule 11 (statement_rule -> SI condicion ENTONCES accion .)
+
+
+state 81
+
+    (63) accion -> MANTENER .
+    CUANDO          reduce using rule 63 (accion -> MANTENER .)
+    SI              reduce using rule 63 (accion -> MANTENER .)
+    $end            reduce using rule 63 (accion -> MANTENER .)
+    COMA            reduce using rule 63 (accion -> MANTENER .)
+    PUNTOCOMA       reduce using rule 63 (accion -> MANTENER .)
+
+
+state 82
+
+    (64) accion -> VENDER . accion_cantidad
+    (68) accion_cantidad -> . TODO
+    (69) accion_cantidad -> . TODO MULT NUMBER
+    TODO            shift and go to state 91
+
+    accion_cantidad                shift and go to state 90
+
+state 83
+
+    (65) accion -> COMPRAR . accion_capital
+    (66) accion_capital -> . CAPITAL
+    (67) accion_capital -> . CAPITAL MULT NUMBER
+    CAPITAL         shift and go to state 93
+
+    accion_capital                 shift and go to state 92
+
+state 84
+
+    (7) statement_construct -> SI ERES condicion ENTONCES . statement_rule_list_comp
+    (8) statement_construct -> SI ERES condicion ENTONCES . statement_rule_list
+    (9) statement_construct -> SI ERES condicion ENTONCES . ERES creencia_list_comp
+    (10) statement_construct -> SI ERES condicion ENTONCES . ERES creencia_list
+    (14) statement_rule_list_comp -> . ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list
+    (12) statement_rule_list -> . statement_rule_list COMA statement_rule
+    (13) statement_rule_list -> . statement_rule
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    ERES            shift and go to state 95
+    ELIMINAR        shift and go to state 98
+    SI              shift and go to state 94
+
+    statement_rule_list_comp       shift and go to state 96
+    statement_rule_list            shift and go to state 97
+    statement_rule                 shift and go to state 99
+
+state 85
+
+    (16) creencia_list -> creencia_list COMA . creencia
+    (19) creencia_list -> creencia_list COMA . creencia LCOR COTA RCOR
+    (34) creencia -> . ID
+    ID              shift and go to state 55
+
+    creencia                       shift and go to state 100
+
+state 86
+
+    (20) creencia_list -> creencia LCOR . COTA RCOR
+    COTA            shift and go to state 101
+
+
+state 87
+
+    (17) creencia_list -> NO creencia .
+    COMA            reduce using rule 17 (creencia_list -> NO creencia .)
+    CUANDO          reduce using rule 17 (creencia_list -> NO creencia .)
+    SI              reduce using rule 17 (creencia_list -> NO creencia .)
+    $end            reduce using rule 17 (creencia_list -> NO creencia .)
+    PUNTOCOMA       reduce using rule 17 (creencia_list -> NO creencia .)
+
+
+state 88
+
+    (70) funcion -> ID LPAREN parametro_list RPAREN .
+    ENTONCES        reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    MENOR_IGUAL_QUE reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    MAYOR_IGUAL_QUE reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    MENOR_QUE       reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    MAYOR_QUE       reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    NO_ES           reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    ES              reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    OR              reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    AND             reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    RPAREN          reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+    COMA            reduce using rule 70 (funcion -> ID LPAREN parametro_list RPAREN .)
+
+
+state 89
+
+    (73) parametro_list -> parametro_list COMA . parametro
+    (72) parametro -> . expresion
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NUMBER          shift and go to state 17
+    ID              shift and go to state 74
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    parametro                      shift and go to state 102
+    expresion                      shift and go to state 78
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 90
+
+    (64) accion -> VENDER accion_cantidad .
+    CUANDO          reduce using rule 64 (accion -> VENDER accion_cantidad .)
+    SI              reduce using rule 64 (accion -> VENDER accion_cantidad .)
+    $end            reduce using rule 64 (accion -> VENDER accion_cantidad .)
+    COMA            reduce using rule 64 (accion -> VENDER accion_cantidad .)
+    PUNTOCOMA       reduce using rule 64 (accion -> VENDER accion_cantidad .)
+
+
+state 91
+
+    (68) accion_cantidad -> TODO .
+    (69) accion_cantidad -> TODO . MULT NUMBER
+    CUANDO          reduce using rule 68 (accion_cantidad -> TODO .)
+    SI              reduce using rule 68 (accion_cantidad -> TODO .)
+    $end            reduce using rule 68 (accion_cantidad -> TODO .)
+    COMA            reduce using rule 68 (accion_cantidad -> TODO .)
+    PUNTOCOMA       reduce using rule 68 (accion_cantidad -> TODO .)
+    MULT            shift and go to state 103
+
+
+state 92
+
+    (65) accion -> COMPRAR accion_capital .
+    CUANDO          reduce using rule 65 (accion -> COMPRAR accion_capital .)
+    SI              reduce using rule 65 (accion -> COMPRAR accion_capital .)
+    $end            reduce using rule 65 (accion -> COMPRAR accion_capital .)
+    COMA            reduce using rule 65 (accion -> COMPRAR accion_capital .)
+    PUNTOCOMA       reduce using rule 65 (accion -> COMPRAR accion_capital .)
+
+
+state 93
+
+    (66) accion_capital -> CAPITAL .
+    (67) accion_capital -> CAPITAL . MULT NUMBER
+    CUANDO          reduce using rule 66 (accion_capital -> CAPITAL .)
+    SI              reduce using rule 66 (accion_capital -> CAPITAL .)
+    $end            reduce using rule 66 (accion_capital -> CAPITAL .)
+    COMA            reduce using rule 66 (accion_capital -> CAPITAL .)
+    PUNTOCOMA       reduce using rule 66 (accion_capital -> CAPITAL .)
+    MULT            shift and go to state 104
+
+
+state 94
+
+    (11) statement_rule -> SI . condicion ENTONCES accion
+    (22) condicion -> . NO creencia
+    (23) condicion -> . creencia
+    (24) condicion -> . expresion
+    (25) condicion -> . LPAREN condicion RPAREN
+    (26) condicion -> . condicion MENOR_IGUAL_QUE condicion
+    (27) condicion -> . condicion MAYOR_IGUAL_QUE condicion
+    (28) condicion -> . condicion MENOR_QUE condicion
+    (29) condicion -> . condicion MAYOR_QUE condicion
+    (30) condicion -> . condicion NO_ES condicion
+    (31) condicion -> . condicion ES condicion
+    (32) condicion -> . condicion OR condicion
+    (33) condicion -> . condicion AND condicion
+    (34) creencia -> . ID
+    (35) expresion -> . funcion
+    (36) expresion -> . NUMBER
+    (37) expresion -> . variable
+    (38) expresion -> . variable MULT NUMBER
+    (70) funcion -> . ID LPAREN parametro_list RPAREN
+    (71) funcion -> . ID LPAREN RPAREN
+    (39) variable -> . MACD
+    (40) variable -> . RSI
+    (41) variable -> . SMA10
+    (42) variable -> . SMA5
+    (43) variable -> . MACDTENDENCIA
+    (44) variable -> . BAJISTA
+    (45) variable -> . ALCISTA
+    (46) variable -> . SMATENDENCIA
+    (47) variable -> . NORMAL
+    (48) variable -> . SOBREVENTA
+    (49) variable -> . SOBRECOMPRA
+    (50) variable -> . BOLLINGER
+    (51) variable -> . ANALIZAR_GRAFICO NUMBER
+    (52) variable -> . NEGATIVO
+    (53) variable -> . NEUTRO
+    (54) variable -> . POSITIVO
+    (55) variable -> . BAJO
+    (56) variable -> . MEDIO
+    (57) variable -> . ALTO
+    (58) variable -> . SENTIMIENTO
+    (59) variable -> . EXPERIENCIA
+    (60) variable -> . CONOCIMIENTO
+    (61) variable -> . CAPITAL
+    (62) variable -> . PRECIO
+    NO              shift and go to state 11
+    LPAREN          shift and go to state 14
+    ID              shift and go to state 15
+    NUMBER          shift and go to state 17
+    MACD            shift and go to state 19
+    RSI             shift and go to state 20
+    SMA10           shift and go to state 21
+    SMA5            shift and go to state 22
+    MACDTENDENCIA   shift and go to state 23
+    BAJISTA         shift and go to state 24
+    ALCISTA         shift and go to state 25
+    SMATENDENCIA    shift and go to state 26
+    NORMAL          shift and go to state 27
+    SOBREVENTA      shift and go to state 28
+    SOBRECOMPRA     shift and go to state 29
+    BOLLINGER       shift and go to state 30
+    ANALIZAR_GRAFICO shift and go to state 31
+    NEGATIVO        shift and go to state 32
+    NEUTRO          shift and go to state 33
+    POSITIVO        shift and go to state 34
+    BAJO            shift and go to state 35
+    MEDIO           shift and go to state 36
+    ALTO            shift and go to state 37
+    SENTIMIENTO     shift and go to state 38
+    EXPERIENCIA     shift and go to state 39
+    CONOCIMIENTO    shift and go to state 40
+    CAPITAL         shift and go to state 41
+    PRECIO          shift and go to state 42
+
+    condicion                      shift and go to state 43
+    creencia                       shift and go to state 12
+    expresion                      shift and go to state 13
+    funcion                        shift and go to state 16
+    variable                       shift and go to state 18
+
+state 95
+
+    (9) statement_construct -> SI ERES condicion ENTONCES ERES . creencia_list_comp
+    (10) statement_construct -> SI ERES condicion ENTONCES ERES . creencia_list
+    (21) creencia_list_comp -> . ELIMINAR creencia_list PUNTOCOMA creencia_list
+    (16) creencia_list -> . creencia_list COMA creencia
+    (17) creencia_list -> . NO creencia
+    (18) creencia_list -> . creencia
+    (19) creencia_list -> . creencia_list COMA creencia LCOR COTA RCOR
+    (20) creencia_list -> . creencia LCOR COTA RCOR
+    (34) creencia -> . ID
+    ELIMINAR        shift and go to state 107
+    NO              shift and go to state 64
+    ID              shift and go to state 55
+
+    creencia_list_comp             shift and go to state 105
+    creencia_list                  shift and go to state 106
+    creencia                       shift and go to state 63
+
+state 96
+
+    (7) statement_construct -> SI ERES condicion ENTONCES statement_rule_list_comp .
+    CUANDO          reduce using rule 7 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list_comp .)
+    SI              reduce using rule 7 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list_comp .)
+    $end            reduce using rule 7 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list_comp .)
+
+
+state 97
+
+    (8) statement_construct -> SI ERES condicion ENTONCES statement_rule_list .
+    (12) statement_rule_list -> statement_rule_list . COMA statement_rule
+    CUANDO          reduce using rule 8 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list .)
+    SI              reduce using rule 8 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list .)
+    $end            reduce using rule 8 (statement_construct -> SI ERES condicion ENTONCES statement_rule_list .)
+    COMA            shift and go to state 108
+
+
+state 98
+
+    (14) statement_rule_list_comp -> ELIMINAR . statement_rule_list PUNTOCOMA statement_rule_list
+    (12) statement_rule_list -> . statement_rule_list COMA statement_rule
+    (13) statement_rule_list -> . statement_rule
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    SI              shift and go to state 94
+
+    statement_rule_list            shift and go to state 109
+    statement_rule                 shift and go to state 99
+
+state 99
+
+    (13) statement_rule_list -> statement_rule .
+    COMA            reduce using rule 13 (statement_rule_list -> statement_rule .)
+    CUANDO          reduce using rule 13 (statement_rule_list -> statement_rule .)
+    SI              reduce using rule 13 (statement_rule_list -> statement_rule .)
+    $end            reduce using rule 13 (statement_rule_list -> statement_rule .)
+    PUNTOCOMA       reduce using rule 13 (statement_rule_list -> statement_rule .)
+
+
+state 100
+
+    (16) creencia_list -> creencia_list COMA creencia .
+    (19) creencia_list -> creencia_list COMA creencia . LCOR COTA RCOR
+    COMA            reduce using rule 16 (creencia_list -> creencia_list COMA creencia .)
+    CUANDO          reduce using rule 16 (creencia_list -> creencia_list COMA creencia .)
+    SI              reduce using rule 16 (creencia_list -> creencia_list COMA creencia .)
+    $end            reduce using rule 16 (creencia_list -> creencia_list COMA creencia .)
+    PUNTOCOMA       reduce using rule 16 (creencia_list -> creencia_list COMA creencia .)
+    LCOR            shift and go to state 110
+
+
+state 101
+
+    (20) creencia_list -> creencia LCOR COTA . RCOR
+    RCOR            shift and go to state 111
+
+
+state 102
+
+    (73) parametro_list -> parametro_list COMA parametro .
+    RPAREN          reduce using rule 73 (parametro_list -> parametro_list COMA parametro .)
+    COMA            reduce using rule 73 (parametro_list -> parametro_list COMA parametro .)
+
+
+state 103
+
+    (69) accion_cantidad -> TODO MULT . NUMBER
+    NUMBER          shift and go to state 112
+
+
+state 104
+
+    (67) accion_capital -> CAPITAL MULT . NUMBER
+    NUMBER          shift and go to state 113
+
+
+state 105
+
+    (9) statement_construct -> SI ERES condicion ENTONCES ERES creencia_list_comp .
+    CUANDO          reduce using rule 9 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list_comp .)
+    SI              reduce using rule 9 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list_comp .)
+    $end            reduce using rule 9 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list_comp .)
+
+
+state 106
+
+    (10) statement_construct -> SI ERES condicion ENTONCES ERES creencia_list .
+    (16) creencia_list -> creencia_list . COMA creencia
+    (19) creencia_list -> creencia_list . COMA creencia LCOR COTA RCOR
+    CUANDO          reduce using rule 10 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list .)
+    SI              reduce using rule 10 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list .)
+    $end            reduce using rule 10 (statement_construct -> SI ERES condicion ENTONCES ERES creencia_list .)
+    COMA            shift and go to state 85
+
+
+state 107
+
+    (21) creencia_list_comp -> ELIMINAR . creencia_list PUNTOCOMA creencia_list
+    (16) creencia_list -> . creencia_list COMA creencia
+    (17) creencia_list -> . NO creencia
+    (18) creencia_list -> . creencia
+    (19) creencia_list -> . creencia_list COMA creencia LCOR COTA RCOR
+    (20) creencia_list -> . creencia LCOR COTA RCOR
+    (34) creencia -> . ID
+    NO              shift and go to state 64
+    ID              shift and go to state 55
+
+    creencia_list                  shift and go to state 114
+    creencia                       shift and go to state 63
+
+state 108
+
+    (12) statement_rule_list -> statement_rule_list COMA . statement_rule
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    SI              shift and go to state 94
+
+    statement_rule                 shift and go to state 115
+
+state 109
+
+    (14) statement_rule_list_comp -> ELIMINAR statement_rule_list . PUNTOCOMA statement_rule_list
+    (12) statement_rule_list -> statement_rule_list . COMA statement_rule
+    PUNTOCOMA       shift and go to state 116
+    COMA            shift and go to state 108
+
+
+state 110
+
+    (19) creencia_list -> creencia_list COMA creencia LCOR . COTA RCOR
+    COTA            shift and go to state 117
+
+
+state 111
+
+    (20) creencia_list -> creencia LCOR COTA RCOR .
+    COMA            reduce using rule 20 (creencia_list -> creencia LCOR COTA RCOR .)
+    CUANDO          reduce using rule 20 (creencia_list -> creencia LCOR COTA RCOR .)
+    SI              reduce using rule 20 (creencia_list -> creencia LCOR COTA RCOR .)
+    $end            reduce using rule 20 (creencia_list -> creencia LCOR COTA RCOR .)
+    PUNTOCOMA       reduce using rule 20 (creencia_list -> creencia LCOR COTA RCOR .)
+
+
+state 112
+
+    (69) accion_cantidad -> TODO MULT NUMBER .
+    CUANDO          reduce using rule 69 (accion_cantidad -> TODO MULT NUMBER .)
+    SI              reduce using rule 69 (accion_cantidad -> TODO MULT NUMBER .)
+    $end            reduce using rule 69 (accion_cantidad -> TODO MULT NUMBER .)
+    COMA            reduce using rule 69 (accion_cantidad -> TODO MULT NUMBER .)
+    PUNTOCOMA       reduce using rule 69 (accion_cantidad -> TODO MULT NUMBER .)
+
+
+state 113
+
+    (67) accion_capital -> CAPITAL MULT NUMBER .
+    CUANDO          reduce using rule 67 (accion_capital -> CAPITAL MULT NUMBER .)
+    SI              reduce using rule 67 (accion_capital -> CAPITAL MULT NUMBER .)
+    $end            reduce using rule 67 (accion_capital -> CAPITAL MULT NUMBER .)
+    COMA            reduce using rule 67 (accion_capital -> CAPITAL MULT NUMBER .)
+    PUNTOCOMA       reduce using rule 67 (accion_capital -> CAPITAL MULT NUMBER .)
+
+
+state 114
+
+    (21) creencia_list_comp -> ELIMINAR creencia_list . PUNTOCOMA creencia_list
+    (16) creencia_list -> creencia_list . COMA creencia
+    (19) creencia_list -> creencia_list . COMA creencia LCOR COTA RCOR
+    PUNTOCOMA       shift and go to state 118
+    COMA            shift and go to state 85
+
+
+state 115
+
+    (12) statement_rule_list -> statement_rule_list COMA statement_rule .
+    COMA            reduce using rule 12 (statement_rule_list -> statement_rule_list COMA statement_rule .)
+    CUANDO          reduce using rule 12 (statement_rule_list -> statement_rule_list COMA statement_rule .)
+    SI              reduce using rule 12 (statement_rule_list -> statement_rule_list COMA statement_rule .)
+    $end            reduce using rule 12 (statement_rule_list -> statement_rule_list COMA statement_rule .)
+    PUNTOCOMA       reduce using rule 12 (statement_rule_list -> statement_rule_list COMA statement_rule .)
+
+
+state 116
+
+    (14) statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA . statement_rule_list
+    (12) statement_rule_list -> . statement_rule_list COMA statement_rule
+    (13) statement_rule_list -> . statement_rule
+    (11) statement_rule -> . SI condicion ENTONCES accion
+    SI              shift and go to state 94
+
+    statement_rule_list            shift and go to state 119
+    statement_rule                 shift and go to state 99
+
+state 117
+
+    (19) creencia_list -> creencia_list COMA creencia LCOR COTA . RCOR
+    RCOR            shift and go to state 120
+
+
+state 118
+
+    (21) creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA . creencia_list
+    (16) creencia_list -> . creencia_list COMA creencia
+    (17) creencia_list -> . NO creencia
+    (18) creencia_list -> . creencia
+    (19) creencia_list -> . creencia_list COMA creencia LCOR COTA RCOR
+    (20) creencia_list -> . creencia LCOR COTA RCOR
+    (34) creencia -> . ID
+    NO              shift and go to state 64
+    ID              shift and go to state 55
+
+    creencia_list                  shift and go to state 121
+    creencia                       shift and go to state 63
+
+state 119
+
+    (14) statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list .
+    (12) statement_rule_list -> statement_rule_list . COMA statement_rule
+    CUANDO          reduce using rule 14 (statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list .)
+    SI              reduce using rule 14 (statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list .)
+    $end            reduce using rule 14 (statement_rule_list_comp -> ELIMINAR statement_rule_list PUNTOCOMA statement_rule_list .)
+    COMA            shift and go to state 108
+
+
+state 120
+
+    (19) creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .
+    COMA            reduce using rule 19 (creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .)
+    CUANDO          reduce using rule 19 (creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .)
+    SI              reduce using rule 19 (creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .)
+    $end            reduce using rule 19 (creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .)
+    PUNTOCOMA       reduce using rule 19 (creencia_list -> creencia_list COMA creencia LCOR COTA RCOR .)
+
+
+state 121
+
+    (21) creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA creencia_list .
+    (16) creencia_list -> creencia_list . COMA creencia
+    (19) creencia_list -> creencia_list . COMA creencia LCOR COTA RCOR
+    CUANDO          reduce using rule 21 (creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA creencia_list .)
+    SI              reduce using rule 21 (creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA creencia_list .)
+    $end            reduce using rule 21 (creencia_list_comp -> ELIMINAR creencia_list PUNTOCOMA creencia_list .)
+    COMA            shift and go to state 85
