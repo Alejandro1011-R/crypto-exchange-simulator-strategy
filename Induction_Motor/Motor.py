@@ -79,19 +79,21 @@ def create_graph_from_parser(parser_result):
         pass
 
     def parse_condition(condition):
+        print(condition)
         if condition != None:
-            if len(condition) == 3:
-                left = parse_condition(condition[0])
-                #print(f"OP: {condition[1]}")
-                rigth = parse_condition(condition[2])
-                return left + rigth
-            elif len(condition) == 2:
-                if condition[0] == "NO":
-                    #print(f"OP: {condition[0]}")
-                    return parse_condition(condition[1])
-                else:
-                    #print(condition[1])
-                    return [condition[1]]
+            if condition[0] == "AND" or condition[0] == "OR" or condition[0] == "NO" or condition[0] == "creencia":
+                if len(condition) == 3:
+                    left = parse_condition(condition[1])
+                    #print(f"OP: {condition[1]}")
+                    rigth = parse_condition(condition[2])
+                    return left + rigth
+                elif len(condition) == 2:
+                    if condition[0] == "NO":
+                        #print(f"OP: {condition[0]}")
+                        return parse_condition(condition[1])
+                    else:
+                        #print(condition[1])
+                        return [condition[1]]
                 
 
     def handle_Belief(beliefs):
@@ -185,11 +187,14 @@ def create_graph_from_parser(parser_result):
 
     return nodes
 
+
+
 class FuzzyInferenceEngine:
     def __init__(self, nodes):
         self.nodes = nodes
         self.beliefs = {}
         self.generated_new_rules = []
+        self.initialbeliefs = []
 
     def boolean_to_fuzzy(self, value, high_confidence):
         """Convertir valores booleanos a lógica difusa."""
@@ -200,6 +205,7 @@ class FuzzyInferenceEngine:
 
     def set_beliefs(self, beliefs_dict):
         """Establecer los valores iniciales de las creencias con lógica difusa."""
+        self.initialbeliefs = list( beliefs_dict)
         for node in self.nodes:
             if isinstance(node, Belief):  # Solo procesa nodos que son creencias
                 belief_id = node.id  # El ID de la creencia
@@ -215,13 +221,13 @@ class FuzzyInferenceEngine:
                     print(f"Creencia en grafo \"{belief_id}\" asignada con valor difuso: {fuzzy_value}")
     
     def get_beliefs(self):
-        beliefs = {} 
+        beliefs = [] 
+
         for belief in self.beliefs:
-            if self.beliefs[belief] >= 0.8:
-                beliefs[belief]=True
-            elif self.beliefs[belief] <= 0.2:
-                beliefs[belief]=False
+            if self.beliefs[belief] >= 0.3:
+                beliefs.append(belief)
         return beliefs
+
 
     def evaluate_belief(self, belief_name):
         """Evaluar el valor de una creencia usando lógica difusa."""
@@ -262,16 +268,12 @@ class FuzzyInferenceEngine:
                 print(f"Eliminando regla: {del_rule} en {node.id}")
                 self.delete_rule(del_rule, node)
 
-            # Generar nuevas creencias basadas en condiciones
-            new_beliefs = self.generate_new_beliefs(condition_value)
-            for belief_id, value in new_beliefs.items():
-                print(f"Cambiando creencia: {belief_id} a valor: {value} en {node.id}")
-                self.beliefs[belief_id] = value  # Actualizar la creencia
+            
     
     
     def evaluate_action(self, action):
-        print(f"Acción a evaluar: {action}")
-        return random.random()
+        #print(f"*************************Acción a evaluar: {action}******************************************")
+        return 1.0
     
     def execute_action(self, action, node_id, rule):
         """Evaluar una acción basada en una regla y generar nuevas reglas."""
@@ -334,6 +336,7 @@ class FuzzyInferenceEngine:
     def evaluate_by_edges(self, node):
         """Evaluar un nodo de tipo ByEdges."""
         for belief_id in node.delbeliefs:
+            del node.delbeliefs[node.delbeliefs.index(belief_id)]
             print(f"Eliminando creencia: {belief_id} en {node.id}")
 
         for edge in node.outgoing:
@@ -347,9 +350,9 @@ class FuzzyInferenceEngine:
         """Evaluar una condición dada."""
         
         if len(condition) == 3:
-            left_value = self.evaluate_condition(condition[0])
+            left_value = self.evaluate_condition(condition[1])
             right_value = self.evaluate_condition(condition[2])
-            operator = condition[1]
+            operator = condition[0]
 
             if operator == 'AND':
                 return min(left_value, right_value)  # Lógica difusa AND
@@ -400,3 +403,4 @@ class FuzzyInferenceEngine:
                 for rule in node.rules:
                     formatted_rule = self.format_rule(rule)
                     print(f"Regla generada: {formatted_rule}")
+

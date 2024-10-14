@@ -10,9 +10,13 @@ class RuleParser(Parser):
     precedence = (
         ('left', OR),
         ('left', AND),
+        ('left', ES, NO_ES),
+        ('left', MAYOR_QUE, MENOR_QUE, MAYOR_IGUAL_QUE, MENOR_IGUAL_QUE),
         ('left', MULT),
     )
 
+    
+    #'ES', 'NO_ES', 'MAYOR_QUE', 'MENOR_QUE', 'MAYOR_IGUAL_QUE', 'MENOR_IGUAL_QUE'
     @_('instruccion_list')
     def programa(self, p):
         return p.instruccion_list
@@ -98,25 +102,33 @@ class RuleParser(Parser):
     
     @_('condicion AND condicion')
     def condicion(self, p):
-        return (p.condicion0, 'AND', p.condicion1)
+        return ('AND', p.condicion0, p.condicion1)
 
     @_('condicion OR condicion')
     def condicion(self, p):
-        return (p.condicion0, 'OR', p.condicion1)
-
+        return ('OR', p.condicion0, p.condicion1)
+    
+    @_('condicion ES condicion')
+    @_('condicion NO_ES condicion')
+    @_('condicion MAYOR_QUE condicion')
+    @_('condicion MENOR_QUE condicion')
+    @_('condicion MAYOR_IGUAL_QUE condicion')
+    @_('condicion MENOR_IGUAL_QUE condicion')
+    def condicion(self, p):
+        return (p[1], p.condicion0, p.condicion1)
+    
     #@_('condicion')
     @_('LPAREN condicion RPAREN')
     def condicion(self, p):
         return p.condicion
     
     
-    @_('expresion comparador expresion',
-       'expresion',
+    @_('expresion',
        'creencia',    # Nueva opción para una creencia
        'NO creencia') # Nueva opción para NO creencia
     def condicion(self, p):
         if len(p) == 3:  # Si es la forma 'expresion comparador expresion'
-            return ("comparador", p.expresion0, p.comparador, p.expresion1)
+            return (p.expresion0, p.comparador, p.expresion1)
         elif len(p) == 1:  # Si es una creencia
             return p[0]
         elif len(p) == 2:  # Si es 'NO creencia'
@@ -127,9 +139,9 @@ class RuleParser(Parser):
         return ("creencia",p[0])
     
 
-    @_('ES', 'NO_ES', 'MAYOR_QUE', 'MENOR_QUE', 'MAYOR_IGUAL_QUE', 'MENOR_IGUAL_QUE')
+    """@_('ES', 'NO_ES', 'MAYOR_QUE', 'MENOR_QUE', 'MAYOR_IGUAL_QUE', 'MENOR_IGUAL_QUE')
     def comparador(self, p):
-        return ("comparador", p[0])
+        return ("comparador", p[0])"""
 
     @_('variable MULT NUMBER')
     def expresion(self, p):
