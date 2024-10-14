@@ -21,7 +21,6 @@ context = {
 
 
     "precio": 0,
-    "volumen": 0,
     "sentimiento": 0,
     
 
