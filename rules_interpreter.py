@@ -108,7 +108,7 @@ class ParserReglas:
 
 class Map:
     def __init__(self):
-        self.pertenencia_map = {
+        self.pertenencia_map = { 
             "Bitcoin": {
                 "precio": {
                     "bajo": lambda precio: self.pertenencia_precio_bajo(precio, limite_inferior=0, limite_superior=45000),

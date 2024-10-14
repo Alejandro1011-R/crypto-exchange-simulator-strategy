@@ -4,25 +4,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from agents import *  # Importamos el agente BDI actualizado
 from market import *
-from rules_interpreter import *
 from llm import *
+from Rules_Interpreter.rulelexer import RuleLexer
+from Rules_Interpreter.ruleparser import RuleParser
+from Induction_Motor.Motor import *
+from Rules_Interpreter.ruleinterpreter import RuleInterpreter
 import random
 
 class Simulation:
-    def __init__(self, num_steps: int, agents: List[Agente], market: Market, parser, sentiment_analyzer, reddit_instance):
+    def __init__(self, num_steps: int, agents: List[Agente], market: Market, parser, motor,interpreter, reddit_instance,map):
         self.num_steps = num_steps
         self.agents = agents
         self.market = market
         self.parser = parser
         self.sentiment_analyzer = sentiment_analyzer
         self.reddit_instance = reddit_instance
-
+        self.motor =  motor
+        self.inter =  interpreter
+        self.map = map
         # Diccionarios para almacenar historiales
         self.price_history = {crypto: [market.cryptocurrencies[crypto].price] for crypto in market.cryptocurrencies}
         self.volume_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.sentiment_history = {crypto: [] for crypto in market.cryptocurrencies}
         self.agent_performances = {agent.nombre: [] for agent in agents}
         self.precomputed_sentiments = {crypto: [] for crypto in market.cryptocurrencies}
+
 
         # DataFrames separados para almacenar los mismos datos que los diccionarios
         # 1. Historial de Precios
@@ -137,7 +143,7 @@ class Simulation:
             # Algoritmo Genético cada 10 pasos
             if count == 10:
                 count = 1
-                nuevos, peores = self.algoritmo_genetico(self.market, self.agents)
+                nuevos, peores = self.algoritmo_genetico(self.market, self.agents,creencias,self.motor,self.inter)
                 # Registrar datos para análisis posterior
                 for agente in nuevos:
                     print(agente.nombre)
@@ -148,7 +154,7 @@ class Simulation:
 
                 for agente in nuevos:
                     nuevo_nombre = f'agente {No_Agente} generación {agent_gen}'
-                    nuevo_agente = Agente(nuevo_nombre, agente.reglas, self.parser)
+                    nuevo_agente = Agente(nuevo_nombre, agente.reglas, self.parser)# ver 
                     self.agents.append(nuevo_agente)
                     self.agent_performances[nuevo_nombre] = []  # Inicializar lista de rendimiento
                     # Añadir columna con NaN para todos los pasos anteriores
@@ -166,43 +172,47 @@ class Simulation:
             # Imprimir información del paso actual (opcional)
             # self._print_step_info(step)
 
-    def mutar_regla(self, regla):
-        # Separar la regla en 'SI', condiciones, 'ENTONCES', acción
-        partes = regla.split(" ENTONCES ")
-        if len(partes) != 2:
-            # Regla mal formada, no puede mutar
-            # print(f"Regla mal formada, no se puede mutar: {regla}")
-            return regla
+    def mutar_regla(self, agcreencias:list,creencias):
+        sobrantes = [elemento for elemento in creencias if elemento not in agcreencias]
+        agcreencias.append(random.choice(sobrantes))
+        return agcreencias
+    # def mutar_regla(self, regla,creencias):
+    #     # Separar la regla en 'SI', condiciones, 'ENTONCES', acción
+    #     partes = regla.split(" ENTONCES ")
+    #     if len(partes) != 2:
+    #         # Regla mal formada, no puede mutar
+    #         # print(f"Regla mal formada, no se puede mutar: {regla}")
+    #         return regla
 
-        condiciones = partes[0].replace("SI ", "")
-        accion = partes[1]
+    #     condiciones = partes[0].replace("SI ", "")
+    #     accion = partes[1]
 
-        # Separar condiciones en palabras
-        condiciones_partes = condiciones.split(" ")
+    #     # Separar condiciones en palabras
+    #     condiciones_partes = condiciones.split(" ")
 
-        # Mutar condiciones
-        valores_precio_volumen = ["alto", "bajo", "medio"]
-        valores_sentimiento = ["negativo", "neutro", "positivo"]
+    #     # Mutar condiciones
+    #     valores_precio_volumen = ["alto", "bajo", "medio"]
+    #     valores_sentimiento = ["negativo", "neutro", "positivo"]
 
-        for i, palabra in enumerate(condiciones_partes):
-            if palabra in valores_precio_volumen:
-                nuevas_valores = [valor for valor in valores_precio_volumen if valor != palabra]
-                condiciones_partes[i] = random.choice(nuevas_valores)
-            elif palabra in valores_sentimiento:
-                nuevas_valores = [valor for valor in valores_sentimiento if valor != palabra]
-                condiciones_partes[i] = random.choice(nuevas_valores)
+    #     for i, palabra in enumerate(condiciones_partes):
+    #         if palabra in valores_precio_volumen:
+    #             nuevas_valores = [valor for valor in valores_precio_volumen if valor != palabra]
+    #             condiciones_partes[i] = random.choice(nuevas_valores)
+    #         elif palabra in valores_sentimiento:
+    #             nuevas_valores = [valor for valor in valores_sentimiento if valor != palabra]
+    #             condiciones_partes[i] = random.choice(nuevas_valores)
 
-        condiciones_mutadas = " ".join(condiciones_partes)
+    #     condiciones_mutadas = " ".join(condiciones_partes)
 
-        # Mutar la acción
-        acciones = ["comprar", "vender", "mantener"]
-        accion_mutada = accion
-        if accion in acciones:
-            accion_mutada = random.choice([a for a in acciones if a != accion])
+    #     # Mutar la acción
+    #     acciones = ["comprar", "vender", "mantener"]
+    #     accion_mutada = accion
+    #     if accion in acciones:
+    #         accion_mutada = random.choice([a for a in acciones if a != accion])
 
-        # Reconstruir la regla asegurando la estructura correcta
-        regla_mutada = f"SI {condiciones_mutadas} ENTONCES {accion_mutada}"
-        return regla_mutada
+    #     # Reconstruir la regla asegurando la estructura correcta
+    #     regla_mutada = f"SI {condiciones_mutadas} ENTONCES {accion_mutada}"
+    #     return regla_mutada
 
     def crossover(self, parent1, parent2, crossover_rate=0.5):
         # Asegurarse de que ambos padres tengan el mismo tamaño
@@ -225,21 +235,21 @@ class Simulation:
 
         return child1, child2
 
-    def validar_regla(self, regla):
-        # Intenta analizar la regla para verificar su validez
-        try:
-            parsed_conditions, accion = self.parser.parse_rule(regla)
-            return True
-        except ValueError as e:
-            # Imprimir mensaje de error si la regla no es válida
-            print(f"Regla inválida: {regla}. Error: {e}")
-            return False
+    # def validar_regla(self, regla):
+    #     # Intenta analizar la regla para verificar su validez
+    #     try:
+    #         parsed_conditions, accion = self.parser.parse_rule(regla)
+    #         return True
+    #     except ValueError as e:
+    #         # Imprimir mensaje de error si la regla no es válida
+    #         print(f"Regla inválida: {regla}. Error: {e}")
+    #         return False
 
     # Función de Supervivencia Sigmoide Basada en Edad
     def probabilidad_supervivencia(self, age, fitness, k=0.1, t=600):
         return fitness / (1 + np.exp(k * (age - t)))
 
-    def algoritmo_genetico(self, contexto, agentes, tasa_mutacion=0.1):
+    def algoritmo_genetico(self, contexto, agentes, creencias,inference_engine , interpreter,tasa_mutacion=0.5):
         nuevos_agentes = []
 
         # Evaluar desempeño de cada agente
@@ -258,19 +268,19 @@ class Simulation:
 
             # Aplicar mutación a las reglas con una probabilidad definida
             if random.random() < tasa_mutacion:
-                nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
+                nuevas_reglas_padre1 = self.mutar_regla(nuevas_reglas_padre1,creencias)
             if random.random() < tasa_mutacion:
-                nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
+                nuevas_reglas_padre2 = self.mutar_regla(nuevas_reglas_padre2,creencias)
 
             # Validar reglas y generar un nuevo agente para reemplazar al peor
-            if all(self.validar_regla(regla) for regla in nuevas_reglas_padre2):
-                nuevo_agente = Agente(
-                    f'agente {peor_agente.nombre}',
-                    nuevas_reglas_padre2,
-                    self.parser,
-                    capital_inicial=peor_agente.capital_inicial  # Mantener el capital inicial
-                )
-                nuevos_agentes.append(nuevo_agente)
+            nuevo_agente = Agente(
+                f'agente {peor_agente.nombre}',
+                nuevas_reglas_padre2,
+                inference_engine ,
+                interpreter,
+                capital_inicial=peor_agente.capital_inicial  # Mantener el capital inicial
+            )
+            nuevos_agentes.append(nuevo_agente)
 
             # Retornar el nuevo agente creado y el agente reemplazado
             return nuevos_agentes, [peor_agente]
@@ -292,30 +302,30 @@ class Simulation:
 
                 # Mutar reglas con probabilidad de tasa_mutacion
                 if random.random() < tasa_mutacion:
-                    nuevas_reglas_padre1 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre1]
+                    nuevas_reglas_padre1 = self.mutar_regla(nuevas_reglas_padre1,creencias)
                 if random.random() < tasa_mutacion:
-                    nuevas_reglas_padre2 = [self.mutar_regla(regla) for regla in nuevas_reglas_padre2]
-
+                    nuevas_reglas_padre2 = self.mutar_regla(nuevas_reglas_padre2,creencias)
+                
                 # Validar reglas y crear nuevos agentes
-                if all(self.validar_regla(regla) for regla in nuevas_reglas_padre1):
-                    nuevo_agente1 = Agente(
-                        f'agente {len(nuevos_agentes)}',
-                        nuevas_reglas_padre1,
-                        self.parser,
-                        capital_inicial=padre1.capital_inicial  # Mantener el capital inicial
-                    )
-                    nuevos_agentes.append(nuevo_agente1)
-                    self.agent_performances[nuevo_agente1.nombre] = []  # Inicializa el desempeño
+                nuevo_agente1 = Agente(
+                    f'agente {len(nuevos_agentes)}',
+                    nuevas_reglas_padre1,
+                    inference_engine ,
+                    interpreter,
+                    capital_inicial=padre1.capital_inicial  # Mantener el capital inicial
+                )
+                nuevos_agentes.append(nuevo_agente1)
+                self.agent_performances[nuevo_agente1.nombre] = []  # Inicializa el desempeño
 
-                if all(self.validar_regla(regla) for regla in nuevas_reglas_padre2):
-                    nuevo_agente2 = Agente(
-                        f'agente {len(nuevos_agentes)}',
-                        nuevas_reglas_padre2,
-                        self.parser,
-                        capital_inicial=padre2.capital_inicial  # Mantener el capital inicial
-                    )
-                    nuevos_agentes.append(nuevo_agente2)
-                    self.agent_performances[nuevo_agente2.nombre] = []  # Inicializa el desempeño
+                nuevo_agente2 = Agente(
+                    f'agente {len(nuevos_agentes)}',
+                    nuevas_reglas_padre2,
+                    inference_engine ,
+                    interpreter,
+                    capital_inicial=padre2.capital_inicial  # Mantener el capital inicial
+                )
+                nuevos_agentes.append(nuevo_agente2)
+                self.agent_performances[nuevo_agente2.nombre] = []  # Inicializa el desempeño
 
             # Retornar los nuevos agentes creados y los agentes que fueron reemplazados
             return nuevos_agentes, [agente[0] for agente in peores]
@@ -442,3 +452,42 @@ class Simulation:
         # print(mejor_agente_data.get('desires'))
 
         return best_agent
+    class MotInit:
+
+        def __init__():
+            self.rules = """SI ERES NO novato Y experto ENTONCES SI novato ENTONCES COMPRAR capital , SI experto ENTONCES COMPRAR capital
+                SI ERES novato Y experto ENTONCES ELIMINAR SI novato ENTONCES COMPRAR capital, SI novato ENTONCES COMPRAR capital; SI experto ENTONCES COMPRAR capital
+                SI ERES NO novato Y experto ENTONCES ERES novato [0.5 <= X < 0.5] , avanzado [0.5 < X <= 0.5] , experto [0.5 < X < 0.5]
+                SI ERES novato Y experto ENTONCES ERES ELIMINAR novato, avanzado; experto [0.5 <= X < 0.5]
+                SI ERES novato ENTONCES ERES impulsivo,tendencia, terco
+                SI ERES avanzado ENTONCES ERES tendencia , analista , noticias
+                SI ERES avanzado ENTONCES ERES NO novato
+
+
+                SI ERES MIEDOSO ENTONCES ERES NO AVARICIOSO # ver regla MEjor poner NO y en la parte Lógica Negar
+                SI ERES AVARICIOSO ENTONCES ERES NO MIEDOSO # [1.0 == X]
+                SI ERES MIEDOSO O TERCO Y AVARICIOSO ENTONCES ERES NO ALEGRE
+                SI ERES MIEDOSO Y NERVIOSO ENTONCES SI historia_precio(20) mayor que 5 ENTONCES COMPRAR capital * 0.20 , SI historia_precio(20) ENTONCES VENDER todo
+                SI ERES AVARICIOSO Y TERCO ENTONCES SI historia_precio(20) ENTONCES COMPRAR capital , SI precio mayor que 500 ENTONCES VENDER todo
+                CUANDO random() menor que 0.20 ENTONCES TERCO
+                CUANDO random() mayor que 0.50 ENTONCES NERVIOSO
+                CUANDO capital mayor que 5000 ENTONCES AVARICIOSO
+                CUANDO capital menor que 100  ENTONCES MIEDOSO
+                CUANDO sentimiento es alto ENTONCES ALEGRE, TONTO
+            """
+
+        def Init():
+            lex = RuleLexer()
+            par = RuleParser()
+
+            
+            result = par.parse(lex.tokenize(self.rules))
+            # for instruction in result:
+            #     print(instruction)
+
+            nodes = create_graph_from_parser(result)
+            # for n in nodes:
+            #     print(n)
+
+            return FuzzyInferenceEngine(nodes)
+
